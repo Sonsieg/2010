@@ -1,0 +1,39 @@
+/* ==========================================================
+   SENDER STUDIO (STUDIO SOẠN THẢO LỜI CHÚC CỦA ANH EM)
+   ========================================================== */
+
+.studio-container {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  background: rgba(30, 20, 28, 0.94);
+  border: 1.5px solid var(--champagne-gold);
+  border-radius: 34px;
+  padding: clamp(28px, 5vw, 44px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(16px);
+  text-align: left;
+  color: #FFF;
+}
+
+.studio-input,
+.studio-select,
+.studio-textarea {
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 16px;
+  background: rgba(18, 9, 16, 0.75);
+  border: 1.2px solid rgba(201, 166, 107, 0.4);
+  color: #FFF;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  outline: none;
+  margin-top: 8px;
+  transition: border-color 0.2s;
+}
+.studio-input:focus,
+.studio-select:focus,
+.studio-textarea:focus {
+  border-color: var(--champagne-gold);
+  box-shadow: 0 0 15px rgba(201, 166, 107, 0.35);
+}

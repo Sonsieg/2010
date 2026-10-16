@@ -13,10 +13,10 @@ export default function WishModal() {
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    const rotX = (-y / 15).toFixed(2);
-    const rotY = (x / 15).toFixed(2);
+    const rotX = (-y / 16).toFixed(2);
+    const rotY = (x / 16).toFixed(2);
     setTiltStyle({
-      transform: `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.02)`
+      transform: `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(1.025)`
     });
   };
 
@@ -47,15 +47,15 @@ export default function WishModal() {
 
   return (
     <div
-      className="modal-overlay open"
+      className="royal-modal-overlay open"
       onClick={(e) => {
-        if (e.target.classList.contains('modal-overlay')) {
+        if (e.target.classList.contains('royal-modal-overlay')) {
           setActiveModalWish(null);
         }
       }}
     >
       <div
-        className="tilt-perspective-box"
+        className="royal-tilt-perspective"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleReset}
         onTouchMove={handleTouchMove}
@@ -63,83 +63,65 @@ export default function WishModal() {
       >
         <div
           ref={cardRef}
-          className="tilt-wish-card"
+          className="royal-parchment-tilt-card"
           style={tiltStyle}
         >
+          {/* Con Dấu Sáp Đỏ Hoàng Gia Đính Góc */}
+          <div className="card-wax-seal-badge">
+            <span>20.10</span>
+          </div>
+
+          {/* Nút Đóng Quý Tộc */}
           <button
-            className="btn-close-x"
+            className="royal-btn-close"
             onClick={() => setActiveModalWish(null)}
-            title="Đóng"
+            title="Đóng lời chúc"
           >
-            &times;
+            ✕
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+          {/* Header Người Gửi */}
+          <div className="royal-wish-sender-row">
             <div
+              className="royal-sender-monogram"
               style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '18px',
-                background: activeModalWish.color || 'var(--rose-500)',
-                color: '#fff',
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.6rem',
-                fontWeight: 'bold',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 6px 18px rgba(244, 63, 94, 0.3)'
+                background: 'linear-gradient(135deg, #BE123C 0%, #8C2F4B 100%)',
+                border: '2px solid #E5C388'
               }}
             >
               {activeModalWish.name.charAt(0)}
             </div>
             <div>
-              <h4
-                className="font-serif"
-                style={{ fontSize: '1.35rem', color: '#1E293B', marginBottom: '2px' }}
-              >
+              <div className="royal-sender-eyebrow">LỜI CHÚC TỪ ANH EM</div>
+              <h4 className="royal-sender-name">
                 {activeModalWish.name}
               </h4>
-              <span
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.75rem',
-                  background: 'var(--rose-50)',
-                  color: 'var(--rose-600)',
-                  padding: '3px 12px',
-                  borderRadius: '9999px',
-                  border: '1px solid var(--rose-200)'
-                }}
-              >
-                {activeModalWish.dept || 'Tech & Product'}
+              <span className="royal-sender-dept-pill">
+                ✦ {activeModalWish.dept || activeModalWish.role || 'Engineering & Product Team'}
               </span>
             </div>
           </div>
 
-          <div
-            style={{
-              background: 'var(--rose-50)',
-              borderLeft: '4px solid var(--rose-500)',
-              borderRadius: '14px',
-              padding: '22px',
-              marginBottom: '22px'
-            }}
-          >
-            <p style={{ fontSize: '1.08rem', lineHeight: '1.85', color: '#334155', fontStyle: 'italic' }}>
-              “{activeModalWish.text}”
+          {/* Nội Dung Lời Chúc (Khung Giấy Da Cẩm Thạch) */}
+          <div className="royal-wish-parchment-box">
+            <span className="royal-quote-mark open">“</span>
+            <p className="royal-wish-text">
+              {activeModalWish.text}
             </p>
+            <span className="royal-quote-mark close">”</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--rose-100)', paddingTop: '16px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: '#94A3B8' }}>
-              Chạm ra ngoài để đóng
+          {/* Footer Card */}
+          <div className="royal-wish-footer">
+            <span className="royal-wish-hint">
+              ✦ Chạm ra ngoài để đóng • Kính chúc chị em rực rỡ ✦
             </span>
             <button
               onClick={handleNextWish}
-              className="btn-rose"
-              style={{ padding: '10px 22px', fontSize: '0.88rem' }}
+              className="royal-btn-next-wish"
+              type="button"
             >
-              <span>Bóng tiếp theo 🎈</span>
+              <span>Xem bóng tiếp theo 🎈</span>
             </button>
           </div>
         </div>
@@ -147,3 +129,4 @@ export default function WishModal() {
     </div>
   );
 }
+

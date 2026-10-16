@@ -1,0 +1,375 @@
+/* ==========================================================
+   LETTER PAGE (MÀN 2: TẤM THIỆP ĐÔI 2 MẶT 3D ĐANG MỞ RỘNG)
+   Phong cách: Sweet Rose & Champagne Editorial
+   ========================================================== */
+
+.letter-page-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(36px, 5vw, 68px) 20px;
+  position: relative;
+  overflow-x: hidden;
+  /* Nền hồng ngát pastel ấm áp, đồng bộ với bối cảnh vườn hoa xuân */
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(253, 164, 175, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, rgba(254, 205, 211, 0.45) 0%, transparent 50%),
+    linear-gradient(180deg, #FFF1F2 0%, #FFE4E6 40%, #FFF5F7 100%);
+}
+
+/* CONTAINER PHỐI CẢNH 3D */
+.bifold-scene-container {
+  max-width: 1120px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  perspective: 2000px;
+  perspective-origin: center center;
+}
+
+/* TẤM THIỆP ĐÔI 2 MẶT (3D OPEN BOOKLET) */
+.bifold-booklet {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  transform-style: preserve-3d;
+  box-shadow: 
+    0 35px 80px -15px rgba(225, 29, 72, 0.22),
+    0 15px 35px rgba(201, 166, 107, 0.25);
+  border-radius: 36px;
+  background: #FAF3EA;
+  border: 3.5px solid var(--champagne-gold);
+}
+
+@media (max-width: 880px) {
+  .bifold-booklet {
+    grid-template-columns: 1fr;
+    border-radius: 28px;
+  }
+}
+
+/* CON DẤU SÁP ĐỎ HOÀNG GIA TRÊN GÁY THIỆP */
+.royal-wax-seal {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(40px);
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #F43F5E 0%, #BE123C 60%, #881337 100%);
+  border: 2px dashed rgba(253, 230, 138, 0.9);
+  box-shadow: 
+    0 10px 25px rgba(225, 29, 72, 0.4),
+    0 0 0 3px rgba(201, 166, 107, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.royal-wax-seal:hover {
+  transform: translateX(-50%) translateZ(50px) scale(1.1) rotate(6deg);
+}
+.wax-number {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #FFFDF9;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* NẾP GẤP GÁY THIỆP Ở GIỮA */
+.bifold-crease-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 36px;
+  transform: translateX(-50%) translateZ(2px);
+  pointer-events: none;
+  z-index: 35;
+  display: flex;
+}
+@media (max-width: 880px) {
+  .bifold-crease-divider { display: none; }
+}
+
+.crease-shadow-left {
+  flex: 1;
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 166, 107, 0.25) 100%);
+}
+.crease-center-line {
+  width: 2px;
+  background: linear-gradient(180deg, #C9A66B 0%, #FDA4AF 50%, #C9A66B 100%);
+  opacity: 0.7;
+}
+.crease-shadow-right {
+  flex: 1;
+  background: linear-gradient(90deg, rgba(201, 166, 107, 0.25) 0%, transparent 100%);
+}
+
+/* HAI TRANG THIỆP (PAGES) */
+.bifold-page {
+  position: relative;
+  background: #FAF3EA;
+  padding: clamp(32px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+/* Trang Trái */
+.bifold-page-left {
+  border-radius: 32px 0 0 32px;
+  transform-origin: right center;
+  transform: rotateY(10deg) translateZ(8px);
+  background: radial-gradient(circle at 10% 10%, #FFFDF9 0%, #FAF3EA 75%);
+  box-shadow: inset -24px 0 40px -10px rgba(201, 166, 107, 0.2);
+  border-right: 1px solid rgba(201, 166, 107, 0.3);
+}
+@media (max-width: 880px) {
+  .bifold-page-left {
+    border-radius: 24px 24px 0 0;
+    transform: none;
+    box-shadow: none;
+    border-right: none;
+    border-bottom: 2px solid #E5C388;
+    padding: 28px 18px 24px;
+  }
+}
+
+/* Trang Phải */
+.bifold-page-right {
+  border-radius: 0 32px 32px 0;
+  transform-origin: left center;
+  transform: rotateY(-10deg) translateZ(8px);
+  background: radial-gradient(circle at 90% 10%, #FFFDF9 0%, #FAF3EA 75%);
+  box-shadow: inset 24px 0 40px -10px rgba(201, 166, 107, 0.2);
+  border-left: 1px solid rgba(201, 166, 107, 0.3);
+}
+@media (max-width: 880px) {
+  .bifold-page-right {
+    border-radius: 0 0 24px 24px;
+    transform: none;
+    box-shadow: none;
+    border-left: none;
+    padding: 28px 18px 32px;
+  }
+}
+
+.page-inner-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* TRANG TRÁI: DẢI VƯƠNG MIỆN & KHUNG ẢNH BỌC HOA */
+.muse-crown-ribbon {
+  font-family: var(--font-serif);
+  font-size: 0.92rem;
+  letter-spacing: 0.16em;
+  color: var(--rose-700);
+  font-weight: 800;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.portrait-botanical-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.portrait-botanical-wrapper .floral-wreath-svg {
+  position: absolute;
+  inset: -22px;
+  width: calc(100% + 44px);
+  height: calc(100% + 44px);
+  pointer-events: none;
+  z-index: 25;
+  overflow: visible;
+}
+
+.cluster-top-left,
+.cluster-top-right,
+.cluster-bottom-left,
+.cluster-bottom-right {
+  transform-origin: center center;
+  transition: transform 0.4s ease;
+}
+.portrait-botanical-wrapper:hover .cluster-top-left {
+  transform: translate(-2px, -2px) scale(1.02);
+}
+.portrait-botanical-wrapper:hover .cluster-top-right {
+  transform: translate(2px, -2px) scale(1.02);
+}
+.portrait-botanical-wrapper:hover .cluster-bottom-left {
+  transform: translate(-2px, 2px) scale(1.02);
+}
+.portrait-botanical-wrapper:hover .cluster-bottom-right {
+  transform: translate(2px, 2px) scale(1.02);
+}
+
+.portrait-display-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 3.9;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid #FFFDF9;
+  box-shadow: 
+    0 15px 35px rgba(225, 29, 72, 0.18),
+    0 0 0 2px var(--champagne-gold);
+  background: var(--rose-100);
+  z-index: 10;
+}
+.portrait-display-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.portrait-display-frame:hover .portrait-display-img {
+  transform: scale(1.06);
+}
+.portrait-glass-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+/* KHỐI THÔNG TIN BÊN DƯỚI ẢNH (NGOÀI ẢNH) */
+.portrait-below-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 18px;
+}
+.portrait-badge-role {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--rose-500), var(--rose-600));
+  color: #FFFDF9;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 4px 16px;
+  border-radius: 9999px;
+  border: 1.2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25);
+  margin-bottom: 8px;
+}
+.portrait-full-name {
+  font-family: var(--font-serif);
+  font-size: clamp(1.45rem, 2.4vw, 1.85rem);
+  font-weight: 700;
+  color: var(--rose-900);
+  line-height: 1.2;
+  margin: 0 0 8px;
+}
+.portrait-quote-italic {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 290px;
+}
+
+/* TRANG PHẢI: BỨC THƯ TRI ÂN VIẾT TAY */
+.letter-reading-area {
+  text-align: left;
+}
+.letter-eyebrow-accent {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--rose-600);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow-dash {
+  width: 22px;
+  height: 2px;
+  background: var(--champagne-gold);
+}
+.letter-honor-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  color: var(--rose-900);
+  line-height: 1.25;
+  margin: 0 0 20px;
+}
+
+.parchment-text-card {
+  background: #FFFDF8;
+  border: 1.5px solid rgba(201, 166, 107, 0.45);
+  border-radius: 22px;
+  padding: clamp(20px, 3vw, 28px);
+  margin-bottom: 22px;
+  box-shadow: 
+    0 8px 24px rgba(244, 63, 94, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+.parchment-lead {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #334155;
+  margin: 0 0 14px;
+}
+.parchment-body {
+  font-family: var(--font-sans);
+  font-size: 1.02rem;
+  line-height: 1.85;
+  color: #475569;
+  margin: 0;
+}
+
+.letter-bottom-sign {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px dashed rgba(201, 166, 107, 0.5);
+  margin-bottom: 20px;
+}
+.letter-warm-sparkle {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--rose-600);
+}
+.letter-gentlemen-sign {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--rose-800);
+}
+.letter-next-action {
+  margin-top: 4px;
+}

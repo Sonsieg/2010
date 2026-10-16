@@ -16,95 +16,71 @@ export default function ArchiveDrawer() {
   return (
     <>
       <div
-        className="modal-overlay open"
+        className="royal-modal-overlay open"
         onClick={() => setIsArchiveOpen(false)}
-        style={{ zIndex: 120 }}
+        style={{ zIndex: 140 }}
       />
-      <aside className="drawer-sheet open" style={{ zIndex: 125 }}>
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid var(--rose-100)', paddingBottom: '16px' }}>
+      <aside className="royal-drawer-sheet open" style={{ zIndex: 145 }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {/* Header Sổ Lưu Niệm */}
+          <div className="royal-drawer-header">
             <div>
-              <h3 className="font-serif" style={{ fontSize: '1.5rem', color: 'var(--rose-700)' }}>
-                Nhật Ký Lời Chúc 20/10 🌸
+              <div className="drawer-eyebrow">ROYAL ARCHIVE • SỔ LƯU NIỆM</div>
+              <h3 className="drawer-title">
+                Nhật Ký Tâm Tình 20/10 🌸
               </h3>
-              <p style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#64748B' }}>
-                Đã mở: {openedBalloons.size}/{wishes.length} lời chúc
+              <p className="drawer-counter">
+                Đã khám phá: <strong>{openedBalloons.size}</strong> / {wishes.length} lời chúc từ anh em
               </p>
             </div>
             <button
               onClick={() => setIsArchiveOpen(false)}
-              className="btn-close-x"
+              className="royal-btn-close"
               style={{ position: 'static' }}
+              title="Đóng ngăn kéo"
             >
-              &times;
+              ✕
             </button>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
+          {/* Ô Tìm Kiếm */}
+          <div style={{ marginBottom: '18px' }}>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="name-search-input"
-              placeholder="🔍 Tìm theo tên người gửi hoặc phòng ban..."
+              className="royal-search-input"
+              placeholder="🔍 Tìm người gửi hoặc lời chúc..."
             />
           </div>
 
-          <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 220px)', display: 'flex', flexDirection: 'column', gap: '14px', paddingRight: '6px' }}>
+          {/* Danh Sách Lời Chúc Trong Sổ */}
+          <div className="royal-drawer-scroll-list">
             {filtered.map(w => {
               const isOpened = openedBalloons.has(w.id);
               return (
                 <div
                   key={w.id}
-                  style={{
-                    background: isOpened ? '#FFFFFF' : 'var(--rose-50)',
-                    border: `1.5px solid ${isOpened ? 'var(--rose-300)' : 'var(--rose-100)'}`,
-                    borderRadius: '18px',
-                    padding: '16px',
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'flex-start',
-                    boxShadow: isOpened ? '0 4px 15px rgba(244,63,94,0.08)' : 'none'
-                  }}
+                  className={`royal-archive-item ${isOpened ? 'item-opened' : 'item-locked'}`}
                 >
-                  <div
-                    style={{
-                      width: '42px',
-                      height: '42px',
-                      borderRadius: '14px',
-                      background: w.color || '#F43F5E',
-                      color: '#fff',
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: '1.2rem',
-                      fontWeight: 'bold',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                  >
+                  <div className="archive-avatar">
                     {w.name.charAt(0)}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <strong style={{ color: '#1E293B', fontSize: '0.95rem' }}>{w.name}</strong>
-                      <span
-                        style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: '0.72rem',
-                          color: 'var(--rose-600)',
-                          background: '#FFF',
-                          padding: '2px 8px',
-                          borderRadius: '9999px',
-                          border: '1px solid var(--rose-200)'
-                        }}
-                      >
-                        {w.dept || 'Tech'}
+                    <div className="archive-item-top">
+                      <strong className="archive-sender-name">{w.name}</strong>
+                      <span className="archive-dept-badge">
+                        {w.dept || 'Tech Team'}
                       </span>
                     </div>
-                    <p style={{ fontSize: '0.88rem', lineHeight: '1.6', color: '#475569', fontStyle: 'italic' }}>
+                    <p className="archive-quote-text">
                       “{w.text}”
                     </p>
+                    {isOpened && (
+                      <span className="archive-opened-indicator">
+                        ✦ Đã đón nhận
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -115,3 +91,4 @@ export default function ArchiveDrawer() {
     </>
   );
 }
+

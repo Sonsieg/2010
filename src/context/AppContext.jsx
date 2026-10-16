@@ -16,6 +16,30 @@ export function AppProvider({ children, navigate }) {
   // Audio state
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
 
+  // Demo Experience Mode: '3d' | '2d'
+  const [experienceMode, setExperienceMode] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const modeParam = (params.get('mode') || '').toLowerCase().trim();
+    if (modeParam === '2d' || modeParam === '3d') {
+      return modeParam;
+    }
+    const saved = localStorage.getItem('tribute_mode');
+    return saved === '2d' ? '2d' : '3d';
+  });
+
+  const updateExperienceMode = (mode) => {
+    setExperienceMode(mode);
+    localStorage.setItem('tribute_mode', mode);
+    if (navigate) {
+      navigate('/');
+    }
+  };
+
+  const toggleExperienceMode = () => {
+    const next = experienceMode === '3d' ? '2d' : '3d';
+    updateExperienceMode(next);
+  };
+
   // Nạp dữ liệu ban đầu
   useEffect(() => {
     async function loadData() {
@@ -26,7 +50,7 @@ export function AppProvider({ children, navigate }) {
       setPeople(peopleData);
       setWishes(wishesData);
 
-      // Kiểm tra URL param (?to= hoặc ?id=)
+      // Kiểm tra URL param (?to= hoặc ?id= hoặc ?mode=)
       const params = new URLSearchParams(window.location.search);
       const toParam = (params.get('to') || params.get('id') || '').toLowerCase().trim();
       if (toParam) {
@@ -36,6 +60,10 @@ export function AppProvider({ children, navigate }) {
         if (found) {
           setSelectedSister(found);
         }
+      }
+      const modeParam = (params.get('mode') || '').toLowerCase().trim();
+      if (modeParam === '2d' || modeParam === '3d') {
+        updateExperienceMode(modeParam);
       }
     }
     loadData();
@@ -96,7 +124,10 @@ export function AppProvider({ children, navigate }) {
       isTransitioning,
       navigateWithFlowerTransition,
       isPlayingMusic,
-      setIsPlayingMusic
+      setIsPlayingMusic,
+      experienceMode,
+      updateExperienceMode,
+      toggleExperienceMode
     }}>
       {children}
     </AppContext.Provider>

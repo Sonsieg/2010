@@ -1,0 +1,43 @@
+/* ==========================================================
+   VARIABLES & DESIGN TOKENS
+   Phong cách: Sweet Pastel Rose & Champagne Editorial
+   Màu sắc: Hồng ngát pastel, Kem ngà ngọc trai, Vàng Champagne, Đỏ hồng hoa thắm
+   ========================================================== */
+
+:root {
+  /* Pastel Pink & Rose Palette (Hồng ngát dịu ngọt, tươi tắn) */
+  --rose-25: #FFF8F8;
+  --rose-50: #FFF1F2;
+  --rose-100: #FFE4E6;
+  --rose-200: #FECDD3;
+  --rose-300: #FDA4AF;
+  --rose-400: #FB7185;
+  --rose-500: #F43F5E;
+  --rose-600: #E11D48;
+  --rose-700: #BE123C;
+  --rose-800: #9F1239;
+  --rose-900: #881337;
+
+  /* Champagne & Gold Accents (Vàng Champagne hoàng gia thanh nhã) */
+  --champagne-gold: #C9A66B;
+  --champagne-light: #F7E7CE;
+  --champagne-soft: #FDF6EC;
+  --champagne-amber: #F59E0B;
+  --gold-highlight: #FFE5A3;
+
+  /* Parchment & Cream (Kem ngà, cẩm thạch ngọc trai) */
+  --ivory-cream: #FAF3EA;
+  --pure-ivory: #FFFDF9;
+  --marble-white: #FFFFFF;
+
+  /* Typography */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Shadows (Ngọt ngào, bồng bềnh, đa tầng) */
+  --shadow-sweet: 0 16px 36px -6px rgba(244, 63, 94, 0.22);
+  --shadow-gold: 0 12px 30px -5px rgba(201, 166, 107, 0.35);
+  --shadow-card: 0 20px 45px rgba(225, 29, 72, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-floating: 0 25px 60px rgba(190, 18, 60, 0.18);
+}

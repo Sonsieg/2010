@@ -1,26 +1,27 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import confetti from 'canvas-confetti';
+import IdentitySelector from '../components/IdentitySelector.jsx';
 
 export default function GiftPage() {
-  const { people, selectedSister, setSelectedSister, navigateWithFlowerTransition } = useApp();
+  const { 
+    selectedSister, 
+    navigateWithFlowerTransition, 
+    experienceMode, 
+    updateExperienceMode 
+  } = useApp();
   const [isLidOpened, setIsLidOpened] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredPeople = people.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-    (p.dept && p.dept.toLowerCase().includes(searchTerm.toLowerCase().trim()))
-  );
 
   const handleOpenGift = () => {
     if (isLidOpened) return;
     setIsLidOpened(true);
 
+    // Bắn pháo hoa cánh hoa tung bay ngọt ngào
     confetti({
-      particleCount: 90,
-      spread: 90,
-      origin: { y: 0.6 },
-      colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#FECDD3']
+      particleCount: 110,
+      spread: 95,
+      origin: { y: 0.58 },
+      colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#FECDD3', '#FB7185']
     });
 
     setTimeout(() => {
@@ -28,96 +29,171 @@ export default function GiftPage() {
     }, 700);
   };
 
-  const handleSelectSister = (person) => {
-    setSelectedSister(person);
-    handleOpenGift();
-  };
-
   return (
     <div className="page-screen" id="page-gift">
-      <div className="gift-badge">
-        <span>🌸</span>
-        <span>
-          {selectedSister ? `Gửi riêng tặng: Chị ${selectedSister.name}` : 'Món Quà Bí Mật 20/10'}
-        </span>
-      </div>
+      <div className="gift-page-container">
+        {/* Badge Header */}
+        <div className="gift-honor-badge">
+          <span className="crown">👑</span>
+          <span>
+            {selectedSister 
+              ? `Món Quà Riêng Tặng: Chị ${selectedSister.name}` 
+              : 'Chào Mừng Ngày Phụ Nữ Việt Nam 20/10'}
+          </span>
+          <span>🌸</span>
+        </div>
 
-      <h1 className="page-hero-title">
-        Món Quà Đặc Biệt Dành Tặng Chị Em 🎁
-      </h1>
-      <p className="page-hero-sub">
-        Có một chiếc hộp bí mật chứa đựng những điều ngọt ngào nhất từ toàn thể anh em công ty gửi đến bạn...
-      </p>
+        {/* Tiêu đề chính */}
+        <h1 className="gift-hero-title">
+          Món Quà Ngọt Ngào Dành Tặng Bạn 🎁
+        </h1>
+        <p className="gift-hero-sub">
+          Có một chiếc hộp bí mật chứa đựng những đóa hoa tươi thắm và lời chúc chân thành nhất từ toàn thể anh em công ty gửi đến bạn...
+        </p>
 
-      {/* 3D Gift Box Component */}
-      <div
-        className={`gift-wrapper ${isLidOpened ? 'gift-opened' : 'gift-wobble'}`}
-        onClick={handleOpenGift}
-        title="Chạm để mở hộp quà!"
-      >
-        <svg className="gift-box-svg" viewBox="0 0 220 220" fill="none">
-          <ellipse cx="110" cy="205" rx="75" ry="14" fill="#F43F5E" opacity="0.25" />
-          <rect x="45" y="90" width="130" height="105" rx="18" fill="url(#boxGrad)" />
-          <rect x="100" y="90" width="20" height="105" fill="url(#goldGrad)" />
+        {/* BỘ CHỌN TÊN CHỊ EM (ĐẶT NGAY ĐẦU TRANG, TRỰC QUAN & RÕ RÀNG) */}
+        <IdentitySelector onOpenGift={handleOpenGift} />
 
-          <g className="gift-lid-part">
-            <rect x="35" y="70" width="150" height="28" rx="8" fill="url(#lidGrad)" />
-            <rect x="100" y="70" width="20" height="28" fill="url(#goldGrad)" />
-            <path d="M110 70 C95 40 65 45 78 68 C88 80 110 70 110 70 Z" fill="url(#goldGrad)" />
-            <path d="M110 70 C125 40 155 45 142 68 C132 80 110 70 110 70 Z" fill="url(#goldGrad)" />
-            <circle cx="110" cy="69" r="9" fill="#F59E0B" />
-          </g>
-
-          <defs>
-            <linearGradient id="boxGrad" x1="45" y1="90" x2="175" y2="195" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#FB7185" />
-              <stop offset="1" stopColor="#E11D48" />
-            </linearGradient>
-            <linearGradient id="lidGrad" x1="35" y1="70" x2="185" y2="98" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#FDA4AF" />
-              <stop offset="1" stopColor="#F43F5E" />
-            </linearGradient>
-            <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop stopColor="#FCD34D" />
-              <stop offset="1" stopColor="#D97706" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-      <div style={{ marginBottom: '24px' }}>
-        <button onClick={handleOpenGift} className="btn-rose" style={{ fontSize: '1.05rem' }}>
-          <span>Mở Hộp Quà Ngay 🌸</span>
-        </button>
-      </div>
-
-      {/* Smart Name Selector Card nếu chưa chọn tên */}
-      {!selectedSister && (
-        <div className="name-picker-card">
-          <label style={{ display: 'block', fontSize: '0.88rem', fontWeight: '700', color: 'var(--rose-600)', marginBottom: '8px' }}>
-            Bạn là chị em nào trong công ty nè? (Chọn tên để cá nhân hóa món quà 🌸)
-          </label>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="name-search-input"
-            placeholder="🔍 Gõ tên bạn để tìm nhanh..."
-          />
-          <div className="name-dropdown-list">
-            {filteredPeople.map(p => (
-              <div
-                key={p.id}
-                className="name-option-item"
-                onClick={() => handleSelectSister(p)}
-              >
-                <span><strong>{p.name}</strong> <small style={{ color: '#94A3B8' }}>({p.dept || p.role})</small></span>
-                <span>🌸</span>
+        {/* Switcher chế độ trải nghiệm 2D vs 3D */}
+        <div className="mode-banner-card">
+          <div className="mode-banner-label">
+            <span>🎭 Chế Độ Trải Nghiệm Demo:</span>
+          </div>
+          <div className="mode-banner-grid">
+            <button
+              type="button"
+              onClick={() => updateExperienceMode('2d')}
+              className={`mode-card-pill ${experienceMode === '2d' ? 'active' : ''}`}
+            >
+              <span style={{ fontSize: '1.6rem' }}>🌸</span>
+              <div>
+                <strong>Bản 2D Cổ Tích</strong>
+                <small>Thiệp bifold mở rộng • Xe thư vintage • Suối hoa pastel</small>
               </div>
-            ))}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => updateExperienceMode('3d')}
+              className={`mode-card-pill ${experienceMode === '3d' ? 'active' : ''}`}
+            >
+              <span style={{ fontSize: '1.6rem' }}>✨</span>
+              <div>
+                <strong>Bản 3D Điện Ảnh</strong>
+                <small>Three.js hoàng hôn • Xe van 3D • Camera bám đuổi</small>
+              </div>
+            </button>
           </div>
         </div>
-      )}
+
+        {/* HỘP QUÀ HỒNG PHẤN 3D NƠ VÀNG CHAMPAGNE */}
+        <div
+          className={`sweet-gift-wrapper ${isLidOpened ? 'box-is-open' : 'gift-wobble-anim'}`}
+          onClick={handleOpenGift}
+          title="Chạm để mở hộp quà!"
+        >
+          <svg className="sweet-gift-svg" viewBox="0 0 240 240" fill="none">
+            <defs>
+              {/* Bóng đổ */}
+              <ellipse id="boxShadow" cx="120" cy="222" rx="82" ry="15" fill="#F43F5E" opacity="0.22" />
+
+              {/* Thân hộp màu hồng phấn pastel cao cấp */}
+              <linearGradient id="sweetBoxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FDA4AF" />
+                <stop offset="40%" stopColor="#FB7185" />
+                <stop offset="100%" stopColor="#E11D48" />
+              </linearGradient>
+
+              {/* Nắp hộp */}
+              <linearGradient id="sweetLidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFF1F2" />
+                <stop offset="35%" stopColor="#FDA4AF" />
+                <stop offset="100%" stopColor="#F43F5E" />
+              </linearGradient>
+
+              {/* Ruy băng vàng champagne */}
+              <linearGradient id="sweetGoldRibbon" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#FFFBEB" />
+                <stop offset="30%" stopColor="#FDE68A" />
+                <stop offset="70%" stopColor="#C9A66B" />
+                <stop offset="100%" stopColor="#B45309" />
+              </linearGradient>
+            </defs>
+
+            {/* Bóng đổ dưới đáy */}
+            <use href="#boxShadow" />
+
+            {/* THÂN HỘP */}
+            <rect x="48" y="98" width="144" height="116" rx="18" fill="url(#sweetBoxGrad)" />
+            {/* Vệt sáng mép trái thân hộp */}
+            <path d="M 50 112 L 50 200" stroke="#FFF" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+            
+            {/* Ruy băng vàng dọc thân */}
+            <rect x="108" y="98" width="24" height="116" fill="url(#sweetGoldRibbon)" />
+            <rect x="118" y="98" width="4" height="116" fill="#FFF" opacity="0.6" />
+
+            {/* Ruy băng vàng ngang thân */}
+            <rect x="48" y="148" width="144" height="22" fill="url(#sweetGoldRibbon)" />
+            <rect x="48" y="157" width="144" height="4" fill="#FFF" opacity="0.5" />
+
+            {/* NẮP HỘP VÀ NƠ VÀNG (BẬT MỞ KHI CLICK) */}
+            <g className="sweet-gift-lid">
+              {/* Vành nắp hộp */}
+              <rect x="38" y="78" width="164" height="30" rx="9" fill="url(#sweetLidGrad)" stroke="#FDA4AF" strokeWidth="1.5" />
+              <line x1="40" y1="82" x2="200" y2="82" stroke="#FFF" strokeWidth="1.5" opacity="0.6" strokeLinecap="round" />
+
+              {/* Ruy băng trên nắp */}
+              <rect x="108" y="78" width="24" height="30" fill="url(#sweetGoldRibbon)" />
+              <rect x="118" y="78" width="4" height="30" fill="#FFF" opacity="0.7" />
+
+              {/* NƠ BƯỚM VÀNG CHAMPAGNE ĐA TẦNG */}
+              {/* Cánh nơ trái */}
+              <path
+                d="M 120 80 C 95 40 55 46 68 70 C 78 84 105 80 120 80 Z"
+                fill="url(#sweetGoldRibbon)"
+                stroke="#C9A66B"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M 118 78 C 100 48 72 52 82 70 C 90 78 110 78 118 78 Z"
+                fill="#FFFBEB"
+                opacity="0.6"
+              />
+
+              {/* Cánh nơ phải */}
+              <path
+                d="M 120 80 C 145 40 185 46 172 70 C 162 84 135 80 120 80 Z"
+                fill="url(#sweetGoldRibbon)"
+                stroke="#C9A66B"
+                strokeWidth="1.2"
+              />
+              <path
+                d="M 122 78 C 140 48 168 52 158 70 C 150 78 130 78 122 78 Z"
+                fill="#FFFBEB"
+                opacity="0.6"
+              />
+
+              {/* Đuôi nơ rủ xuống */}
+              <path d="M 114 82 Q 88 102 96 122 Q 104 108 118 84 Z" fill="url(#sweetGoldRibbon)" />
+              <path d="M 126 82 Q 152 102 144 122 Q 136 108 122 84 Z" fill="url(#sweetGoldRibbon)" />
+
+              {/* Nút thắt nơ trung tâm */}
+              <circle cx="120" cy="80" r="10" fill="url(#sweetGoldRibbon)" stroke="#B45309" strokeWidth="1" />
+              <circle cx="120" cy="80" r="5" fill="#E11D48" />
+              <circle cx="118" cy="78" r="2" fill="#FFF" opacity="0.8" />
+            </g>
+          </svg>
+        </div>
+
+        {/* Nút Mở Hộp Quà */}
+        <div style={{ marginBottom: '28px' }}>
+          <button onClick={handleOpenGift} className="btn-rose" style={{ fontSize: '1.08rem' }}>
+            <span>Mở Hộp Quà Ngay 🌸</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
+
+
