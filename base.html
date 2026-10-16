@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chúc Mừng 20/10 ✨ Dành Tặng Chị Em IT</title>
+  
+  <!-- SEO & OpenGraph preview for Zalo / Facebook -->
+  <meta property="og:title" content="Chúc Mừng 20/10 ✨ Món Quà Từ Anh Em IT">
+  <meta property="og:description" content="50+ lời chúc chân thành, ấm áp và rực rỡ nhất gửi trao những người phụ nữ tuyệt vời của công ty!">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts: Be Vietnam Pro, Dancing Script, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Dancing+Script:wght@600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Canvas Confetti & html2canvas & FontAwesome Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+            script: ['"Dancing Script"', 'cursive'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            }
+          },
+          animation: {
+            'float-slow': 'float 6s ease-in-out infinite',
+            'float-reverse': 'floatRev 7s ease-in-out infinite',
+            'pulse-subtle': 'pulseSubtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'wiggle': 'wiggle 1s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-18px) rotate(2deg)' },
+            },
+            floatRev: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-14px) rotate(-2deg)' },
+            },
+            pulseSubtle: {
+              '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+              '50%': { opacity: '0.88', transform: 'scale(1.03)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #fff1f2; }
+    ::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #fb7185; }
+
+    /* Petal falling canvas overlay */
+    #petal-canvas, #firework-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    /* 3D card tilt effect */
+    .perspective-card {
+      perspective: 1000px;
+    }
+    .preserve-3d {
+      transform-style: preserve-3d;
+    }
+
+    /* Balloon wobble animation */
+    .balloon-node {
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+      will-change: transform;
+    }
+    .balloon-node:hover {
+      transform: scale(1.12) translateY(-6px) !important;
+      filter: drop-shadow(0 14px 20px rgba(244, 63, 94, 0.35));
+    }
+    .balloon-node.popping {
+      transform: scale(1.6) !important;
+      opacity: 0 !important;
+      filter: blur(4px);
+      pointer-events: none;
+    }
+
+    /* Gift box pop */
+    .gift-lid {
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: top center;
+    }
+    .gift-box-opened .gift-lid {
+      transform: translateY(-50px) rotate(-15deg);
+    }
+
+    /* Glow utilities */
+    .glow-rose {
+      filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.45));
+    }
+    .text-glow {
+      text-shadow: 0 2px 10px rgba(225, 29, 72, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-rose-50 via-pink-50 to-rose-100 text-slate-800 font-sans antialiased selection:bg-rose-200 selection:text-rose-900 overflow-x-hidden min-h-screen">
+
+  <!-- Background Petals Fall -->
+  <canvas id="petal-canvas"></canvas>
+  <!-- Secret Fireworks Canvas for Easter Egg -->
+  <canvas id="firework-canvas"></canvas>
+
+  <!-- Floating Audio & Tool Controller (Fixed at top-right) -->
+  <div class="fixed top-4 right-4 z-50 flex items-center gap-2">
+    <!-- Dev Mode Toggle -->
+    <button id="devModeBtn" title="Chuyển chế độ Git Log / Dev view" class="bg-slate-900/80 hover:bg-slate-900 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-full text-xs font-mono backdrop-blur shadow-lg flex items-center gap-1.5 transition-all">
+      <i class="fa-solid fa-code"></i>
+      <span class="hidden sm:inline">Git Log</span>
+    </button>
+
+    <!-- Music Toggle -->
+    <button id="musicToggleBtn" class="bg-white/90 hover:bg-white text-rose-600 border border-rose-200 px-3.5 py-2 rounded-full text-sm font-medium shadow-lg backdrop-blur flex items-center gap-2 transition-all">
+      <i id="musicIcon" class="fa-solid fa-volume-xmark"></i>
+      <span id="musicText" class="text-xs hidden sm:inline">Bật nhạc</span>
+    </button>
+  </div>
+
+  <!-- Audio Element (Relaxing gentle acoustic piano / lofi) -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="https://assets.mixkit.co/music/preview/mixkit-gentle-acoustic-guitar-solos-and-piano-melody-270.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- ==========================================
+       MÀN 0: LOADING (CHẤT IT)
+  =========================================== -->
+  <div id="screen-loading" class="fixed inset-0 z-[100] bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 transition-all duration-700 font-mono">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center gap-2 pb-4 mb-4 border-b border-slate-800 text-xs text-slate-400">
+        <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+        <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+        <span class="ml-2 font-mono text-slate-300">bash: build-happiness-20-10.sh</span>
+      </div>
+
+      <div class="space-y-2 text-sm">
+        <p class="text-slate-400">$ yarn build:womens-day --production</p>
+        <p class="text-emerald-400">> Fetching 60 heartfelt wishes from Boys Team...</p>
+        <p class="text-pink-400" id="loadingStatusText">> Compiling pure happiness: 0%</p>
+        <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden my-3">
+          <div id="loadingProgressBar" class="bg-gradient-to-r from-pink-500 to-rose-400 h-2.5 rounded-full transition-all duration-100 ease-out" style="width: 0%"></div>
+        </div>
+        <p id="loadingSuccessMsg" class="text-emerald-400 font-bold hidden flex items-center gap-2">
+          <span>✔ Build passed successfully! Ready to celebrate! 🎉</span>
+        </p>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button id="enterGiftBtn" class="opacity-0 pointer-events-none transition-all duration-300 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-sans font-bold shadow-lg shadow-rose-500/40 hover:scale-105 active:scale-95 flex items-center gap-2">
+          <span>Mở món quà bí mật</span>
+          <i class="fa-solid fa-gift"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MÀN 1: HỘP QUÀ BÍ MẬT (HERO SCREEN)
+  =========================================== -->
+  <section id="screen-gift" class="min-h-screen flex flex-col items-center justify-center relative p-6 text-center overflow-hidden">
+    <!-- Soft Decorative Blobs -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-rose-200/50 rounded-full blur-3xl pointer-events-none animate-pulse-subtle"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-pink-200/60 rounded-full blur-3xl pointer-events-none animate-pulse-subtle" style="animation-delay: 1.5s;"></div>
+
+    <div class="max-w-2xl mx-auto z-10 flex flex-col items-center">
+      <!-- Personalized Greeting Badge (?to=TenChiEm) -->
+      <div id="personalizedBadge" class="hidden mb-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100 border border-rose-300 text-rose-700 font-medium text-sm shadow-sm animate-bounce">
+        <i class="fa-solid fa-sparkles text-rose-500"></i>
+        <span id="personalizedName">Gửi tới chị em xinh đẹp</span>
+      </div>
+
+      <h1 class="font-script text-5xl md:text-7xl font-bold text-rose-600 mb-3 text-glow">
+        20 Tháng 10 Rực Rỡ
+      </h1>
+      <p class="text-slate-600 text-base md:text-xl font-normal max-w-lg mb-8 leading-relaxed">
+        Có một món quà nhỏ đầy ắp bất ngờ từ toàn thể anh em IT gửi đến các chị em… 🎁
+      </p>
+
+      <!-- 3D Gift Box Interactive Area -->
+      <div id="giftBoxContainer" class="cursor-pointer group relative my-4 p-8 transition-transform duration-300 hover:scale-105 active:scale-95">
+        <div class="relative w-48 h-48 md:w-56 md:h-56 mx-auto flex items-center justify-center">
+          <!-- Box glow -->
+          <div class="absolute inset-0 bg-rose-400/20 rounded-3xl blur-2xl group-hover:bg-rose-400/35 transition-all"></div>
+          
+          <!-- Box SVG Illustration -->
+          <div id="giftBoxVisual" class="relative z-10 animate-wiggle">
+            <svg class="w-44 h-44 md:w-52 md:h-52 drop-shadow-2xl" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- Box Body -->
+              <rect x="35" y="75" width="130" height="105" rx="14" fill="#F43F5E" />
+              <rect x="35" y="75" width="130" height="105" rx="14" fill="url(#box_grad)" />
+              <!-- Vertical Ribbon -->
+              <rect x="88" y="75" width="24" height="105" fill="#FFE4E6" />
+              <rect x="94" y="75" width="12" height="105" fill="#FDA4AF" />
+              <!-- Horizontal Ribbon on body -->
+              <rect x="35" y="118" width="130" height="20" fill="#FFE4E6" />
+              <rect x="35" y="123" width="130" height="10" fill="#FDA4AF" />
+              
+              <!-- Gift Lid (can animate opening) -->
+              <g id="giftLidGroup" class="gift-lid origin-top">
+                <rect x="25" y="55" width="150" height="26" rx="8" fill="#E11D48" />
+                <rect x="85" y="55" width="30" height="26" fill="#FFE4E6" />
+                <rect x="93" y="55" width="14" height="26" fill="#FDA4AF" />
+                <!-- Ribbon Bow -->
+                <path d="M72 40C62 25 78 18 90 32C95 38 98 48 98 55C90 52 79 50 72 40Z" fill="#FECDD3"/>
+                <path d="M128 40C138 25 122 18 110 32C105 38 102 48 102 55C110 52 121 50 128 40Z" fill="#FECDD3"/>
+                <circle cx="100" cy="50" r="10" fill="#FFE4E6" />
+              </g>
+
+              <defs>
+                <linearGradient id="box_grad" x1="35" y1="75" x2="165" y2="180" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#FB7185" stop-opacity="0.5"/>
+                  <stop offset="1" stop-color="#BE123C" stop-opacity="0.8"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-col items-center">
+          <span class="inline-flex items-center gap-2 bg-white/90 text-rose-600 px-5 py-2 rounded-full font-bold text-sm shadow-md border border-rose-200 group-hover:bg-rose-600 group-hover:text-white transition-all">
+            <span>Chạm vào hộp để mở quà! 🎈</span>
+          </span>
+          <span class="text-xs text-slate-400 mt-2 font-mono">(Click to pop & start music)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll down indicator -->
+    <a href="#screen-letter" class="absolute bottom-6 flex flex-col items-center text-rose-400 hover:text-rose-600 transition-colors animate-bounce">
+      <span class="text-xs font-medium mb-1">Cuộn xuống</span>
+      <i class="fa-solid fa-chevron-down"></i>
+    </a>
+  </section>
+
+  <!-- ==========================================
+       MÀN 2: LỜI MỞ ĐẦU TỪ ANH EM (THIỆP LỚN)
+  =========================================== -->
+  <section id="screen-letter" class="min-h-screen flex items-center justify-center p-4 md:p-10 relative">
+    <div class="max-w-3xl w-full bg-white/90 backdrop-blur-md border border-rose-200 rounded-3xl p-6 md:p-12 shadow-2xl relative overflow-hidden">
+      <!-- Floral Corner Ornaments -->
+      <div class="absolute -top-8 -left-8 text-rose-200/70 text-7xl select-none pointer-events-none">🌸</div>
+      <div class="absolute -bottom-8 -right-8 text-pink-200/70 text-7xl select-none pointer-events-none">💐</div>
+      
+      <!-- Stamp & Header -->
+      <div class="flex items-center justify-between border-b border-rose-100 pb-5 mb-8">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-400 text-white flex items-center justify-center text-xl shadow-md">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <div>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800">Thư Ngỏ 20/10</h2>
+            <p class="text-xs text-slate-400 font-mono">From: Brother_Engineers_Team@TechCorp</p>
+          </div>
+        </div>
+        <div class="border-2 border-dashed border-rose-300 rounded-xl px-3 py-1.5 text-center text-rose-500 font-mono text-xs rotate-3">
+          OCT 20<br>SPECIAL
+        </div>
+      </div>
+
+      <!-- Typewriter / Styled Letter Content -->
+      <div class="space-y-5 text-slate-700 leading-relaxed text-base md:text-lg">
+        <p class="font-script text-3xl md:text-4xl text-rose-600 font-bold">
+          Thân gửi các chị em đồng nghiệp tuyệt vời,
+        </p>
+        <p>
+          Nhân ngày Phụ Nữ Việt Nam 20/10, toàn thể anh em khối Công nghệ & Sản phẩm xin gửi đến các chị em lời tri ân chân thành nhất!
+        </p>
+        <p class="bg-rose-50/80 p-4 rounded-2xl border-l-4 border-rose-400 text-slate-800 italic">
+          &ldquo;Cảm ơn các chị em vì đã làm cho công ty chúng ta mỗi ngày đều rực rỡ sắc màu, ngập tràn tiếng cười và luôn có những phút giây ấm áp, đáng nhớ nhất giữa những dòng code khô khan.&rdquo; 💐
+        </p>
+        <p>
+          Không chỉ có một lời chúc chung chung, từng anh em đã chuẩn bị riêng những tâm tư, lời chúc dí dỏm và chân thật nhất. Tất cả đã được đóng gói thành từng quả bóng bay trên bầu trời phía dưới!
+        </p>
+      </div>
+
+      <!-- Navigation to Balloon Sky -->
+      <div class="mt-10 pt-6 border-t border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+          <i class="fa-solid fa-envelope-open-text text-rose-500"></i>
+          <span>Có <strong>56 lời chúc</strong> đang chờ chị em khám phá</span>
+        </div>
+        <a href="#screen-balloons" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold shadow-lg shadow-rose-500/30 transition-all hover:scale-105 active:scale-95">
+          <span>Xem lời chúc từ anh em 🎈</span>
+          <i class="fa-solid fa-arrow-down"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MÀN 3: BẦU TRỜ BÓNG BAY (PHẦN CHÍNH - CORE)
+  =========================================== -->
+  <section id="screen-balloons" class="min-h-screen py-16 px-4 md:px-8 relative bg-gradient-to-b from-pink-100 via-rose-50 to-purple-100/50">
+    <!-- Cloud Background elements -->
+    <div class="absolute top-10 left-8 text-white/70 text-6xl select-none pointer-events-none animate-float-slow"><i class="fa-solid fa-cloud"></i></div>
+    <div class="absolute top-36 right-12 text-white/60 text-8xl select-none pointer-events-none animate-float-reverse"><i class="fa-solid fa-cloud"></i></div>
+
+    <div class="max-w-6xl mx-auto relative z-10">
+      
+      <!-- Sky Dashboard / Controls -->
+      <div class="bg-white/80 backdrop-blur-md border border-rose-200/80 rounded-3xl p-5 md:p-6 mb-8 shadow-xl flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-600 font-bold text-xs uppercase tracking-wider mb-2">Màn chính • Tương tác bóng bay</span>
+          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800">
+            Bầu Trời Lời Chúc Của Anh Em
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">
+            Bấm vào bất kỳ quả bóng nào để nổ bung điều bất ngờ và mở tấm thiệp may mắn! 🎈
+          </p>
+        </div>
+
+        <!-- Progress Counter & Quick Actions -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Counter Progress -->
+          <div class="bg-rose-50 border border-rose-200 rounded-2xl px-4 py-2.5 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-rose-500 text-white flex items-center justify-center font-bold text-sm shadow">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">Đã mở:</div>
+              <div class="text-base font-extrabold text-rose-600 font-mono">
+                <span id="openedCount">0</span> / <span id="totalCount">56</span> lời chúc
+              </div>
+            </div>
+          </div>
+
+          <!-- Random Pop Button -->
+          <button id="randomPopBtn" class="px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 active:scale-95">
+            <i class="fa-solid fa-dice"></i>
+            <span>Mở ngẫu nhiên</span>
+          </button>
+
+          <!-- Search or Filter -->
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="searchWishInput" placeholder="Tìm tên anh em..." class="pl-9 pr-4 py-2 rounded-2xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 w-36 sm:w-44">
+          </div>
+
+          <!-- View All as List Modal -->
+          <button id="viewAllListBtn" class="px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 hover:border-rose-300 text-slate-700 hover:text-rose-600 font-medium text-sm transition-colors shadow-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>Dạng danh sách</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Git Log Mode Banner (when active) -->
+      <div id="gitLogBanner" class="hidden mb-6 bg-slate-900 border border-slate-700 text-emerald-400 p-4 rounded-2xl font-mono text-xs shadow-xl">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-2">
+          <span class="flex items-center gap-2"><i class="fa-solid fa-terminal"></i> git log --oneline --author="Boys"</span>
+          <button id="closeGitMode" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i> Thoát Dev Mode</button>
+        </div>
+        <div id="gitLogContent" class="space-y-1.5 max-h-48 overflow-y-auto pr-2">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- BALLOONS SKY GRID CONTAINER -->
+      <div id="balloonsContainer" class="relative min-h-[600px] w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6 md:gap-8 p-4 items-center justify-items-center">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+
+      <!-- Stage Completion Prompt (shown when all/many are popped) -->
+      <div id="balloonsCompletedBox" class="mt-12 text-center p-8 bg-white/90 border border-rose-200 rounded-3xl shadow-xl max-w-xl mx-auto hidden">
+        <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+          🎉
+        </div>
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">Chị em đã khám phá hết những lời chúc!</h3>
+        <p class="text-slate-600 text-sm mb-6">Mời chị em cùng xem video clip kỷ niệm đặc biệt và ghé qua nhận phần quà thật nhé!</p>
+        <a href="#screen-video" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold shadow-lg shadow-rose-500/30">
+          <span>Tiếp tục sang Màn Video & Quà Thật</span>
+          <i class="fa-solid fa-arrow-down"></i>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MÀN 4: VIDEO / SLIDESHOW KỶ NIỆM
+  =========================================== -->
+  <section id="screen-video" class="min-h-screen py-16 px-4 md:px-8 flex items-center justify-center relative bg-gradient-to-b from-purple-100/50 via-pink-50 to-rose-100">
+    <div class="max-w-4xl w-full mx-auto">
+      <div class="text-center mb-8">
+        <span class="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 font-bold text-xs uppercase tracking-wider mb-2">Màn 4 • Khoảnh khắc đáng nhớ</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800">
+          Video Clip & Ảnh Chúc Mừng
+        </h2>
+        <p class="text-slate-600 text-sm md:text-base mt-2">
+          Những nụ cười, những tấm bảng chúc và khoảnh khắc dễ thương nhất từ các chàng trai phòng IT 🎬
+        </p>
+      </div>
+
+      <!-- Responsive Video / Presentation Frame -->
+      <div class="bg-white p-3 md:p-6 rounded-3xl shadow-2xl border border-rose-200">
+        <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 group flex items-center justify-center">
+          
+          <!-- Mock Video Player with real Interactive Slideshow + Ambient Sound -->
+          <div id="videoMockDisplay" class="absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white bg-gradient-to-tr from-slate-950 via-slate-900 to-rose-950 p-6 text-center">
+            
+            <div id="slideshowSlide1" class="slideshow-slide flex flex-col items-center max-w-lg transition-opacity duration-500">
+              <div class="w-20 h-20 rounded-full bg-rose-500/20 border-2 border-rose-400 flex items-center justify-center text-3xl mb-4 text-rose-300">
+                <i class="fa-solid fa-film"></i>
+              </div>
+              <h3 class="text-xl md:text-2xl font-bold text-rose-200 mb-2">
+                &ldquo;Cảm ơn vì đã luôn đồng hành cùng team!&rdquo;
+              </h3>
+              <p class="text-slate-300 text-xs md:text-sm">Anh em Backend • Frontend • DevOps • QA • Product gửi trọn yêu thương</p>
+            </div>
+
+            <!-- Slideshow Controls -->
+            <div class="absolute bottom-4 left-0 right-0 px-6 flex items-center justify-between text-xs text-slate-400">
+              <span class="font-mono flex items-center gap-1.5"><i class="fa-solid fa-circle text-rose-500 text-[8px] animate-pulse"></i> CapCut Tribute 20/10 (HD 1080p)</span>
+              <div class="flex items-center gap-2">
+                <button id="prevSlideBtn" class="p-2 hover:text-white bg-slate-800/80 rounded-lg"><i class="fa-solid fa-backward"></i></button>
+                <button id="togglePlaySlideBtn" class="px-3 py-1.5 hover:text-white bg-rose-600 text-white rounded-lg font-bold flex items-center gap-1">
+                  <i class="fa-solid fa-play"></i> <span>Tự chạy</span>
+                </button>
+                <button id="nextSlideBtn" class="p-2 hover:text-white bg-slate-800/80 rounded-lg"><i class="fa-solid fa-forward"></i></button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Video Badges -->
+          <div class="absolute top-4 left-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-mono flex items-center gap-2 pointer-events-none">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <span>20/10 Special Edition</span>
+          </div>
+        </div>
+
+        <!-- Quote under video -->
+        <div class="mt-4 text-center">
+          <p class="text-xs text-slate-500 italic">
+            *Video được tổng hợp từ 56 clip ngắn của anh em công ty. Click để chuyển ảnh/lời chúc tiếp theo!
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center">
+        <a href="#screen-conclusion" class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-white border border-rose-300 text-rose-600 font-bold hover:bg-rose-50 shadow-md transition-all hover:scale-105">
+          <span>Tiến tới Màn Nhận Quà & Tải Thiệp 🌸</span>
+          <i class="fa-solid fa-arrow-down"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MÀN 5: KẾT, HOA, QUÀ THẬT & TẢI THIỆP
+  =========================================== -->
+  <section id="screen-conclusion" class="min-h-screen py-20 px-4 md:px-8 relative bg-gradient-to-b from-rose-100 via-rose-900 to-slate-950 text-white flex flex-col justify-between">
+    
+    <div class="max-w-4xl mx-auto w-full relative z-10 text-center pt-8">
+      
+      <!-- Stage spotlight header -->
+      <div class="inline-block px-4 py-1.5 rounded-full bg-rose-500/30 border border-rose-400/40 text-rose-200 font-mono text-xs uppercase tracking-widest mb-6 backdrop-blur">
+        Final Stage • Happy Vietnamese Women's Day
+      </div>
+
+      <h2 class="font-script text-5xl md:text-7xl font-bold text-rose-200 mb-6 text-glow">
+        Rạng Rỡ & Hạnh Phúc Mỗi Ngày
+      </h2>
+
+      <p class="text-rose-100/90 text-lg md:text-2xl font-light max-w-2xl mx-auto leading-relaxed mb-10">
+        &ldquo;Chúc các chị em một ngày 20/10 thật rạng rỡ, nhiều niềm vui và luôn có thật nhiều nụ cười rạng ngời trên môi!&rdquo;
+      </p>
+
+      <!-- 2 Major Action Cards: Nhận Quà Thật & Tải Thiệp Cá Nhân Hóa -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-10 text-left">
+        
+        <!-- Card 1: Quà Thật Ngoài Đời -->
+        <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 md:p-8 hover:bg-white/15 transition-all shadow-2xl flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-500 flex items-center justify-center text-white text-2xl shadow-lg mb-5">
+              <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Thông Tin Nhận Quà Thật</h3>
+            <p class="text-rose-200/80 text-sm mb-4">
+              Món quà ảo chỉ là phần mở đầu, các anh em đã chuẩn bị những phần quà hoa và bánh trà sữa ngọt ngào trực tiếp tại văn phòng!
+            </p>
+            <div id="giftLocationInfo" class="bg-black/30 border border-white/10 rounded-2xl p-4 space-y-2 text-xs font-mono text-rose-100">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-location-dot text-rose-400"></i>
+                <span>Địa điểm: <strong>Pantry Tầng 8 & Khu vực Lounge</strong></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-400"></i>
+                <span>Thời gian: <strong>10:00 Sáng - 20/10 (Thứ Ba)</strong></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-champagne-glasses text-pink-400"></i>
+                <span>Tea-break & Mini game bất ngờ cùng anh em!</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="claimGiftPopupBtn" class="mt-6 w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-500 hover:to-rose-600 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bell"></i>
+            <span>Nhắc tôi giờ nhận quà! 🎁</span>
+          </button>
+        </div>
+
+        <!-- Card 2: Xuất Thiệp Lưu Niệm (html2canvas) -->
+        <div class="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl p-6 md:p-8 hover:bg-white/15 transition-all shadow-2xl flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white text-2xl shadow-lg mb-5">
+              <i class="fa-solid fa-image"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">Tải Thiệp Chúc Mừng Cá Nhân</h3>
+            <p class="text-rose-200/80 text-sm mb-4">
+              Tải ngay tấm thiệp xinh đẹp mang tên của riêng bạn để lưu giữ hoặc chia sẻ lên Zalo/Facebook cùng bạn bè!
+            </p>
+            
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-medium text-rose-200 mb-1">Tên của bạn trên thiệp:</label>
+                <input type="text" id="cardRecipientInput" placeholder="Ví dụ: Chị Lan Anh, Em Trang..." class="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-rose-300/40 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400">
+              </div>
+            </div>
+          </div>
+
+          <button id="downloadCardBtn" class="mt-6 w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold text-sm shadow-lg shadow-rose-500/30 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Tải thiệp về máy (PNG) 💌</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Send Gratitude Emoji Reaction (Cảm ơn lại anh em) -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 max-w-xl mx-auto my-8 backdrop-blur">
+        <p class="text-sm text-rose-200 mb-3 font-medium">
+          💌 Thả tim / Gửi lời cảm ơn lại đến anh em bằng 1 chạm:
+        </p>
+        <div class="flex items-center justify-center gap-4 text-3xl">
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="❤️">❤️</button>
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="🥰">🥰</button>
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="💐">💐</button>
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="✨">✨</button>
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="🎉">🎉</button>
+          <button class="reaction-btn hover:scale-130 transition-transform active:scale-95" data-emoji="☕">☕</button>
+        </div>
+        <div id="reactionThanksMsg" class="text-xs text-emerald-400 font-mono mt-3 hidden">
+          Cảm ơn bạn! Anh em đã nhận được tim của bạn qua Slack/Teams rồi nè! 🥰
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Dev-Style Signature -->
+    <div class="text-center pt-12 pb-6 border-t border-white/10 text-xs text-rose-300/60 font-mono">
+      <p class="mb-1">
+        Built with ❤️ by anh em Dev, Tech & Product team • Không có bug (chắc vậy 😄)
+      </p>
+      <p class="text-[11px] text-rose-300/40">
+        Tip: Hãy thử bấm phím Konami: &uarr; &uarr; &darr; &darr; &larr; &rarr; &larr; &rarr; B A để xem pháo hoa rực trời!
+      </p>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       MODAL 1: CHI TIẾT LỜI CHÚC (3D TILT CARD)
+  =========================================== -->
+  <div id="wishModal" class="fixed inset-0 z-[80] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="perspective-card w-full max-w-lg">
+      <div id="wishCardInner" class="preserve-3d bg-white rounded-3xl p-6 md:p-8 shadow-2xl border-2 border-rose-300 relative transition-transform duration-150">
+        
+        <!-- Close Button -->
+        <button id="closeWishModalBtn" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        <!-- Sender Avatar & Info -->
+        <div class="flex items-center gap-4 mb-5">
+          <div id="modalSenderAvatar" class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-400 text-white flex items-center justify-center font-bold text-2xl shadow-md border-2 border-white">
+            M
+          </div>
+          <div>
+            <h4 id="modalSenderName" class="text-xl font-bold text-slate-900">Minh Dev</h4>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="modalSenderDept" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700">Backend Engineering</span>
+              <span class="text-xs text-slate-400 font-mono">#Wish</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wish Message Content -->
+        <div class="my-6 p-5 rounded-2xl bg-gradient-to-br from-rose-50/70 to-pink-50/40 border border-rose-100">
+          <i class="fa-solid fa-quote-left text-2xl text-rose-300 mb-2 block"></i>
+          <p id="modalWishText" class="text-slate-800 text-base md:text-lg leading-relaxed font-normal">
+            &ldquo;Cảm ơn chị đã luôn là người chỉ cho em cách làm việc cẩn thận và tử tế. Chúc chị 20/10 thật nhiều niềm vui và luôn tươi cười!&rdquo;
+          </p>
+          <div class="text-right mt-2 text-rose-400 text-xs font-mono">
+            — From heart with love ❤️
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <span class="text-xs text-slate-400 font-mono">Chạm ra ngoài để đóng</span>
+          <button id="modalNextWishBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-sm shadow hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+            <span>Bóng tiếp theo 🎈</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: TẤT CẢ LỜI CHÚC DẠNG DANH SÁCH
+  =========================================== -->
+  <div id="allListModal" class="fixed inset-0 z-[80] bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-3xl max-h-[85vh] flex flex-col shadow-2xl border border-rose-200 overflow-hidden">
+      <div class="p-5 md:p-6 border-b border-rose-100 flex items-center justify-between bg-rose-50/60">
+        <div>
+          <h3 class="text-xl font-bold text-slate-800">Toàn Bộ 56 Lời Chúc Từ Anh Em</h3>
+          <p class="text-xs text-slate-500 font-mono">Tổng hợp danh sách gửi tặng các chị em 20/10</p>
+        </div>
+        <button id="closeAllListModalBtn" class="w-9 h-9 rounded-full bg-white text-slate-500 hover:text-rose-600 flex items-center justify-center shadow-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="allListItemsContainer" class="p-6 overflow-y-auto space-y-4 divide-y divide-rose-50">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       HIDDEN RENDER CANVAS CONTAINER FOR EXPORT (html2canvas)
+  =========================================== -->
+  <div class="fixed -left-[9999px] -top-[9999px]">
+    <div id="exportableCard" class="w-[600px] h-[750px] bg-gradient-to-br from-rose-500 via-pink-600 to-purple-700 p-10 text-white flex flex-col justify-between rounded-3xl font-sans relative overflow-hidden shadow-2xl">
+      <!-- Decorative circles -->
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+      <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-2xl"></div>
+
+      <!-- Header -->
+      <div class="flex items-center justify-between border-b border-white/20 pb-6 relative z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-white text-rose-600 flex items-center justify-center text-xl font-bold shadow">
+            🌸
+          </div>
+          <div>
+            <h4 class="font-bold text-lg tracking-wide">HAPPY WOMEN'S DAY</h4>
+            <p class="text-xs text-rose-200 font-mono">20 Tháng 10 • Tech & Product Family</p>
+          </div>
+        </div>
+        <div class="font-mono text-xs text-white/70">
+          #VietnameseWomensDay
+        </div>
+      </div>
+
+      <!-- Main card body -->
+      <div class="my-auto py-8 text-center relative z-10">
+        <div class="text-rose-200 text-sm font-mono uppercase tracking-widest mb-3">Món quà trao gửi</div>
+        <h2 id="exportCardRecipientName" class="text-4xl font-extrabold text-white mb-6 font-script">
+          Thân gửi Chị Lan Anh
+        </h2>
+        <div class="bg-white/15 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-inner">
+          <p class="text-lg text-rose-50 leading-relaxed font-light">
+            &ldquo;Chúc bạn một ngày 20/10 ngập tràn nụ cười, luôn rực rỡ, may mắn trong công việc và vẹn tròn hạnh phúc trong cuộc sống!&rdquo;
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer info -->
+      <div class="pt-6 border-t border-white/20 flex items-center justify-between text-xs text-rose-200 relative z-10">
+        <span>Toàn thể anh em IT & Công nghệ</span>
+        <span class="font-mono">Built with love ❤️</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       JAVASCRIPT DATA & LOGIC (56 WISHES & INTERACTIONS)
+  =========================================== -->
+  <script>
+    /* ========================================================
+       1. DATA: 56 Heartfelt & Respectful IT Wishes
+       ======================================================== */
+    const WISHES = [
+      { id: 1, name: "Hoàng Minh", dept: "Backend Dev", color: "#F43F5E", text: "Cảm ơn chị đã luôn là người chỉ cho em cách làm việc cẩn thận và tử tế. Chúc chị 20/10 thật nhiều niềm vui và luôn tươi cười! 🌸" },
+      { id: 2, name: "Quốc Tuấn", dept: "Frontend Dev", color: "#EC4899", text: "Chúc các chị em luôn xinh đẹp, rạng rỡ và code không bao giờ có bug, release là deploy êm ái! 🚀" },
+      { id: 3, name: "Đức Thắng", dept: "Tech Lead", color: "#8B5CF6", text: "Nhờ có chị em mà không khí phòng kỹ thuật luôn tràn ngập sức sống và sự cân bằng. Chúc mọi người luôn hạnh phúc và thành công! 💐" },
+      { id: 4, name: "Văn Nam", dept: "DevOps", color: "#3B82F6", text: "Chúc chị em uptime 100%, deadline luôn xanh và cuộc sống lúc nào cũng ngập tràn năng lượng tích cực! ⚡" },
+      { id: 5, name: "Gia Bảo", dept: "Mobile Lead", color: "#10B981", text: "Cảm ơn các bạn QA/BA nữ đã luôn kiên nhẫn review và giữ chất lượng sản phẩm chuẩn chỉ nhất. 20/10 thật hạnh phúc nhé! 📱" },
+      { id: 6, name: "Hải Đăng", dept: "Data Engineer", color: "#F59E0B", text: "Chúc chị em có thật nhiều niềm vui, mọi metric trong công việc và cuộc sống đều tăng trưởng vượt bậc! 📈" },
+      { id: 7, name: "Trọng Nghĩa", dept: "QA Team", color: "#F43F5E", text: "Không có các chị em, văn phòng chắc chỉ toàn tiếng gõ bàn phím khô khan. Chúc các chị em luôn rực rỡ và tươi trẻ! ✨" },
+      { id: 8, name: "Việt Anh", dept: "UI/UX Designer", color: "#EC4899", text: "Mỗi ngày đi làm gặp các chị em là một nguồn cảm hứng sáng tạo tuyệt vời. Chúc chị em 20/10 trọn vẹn hạnh phúc! 🎨" },
+      { id: 9, name: "Thành Đạt", dept: "Frontend Dev", color: "#8B5CF6", text: "Chúc các chị em nhận được thật nhiều hoa, nhiều quà và ngập tràn tình yêu thương từ những người thân yêu! 🎁" },
+      { id: 10, name: "Khánh Duy", dept: "System Admin", color: "#3B82F6", text: "Chúc các bạn nữ luôn xinh đẹp, tự tin, công việc hanh thông và mãi là chỗ dựa tinh thần của cả team! 🛡️" },
+      { id: 11, name: "Thế Hiển", dept: "AI Researcher", color: "#10B981", text: "Chúc chị em luôn có trí tuệ sắc sảo, năng lượng dồi dào và luôn mỉm cười với mọi thử thách! 🤖" },
+      { id: 12, name: "Quang Huy", dept: "Security", color: "#F59E0B", text: "Chúc tâm hồn chị em luôn bình an, không bao giờ bị 'tấn công' bởi những muộn phiền hay âu lo! 🔒" },
+      { id: 13, name: "Nhật Minh", dept: "Product Manager", color: "#F43F5E", text: "Cảm ơn sự tận tụy, tỉ mỉ và đồng hành của các chị em trong từng sprint. Chúc ngày 20/10 thật ngọt ngào! 🍰" },
+      { id: 14, name: "Hữu Phước", dept: "Backend Dev", color: "#EC4899", text: "Chúc chị em lúc nào cũng rạng rỡ như nắng mai, việc gì khó cũng giải quyết êm đẹp và nhẹ nhàng! ☀️" },
+      { id: 15, name: "Tuấn Kiệt", dept: "Frontend Dev", color: "#8B5CF6", text: "Mong mọi điều ước của chị em trong ngày 20/10 này đều trở thành hiện thực rực rỡ! 🌟" },
+      { id: 16, name: "Duy Khoa", dept: "Tester", color: "#3B82F6", text: "Chúc các chị em luôn vui vẻ, rạng ngời và mãi là những bông hoa tươi thắm nhất của công ty! 🌺" },
+      { id: 17, name: "Tấn Tài", dept: "Infrastructure", color: "#10B981", text: "Hạ tầng vững chãi, cuộc sống an nhiên. Chúc các chị em luôn nhận được sự tôn trọng và yêu quý xứng đáng! 🏗️" },
+      { id: 18, name: "Bảo Long", dept: "Fullstack Dev", color: "#F59E0B", text: "Chúc các chị em xinh đẹp, duyên dáng và luôn tìm thấy niềm hứng khởi trong công việc mỗi ngày! 🌼" },
+      { id: 19, name: "Vĩnh Thụy", dept: "Scrum Master", color: "#F43F5E", text: "Chúc chị em sprint nào cũng velocity cao, backlog cuộc sống toàn những điều ngọt ngào và may mắn! 🎯" },
+      { id: 20, name: "Thanh Tùng", dept: "Database Admin", color: "#EC4899", text: "Dữ liệu có thể query nhanh, nhưng sự trân quý của anh em dành cho chị em là vô hạn. 20/10 ấm áp nhé! 💾" },
+      { id: 21, name: "Ngọc Sơn", dept: "Backend Dev", color: "#8B5CF6", text: "Chúc các chị em nhận được thật nhiều điều bất ngờ thú vị và luôn tràn đầy năng lượng tích cực! 🌷" },
+      { id: 22, name: "Văn Hùng", dept: "Frontend Dev", color: "#3B82F6", text: "Chúc giao diện cuộc sống của chị em luôn chuẩn pixel-perfect, rực rỡ sắc màu hạnh phúc! 🖼️" },
+      { id: 23, name: "Đình Trọng", dept: "QA Lead", color: "#10B981", text: "Cảm ơn các chị em vì sự cẩn thận và thấu cảm tuyệt vời trong từng dự án. Chúc ngày 20/10 đáng nhớ! 📝" },
+      { id: 24, name: "Trung Kiên", dept: "Cloud Arch", color: "#F59E0B", text: "Chúc cuộc sống của chị em luôn bay bổng, tự do và bao la như những đám mây công nghệ! ☁️" },
+      { id: 25, name: "Mạnh Cường", dept: "Backend Dev", color: "#F43F5E", text: "Chúc chị em ăn ngon, ngủ ngon, không lo tăng cân và luôn tươi trẻ yêu đời! 🍧" },
+      { id: 26, name: "Hồng Phong", dept: "Mobile Dev", color: "#EC4899", text: "Chúc ứng dụng cuộc đời của các chị em luôn mượt mà 120Hz, không bao giờ bị lag hay đứng hình! 📲" },
+      { id: 27, name: "Công Danh", dept: "DevOps", color: "#8B5CF6", text: "Pipeline suôn sẻ, cuộc đời êm ả. Chúc chị em 20/10 ngập tràn hoa và những lời chúc tốt lành! 🌻" },
+      { id: 28, name: "Tiến Dũng", dept: "Fullstack", color: "#3B82F6", text: "Gửi ngàn lời chúc tốt đẹp nhất đến một nửa thế giới xinh đẹp của công ty chúng ta! 💖" },
+      { id: 29, name: "Đăng Khoa", dept: "Designer", color: "#10B981", text: "Chúc palette cuộc sống của các chị em luôn ngập tràn những gam màu ấm áp, hạnh phúc nhất! 🎨" },
+      { id: 30, name: "Bá Thông", dept: "Solutions", color: "#F59E0B", text: "Mọi bài toán khó đều có lời giải, chúc chị em luôn tự tin và tỏa sáng trên con đường sự nghiệp! 💡" },
+      { id: 31, name: "Xuân Bách", dept: "Backend Dev", color: "#F43F5E", text: "Chúc các chị em luôn được yêu thương, chăm sóc và trân trọng mỗi ngày, không chỉ riêng 20/10! 🌹" },
+      { id: 32, name: "Hoàng Long", dept: "Frontend Dev", color: "#EC4899", text: "Cảm ơn các chị em vì luôn đem lại tiếng cười vui vẻ trong giờ giải lao. Chúc ngày 20/10 ngập tràn quà! ☕" },
+      { id: 33, name: "Văn Quyết", dept: "QA Tester", color: "#8B5CF6", text: "Chúc chị em luôn tìm thấy niềm vui trong những điều bình dị nhất. Mãi xinh xắn nhé! 🍀" },
+      { id: 34, name: "Quang Hải", dept: "Product Owner", color: "#3B82F6", text: "Giá trị mà các chị em mang lại cho tập thể là vô giá. Chúc các bạn luôn tự hào về chính mình! 🏆" },
+      { id: 35, name: "Huy Toàn", dept: "Backend", color: "#10B981", text: "Chúc chị em luôn dồi dào sức khỏe, may mắn ngập tràn và tình duyên luôn như ý! 💌" },
+      { id: 36, name: "Minh Quân", dept: "Data Analyst", color: "#F59E0B", text: "Insight cuộc đời: Chị em là nguồn năng lượng quý báu nhất của văn phòng này. 20/10 rực rỡ nhé! 📊" },
+      { id: 37, name: "Anh Tuấn", dept: "System Eng", color: "#F43F5E", text: "Chúc chị em không chỉ hôm nay mà 364 ngày còn lại đều được yêu chiều như công chúa! 👑" },
+      { id: 38, name: "Phi Long", dept: "Mobile Dev", color: "#EC4899", text: "Chúc các bạn nữ nhận được nhiều hoa thật, quà xịn và đi ăn thật ngon cùng gia đình, bạn bè! 🍨" },
+      { id: 39, name: "Đức Anh", dept: "Frontend Dev", color: "#8B5CF6", text: "Cảm ơn vì đã cùng nhau vượt qua bao nhiêu đợt release căng thẳng. Chúc chị em luôn an yên! 🕊️" },
+      { id: 40, name: "Thái Sơn", dept: "Tech Support", color: "#3B82F6", text: "Bất kể khó khăn gì anh em cũng sẵn sàng hỗ trợ, chúc chị em luôn an tâm và vui vẻ! 🛠️" },
+      { id: 41, name: "Nguyên Khang", dept: "AI Engineer", color: "#10B981", text: "Prompt nào cũng tạo ra điều kỳ diệu, nhưng nụ cười của chị em là điều kỳ diệu nhất! 🪄" },
+      { id: 42, name: "Thành Trung", dept: "Backend Dev", color: "#F59E0B", text: "Chúc các chị em luôn là phiên bản tự tin, duyên dáng và hạnh phúc nhất của chính mình! 🌸" },
+      { id: 43, name: "Duy Mạnh", dept: "Security Eng", color: "#F43F5E", text: "Chúc trái tim chị em luôn được sưởi ấm bởi những điều dịu dàng nhất trên thế gian! 🛡️" },
+      { id: 44, name: "Thế Anh", dept: "Fullstack", color: "#EC4899", text: "Cảm ơn sự đóng góp to lớn của các chị em trong mọi cột mốc phát triển của dự án! 🚀" },
+      { id: 45, name: "Tùng Dương", dept: "Tester", color: "#8B5CF6", text: "Chúc chị em luôn giữ trọn ngọn lửa đam mê và sự tự tin rạng ngời! 🕯️" },
+      { id: 46, name: "Bảo Nam", dept: "Backend Dev", color: "#3B82F6", text: "Chúc chị em mua sắm thả ga, không lo nhìn giá và có những chuyến du lịch tuyệt vời! 🛍️" },
+      { id: 47, name: "Khắc Huy", dept: "Frontend Dev", color: "#10B981", text: "Chúc chị em luôn được vây quanh bởi những người chân thành và tử tế nhất! 💐" },
+      { id: 48, name: "Phú Quý", dept: "DevOps", color: "#F59E0B", text: "Chúc các bạn nữ lúc nào cũng rạng rỡ và thảnh thơi như ngày cuối tuần! ☕" },
+      { id: 49, name: "Bình An", dept: "Product Ops", color: "#F43F5E", text: "Cảm ơn các chị em vì đã luôn kiên nhẫn và thấu hiểu. Chúc ngày 20/10 đong đầy yêu thương! 🌾" },
+      { id: 50, name: "Hữu Đạt", dept: "Mobile Lead", color: "#EC4899", text: "Chúc chị em ngày nào cũng là một ngày vui, nhiều may mắn và ngập tràn quà cáp! 🎈" },
+      { id: 51, name: "Quang Minh", dept: "Backend", color: "#8B5CF6", text: "Chúc chị em trẻ mãi không già, nụ cười luôn tỏa sáng như ánh nắng sớm mai! ☀️" },
+      { id: 52, name: "Minh Triết", dept: "Designer", color: "#3B82F6", text: "Chúc cuộc đời chị em vẽ nên những gam màu rực rỡ và lãng mạn nhất! 🎨" },
+      { id: 53, name: "Đức Huy", dept: "QA Tester", color: "#10B981", text: "Chúc mọi điều tốt đẹp nhất sẽ đến với các chị em trong hôm nay và mãi về sau! 🎁" },
+      { id: 54, name: "Trung Hiếu", dept: "Backend Dev", color: "#F59E0B", text: "Gửi trọn tấm lòng và sự ngưỡng mộ đến tất cả các nữ đồng nghiệp kiên cường, giỏi giang! 🌟" },
+      { id: 55, name: "Thanh Hải", dept: "Fullstack", color: "#F43F5E", text: "Chúc chị em luôn yêu đời, bình an và gặt hái thật nhiều thành tựu lớn lao! 🍀" },
+      { id: 56, name: "Toàn Thể Anh Em", dept: "Tech & Product", color: "#EC4899", text: "Chúc mừng 20/10! Cảm ơn các chị em vì đã luôn là nguồn cảm hứng và niềm tự hào to lớn của công ty chúng ta! ❤️💐" }
+    ];
+
+    /* ========================================================
+       2. INITIALIZATION & URL PARAM HANDLING (?to=...)
+       ======================================================== */
+    const urlParams = new URLSearchParams(window.location.search);
+    const toParam = urlParams.get('to');
+    
+    if (toParam) {
+      const recipient = decodeURIComponent(toParam).trim();
+      const badge = document.getElementById('personalizedBadge');
+      const badgeName = document.getElementById('personalizedName');
+      const cardInput = document.getElementById('cardRecipientInput');
+      const exportName = document.getElementById('exportCardRecipientName');
+      
+      badge.classList.remove('hidden');
+      badgeName.textContent = `Gửi tặng riêng: ${recipient} 🌸`;
+      cardInput.value = recipient;
+      exportName.textContent = `Thân gửi ${recipient}`;
+    }
+
+    /* Change Document Title on Tab Blur (Easter Egg) */
+    const originalDocTitle = document.title;
+    window.addEventListener('blur', () => {
+      document.title = "Quay lại đi mà chị em ơi 🥺❤️";
+    });
+    window.addEventListener('focus', () => {
+      document.title = originalDocTitle;
+    });
+
+    /* Console DevTools Easter Egg */
+    console.log(
+      "%c🌸 CHÚC MỪNG 20/10 TOÀN THỂ CHỊ EM IT! 🌸\n%c" +
+      "Bạn đang mở F12 soi code đúng không? 😄\n" +
+      "Code này được viết bằng tất cả sự tôn trọng, lòng biết ơn và không có bug nào (hy vọng vậy)!\n" +
+      "Chúc chị em một ngày ngập tràn niềm vui và luôn rực rỡ nhé! ❤️\n" +
+      "Try Konami: ↑ ↑ ↓ ↓ ← → ← → B A for fireworks!",
+      "color: #e11d48; font-size: 18px; font-weight: bold;",
+      "color: #059669; font-size: 13px;"
+    );
+
+    /* ========================================================
+       3. MÀN 0: LOADING PROGRESS & TRANSITION
+       ======================================================== */
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.floor(Math.random() * 14) + 6;
+      if (progress > 100) progress = 100;
+      
+      document.getElementById('loadingProgressBar').style.width = progress + '%';
+      document.getElementById('loadingStatusText').textContent = `> Compiling pure happiness: ${progress}%`;
+
+      if (progress === 100) {
+        clearInterval(progressInterval);
+        document.getElementById('loadingSuccessMsg').classList.remove('hidden');
+        const btn = document.getElementById('enterGiftBtn');
+        btn.classList.remove('opacity-0', 'pointer-events-none');
+        btn.classList.add('opacity-100');
+      }
+    }, 120);
+
+    document.getElementById('enterGiftBtn').addEventListener('click', () => {
+      const screenLoading = document.getElementById('screen-loading');
+      screenLoading.style.opacity = '0';
+      screenLoading.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        screenLoading.style.display = 'none';
+        // Auto scroll smoothly to gift screen
+        document.getElementById('screen-gift').scrollIntoView({ behavior: 'smooth' });
+      }, 600);
+    });
+
+    /* ========================================================
+       4. AUDIO CONTROLLER
+       ======================================================== */
+    const bgMusic = document.getElementById('bgMusic');
+    const musicToggleBtn = document.getElementById('musicToggleBtn');
+    const musicIcon = document.getElementById('musicIcon');
+    const musicText = document.getElementById('musicText');
+    let isMusicPlaying = false;
+
+    function toggleMusic() {
+      if (!isMusicPlaying) {
+        bgMusic.play().then(() => {
+          isMusicPlaying = true;
+          musicIcon.className = "fa-solid fa-volume-high text-rose-500 animate-pulse";
+          musicText.textContent = "Nhạc đang phát";
+        }).catch(() => {
+          console.warn("Browser blocked audio autoplay until interaction.");
+        });
+      } else {
+        bgMusic.pause();
+        isMusicPlaying = false;
+        musicIcon.className = "fa-solid fa-volume-xmark";
+        musicText.textContent = "Bật nhạc";
+      }
+    }
+    musicToggleBtn.addEventListener('click', toggleMusic);
+
+    /* ========================================================
+       5. MÀN 1: MỞ HỘP QUÀ & CONFETTI
+       ======================================================== */
+    const giftBoxContainer = document.getElementById('giftBoxContainer');
+    let giftOpened = false;
+
+    giftBoxContainer.addEventListener('click', () => {
+      if (!isMusicPlaying) toggleMusic();
+
+      const lid = document.getElementById('giftLidGroup');
+      lid.style.transform = "translateY(-40px) rotate(-18deg)";
+      
+      confetti({
+        particleCount: 80,
+        spread: 90,
+        origin: { y: 0.6 }
+      });
+
+      if (!giftOpened) {
+        giftOpened = true;
+        setTimeout(() => {
+          document.getElementById('screen-letter').scrollIntoView({ behavior: 'smooth' });
+        }, 800);
+      }
+    });
+
+    /* ========================================================
+       6. MÀN 3: BALLOONS SKY LOGIC & 3D TILT POPUP
+       ======================================================== */
+    const balloonsContainer = document.getElementById('balloonsContainer');
+    const openedCountEl = document.getElementById('openedCount');
+    const totalCountEl = document.getElementById('totalCount');
+    let openedIds = new Set();
+    let currentModalWishIndex = 0;
+
+    totalCountEl.textContent = WISHES.length;
+
+    // SVG Balloon template function
+    function createBalloonElement(wish, index) {
+      const node = document.createElement('div');
+      node.className = "balloon-node flex flex-col items-center justify-center p-2 relative group";
+      node.id = `balloon-${wish.id}`;
+      node.style.animation = `${index % 2 === 0 ? 'float' : 'floatRev'} ${5 + (index % 4)}s ease-in-out infinite`;
+      node.style.animationDelay = `${(index % 5) * 0.4}s`;
+
+      node.innerHTML = `
+        <div class="relative w-20 h-28 md:w-24 md:h-32 flex items-center justify-center">
+          <!-- Balloon Body SVG -->
+          <svg viewBox="0 0 100 130" class="w-full h-full drop-shadow-md">
+            <!-- Balloon -->
+            <path d="M50 0 C22.38 0 0 22.38 0 50 C0 75 35 105 47 115 L50 118 L53 115 C65 105 100 75 100 50 C100 22.38 77.62 0 50 0 Z" fill="${wish.color}" />
+            <!-- Highlight Gloss -->
+            <ellipse cx="32" cy="28" rx="14" ry="7" transform="rotate(-35 32 28)" fill="#ffffff" opacity="0.45" />
+            <!-- Little knot at bottom -->
+            <polygon points="45,118 55,118 50,124" fill="${wish.color}" />
+            <!-- String -->
+            <path d="M50 124 Q 48 135 52 145" stroke="#cbd5e1" stroke-width="2" fill="none" />
+          </svg>
+          
+          <!-- Avatar Initial in Balloon -->
+          <div class="absolute top-6 left-0 right-0 flex flex-col items-center pointer-events-none">
+            <div class="w-8 h-8 rounded-full bg-white/90 text-slate-800 flex items-center justify-center font-bold text-xs shadow-sm">
+              ${wish.name.charAt(0)}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sender name tag below -->
+        <span class="mt-2 text-xs font-semibold px-2.5 py-1 rounded-full bg-white/95 text-slate-700 shadow-sm border border-slate-200/80 group-hover:bg-rose-500 group-hover:text-white transition-colors">
+          ${wish.name}
+        </span>
+      `;
+
+      node.addEventListener('click', (e) => {
+        popBalloon(wish, node, e);
+      });
+
+      return node;
+    }
+
+    function popBalloon(wish, element, event) {
+      if (element.classList.contains('popping')) return;
+
+      // Particle pop using canvas-confetti directly at balloon coordinates
+      const rect = element.getBoundingClientRect();
+      const x = (rect.left + rect.width / 2) / window.innerWidth;
+      const y = (rect.top + rect.height / 2) / window.innerHeight;
+
+      confetti({
+        particleCount: 25,
+        spread: 60,
+        origin: { x, y },
+        colors: [wish.color, '#fda4af', '#fff1f2', '#ffffff']
+      });
+
+      element.classList.add('popping');
+      setTimeout(() => {
+        element.style.visibility = 'hidden';
+      }, 280);
+
+      openedIds.add(wish.id);
+      openedCountEl.textContent = openedIds.size;
+
+      // Show completed notification if reached threshold
+      if (openedIds.size >= 12) {
+        document.getElementById('balloonsCompletedBox').classList.remove('hidden');
+      }
+
+      // Show Wish Modal
+      openWishModal(wish);
+    }
+
+    function renderBalloons(list) {
+      balloonsContainer.innerHTML = '';
+      list.forEach((w, i) => {
+        if (!openedIds.has(w.id)) {
+          balloonsContainer.appendChild(createBalloonElement(w, i));
+        }
+      });
+    }
+    renderBalloons(WISHES);
+
+    /* Search Wish by Name */
+    document.getElementById('searchWishInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const filtered = WISHES.filter(w => w.name.toLowerCase().includes(q) || w.dept.toLowerCase().includes(q));
+      renderBalloons(filtered);
+    });
+
+    /* Random Pop Button */
+    document.getElementById('randomPopBtn').addEventListener('click', () => {
+      const remaining = WISHES.filter(w => !openedIds.has(w.id));
+      if (remaining.length === 0) {
+        alert("Chị em đã mở hết tất cả các quả bóng rồi nè! 🎉");
+        return;
+      }
+      const randomWish = remaining[Math.floor(Math.random() * remaining.length)];
+      const node = document.getElementById(`balloon-${randomWish.id}`);
+      if (node) {
+        node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          popBalloon(randomWish, node);
+        }, 300);
+      }
+    });
+
+    /* Wish Modal Setup & 3D Tilt */
+    const wishModal = document.getElementById('wishModal');
+    const wishCardInner = document.getElementById('wishCardInner');
+    const modalSenderAvatar = document.getElementById('modalSenderAvatar');
+    const modalSenderName = document.getElementById('modalSenderName');
+    const modalSenderDept = document.getElementById('modalSenderDept');
+    const modalWishText = document.getElementById('modalWishText');
+
+    function openWishModal(wish) {
+      currentModalWishIndex = WISHES.findIndex(w => w.id === wish.id);
+      modalSenderAvatar.textContent = wish.name.charAt(0);
+      modalSenderAvatar.style.backgroundColor = wish.color;
+      modalSenderName.textContent = wish.name;
+      modalSenderDept.textContent = wish.dept;
+      modalWishText.textContent = wish.text;
+      
+      wishModal.classList.remove('hidden');
+    }
+
+    document.getElementById('closeWishModalBtn').addEventListener('click', () => {
+      wishModal.classList.add('hidden');
+    });
+    wishModal.addEventListener('click', (e) => {
+      if (e.target === wishModal) wishModal.classList.add('hidden');
+    });
+
+    document.getElementById('modalNextWishBtn').addEventListener('click', () => {
+      currentModalWishIndex = (currentModalWishIndex + 1) % WISHES.length;
+      openWishModal(WISHES[currentModalWishIndex]);
+    });
+
+    // 3D Mouse Tilt on Modal Card
+    wishModal.addEventListener('mousemove', (e) => {
+      const rect = wishCardInner.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      const rotateX = (-y / 20).toFixed(2);
+      const rotateY = (x / 20).toFixed(2);
+      wishCardInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    wishModal.addEventListener('mouseleave', () => {
+      wishCardInner.style.transform = `rotateX(0deg) rotateY(0deg)`;
+    });
+
+    /* All List Modal */
+    const allListModal = document.getElementById('allListModal');
+    const allListItemsContainer = document.getElementById('allListItemsContainer');
+
+    document.getElementById('viewAllListBtn').addEventListener('click', () => {
+      allListItemsContainer.innerHTML = WISHES.map(w => `
+        <div class="pt-3 pb-3 flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl flex-shrink-0 text-white flex items-center justify-center font-bold text-sm shadow-sm" style="background-color: ${w.color}">
+            ${w.name.charAt(0)}
+          </div>
+          <div class="flex-grow">
+            <div class="flex items-center justify-between">
+              <h5 class="font-bold text-slate-800 text-sm">${w.name}</h5>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${w.dept}</span>
+            </div>
+            <p class="text-sm text-slate-600 mt-1">${w.text}</p>
+          </div>
+        </div>
+      `).join('');
+      allListModal.classList.remove('hidden');
+    });
+
+    document.getElementById('closeAllListModalBtn').addEventListener('click', () => {
+      allListModal.classList.add('hidden');
+    });
+    allListModal.addEventListener('click', (e) => {
+      if (e.target === allListModal) allListModal.classList.add('hidden');
+    });
+
+    /* ========================================================
+       7. DEV MODE: GIT LOG VIEW
+       ======================================================== */
+    const devModeBtn = document.getElementById('devModeBtn');
+    const gitLogBanner = document.getElementById('gitLogBanner');
+    const gitLogContent = document.getElementById('gitLogContent');
+    const closeGitMode = document.getElementById('closeGitMode');
+    let devModeActive = false;
+
+    function toggleDevMode() {
+      devModeActive = !devModeActive;
+      if (devModeActive) {
+        gitLogContent.innerHTML = WISHES.map((w, i) => `
+          <div class="hover:bg-slate-800/60 p-1.5 rounded transition-colors flex items-center gap-2">
+            <span class="text-amber-400">commit #${(1000 + i).toString(16)}</span>
+            <span class="text-slate-300">feat(wishes): "${w.text.substring(0, 38)}..."</span>
+            <span class="text-slate-500 text-[10px]">--author="${w.name} <${w.dept}>"</span>
+          </div>
+        `).join('');
+        gitLogBanner.classList.remove('hidden');
+        gitLogBanner.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        gitLogBanner.classList.add('hidden');
+      }
+    }
+    devModeBtn.addEventListener('click', toggleDevMode);
+    closeGitMode.addEventListener('click', toggleDevMode);
+
+    /* ========================================================
+       8. MÀN 4: SLIDESHOW CONTROLS
+       ======================================================== */
+    const slideshowQuotes = [
+      { text: "“Cảm ơn vì đã luôn đồng hành cùng team!”", sub: "Backend • Frontend • DevOps • QA • Product gửi trọn yêu thương" },
+      { text: "“Chúc các đóa hoa IT luôn rực rỡ và tràn đầy nụ cười!”", sub: "Mỗi ngày đến công ty đều là một ngày ngập tràn cảm hứng" },
+      { text: "“Code có thể có bug, nhưng tình cảm anh em dành cho chị em là 100% không lỗi!”", sub: "Happy 20/10 from all the brothers" }
+    ];
+    let currentSlide = 0;
+    let slideInterval = null;
+
+    function updateSlide() {
+      const slide = slideshowQuotes[currentSlide];
+      const el = document.getElementById('slideshowSlide1');
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.querySelector('h3').textContent = slide.text;
+        el.querySelector('p').textContent = slide.sub;
+        el.style.opacity = '1';
+      }, 250);
+    }
+
+    document.getElementById('nextSlideBtn').addEventListener('click', () => {
+      currentSlide = (currentSlide + 1) % slideshowQuotes.length;
+      updateSlide();
+    });
+    document.getElementById('prevSlideBtn').addEventListener('click', () => {
+      currentSlide = (currentSlide - 1 + slideshowQuotes.length) % slideshowQuotes.length;
+      updateSlide();
+    });
+
+    const togglePlaySlideBtn = document.getElementById('togglePlaySlideBtn');
+    togglePlaySlideBtn.addEventListener('click', () => {
+      if (slideInterval) {
+        clearInterval(slideInterval);
+        slideInterval = null;
+        togglePlaySlideBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Tự chạy</span>';
+      } else {
+        slideInterval = setInterval(() => {
+          currentSlide = (currentSlide + 1) % slideshowQuotes.length;
+          updateSlide();
+        }, 3000);
+        togglePlaySlideBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Tạm dừng</span>';
+      }
+    });
+
+    /* ========================================================
+       9. MÀN 5: EXPORT THIỆP (html2canvas) & REAL GIFT REMINDER
+       ======================================================== */
+    document.getElementById('downloadCardBtn').addEventListener('click', () => {
+      const recipientName = document.getElementById('cardRecipientInput').value.trim() || "Chị Em IT";
+      document.getElementById('exportCardRecipientName').textContent = `Thân gửi ${recipientName}`;
+      
+      const exportElement = document.getElementById('exportableCard');
+      const btn = document.getElementById('downloadCardBtn');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang tạo thiệp...</span>';
+
+      html2canvas(exportElement, { scale: 2, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Thiep-20-10-Tang-${recipientName.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> <span>Đã tải thành công! 🎉</span>';
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fa-solid fa-download"></i> <span>Tải thiệp về máy (PNG) 💌</span>';
+        }, 3000);
+      }).catch(err => {
+        console.error("Lỗi tạo thiệp:", err);
+        btn.innerHTML = '<i class="fa-solid fa-download"></i> <span>Thử lại</span>';
+      });
+    });
+
+    // Real Gift Reminder Alert
+    document.getElementById('claimGiftPopupBtn').addEventListener('click', () => {
+      alert("🎉 Đã lưu lịch hẹn! Mời các chị em có mặt tại Pantry lúc 10:00 Sáng ngày 20/10 để nhận hoa tươi, quà kỷ niệm và thưởng thức tiệc trà ngọt ngào cùng toàn thể anh em nhé!");
+    });
+
+    // Reaction Buttons
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        confetti({
+          particleCount: 15,
+          spread: 45,
+          origin: { y: 0.85 }
+        });
+        document.getElementById('reactionThanksMsg').classList.remove('hidden');
+      });
+    });
+
+    /* ========================================================
+       10. PETALS FALLING EFFECT (CANVAS)
+       ======================================================== */
+    const pCanvas = document.getElementById('petal-canvas');
+    const pCtx = pCanvas.getContext('2d');
+    let petals = [];
+
+    function resizePetalCanvas() {
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizePetalCanvas);
+    resizePetalCanvas();
+
+    class Petal {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * pCanvas.width;
+        this.y = -20;
+        this.size = Math.random() * 8 + 8;
+        this.speedY = Math.random() * 1.2 + 0.8;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.angle = Math.random() * 360;
+        this.spin = Math.random() * 2 - 1;
+        this.color = ['#fb7185', '#fda4af', '#f43f5e', '#fecdd3'][Math.floor(Math.random() * 4)];
+        this.opacity = Math.random() * 0.4 + 0.3;
+      }
+      update() {
+        this.y += this.speedY;
+        this.x += Math.sin(this.angle * Math.PI / 180) * 0.8 + this.speedX;
+        this.angle += this.spin;
+        if (this.y > pCanvas.height + 20) this.reset();
+      }
+      draw() {
+        pCtx.save();
+        pCtx.translate(this.x, this.y);
+        pCtx.rotate(this.angle * Math.PI / 180);
+        pCtx.fillStyle = this.color;
+        pCtx.globalAlpha = this.opacity;
+        pCtx.beginPath();
+        pCtx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+        pCtx.fill();
+        pCtx.restore();
+      }
+    }
+
+    for (let i = 0; i < 24; i++) {
+      const p = new Petal();
+      p.y = Math.random() * pCanvas.height;
+      petals.push(p);
+    }
+
+    function animatePetals() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      petals.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animatePetals);
+    }
+    animatePetals();
+
+    /* ========================================================
+       11. EASTER EGG: KONAMI CODE (SECRET FIREWORKS)
+       ======================================================== */
+    const konamiSequence = [
+      "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+      "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
+      "b", "a"
+    ];
+    let konamiPos = 0;
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      const requiredKey = konamiSequence[konamiPos].toLowerCase();
+
+      if (key === requiredKey) {
+        konamiPos++;
+        if (konamiPos === konamiSequence.length) {
+          triggerSecretFireworks();
+          konamiPos = 0;
+        }
+      } else {
+        konamiPos = 0;
+      }
+    });
+
+    function triggerSecretFireworks() {
+      alert("✨ Chúc mừng bạn đã mở khóa Easter Egg: Đại tiệc pháo hoa dành cho chị em! 🎆");
+      const duration = 6 * 1000;
+      const animationEnd = Date.now() + duration;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+
+        confetti({
+          startVelocity: 30,
+          spread: 360,
+          ticks: 60,
+          origin: { x: Math.random(), y: Math.random() - 0.2 }
+        });
+      }, 250);
+    }
+  </script>
+</body>
+</html>
