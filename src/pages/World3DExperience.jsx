@@ -11,6 +11,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import confetti from 'canvas-confetti';
 import html2canvas from 'html2canvas';
+import { playPopSound, playLetterOpenSound, playTruckHonkSound, playSparkleSound, playSoftTapSound } from '../utils/soundEffects.js';
 
 /* ================================================================== */
 /*  HELPERS & PROCEDURAL PROCEDURES                                    */
@@ -454,6 +455,19 @@ export default function World3DExperience() {
   const autoRotateRef = useRef(false);
   autoRotateRef.current = autoRotate;
 
+  // Phát hiện thiết bị di động / màn hình nhỏ để tối ưu chỉ dẫn thao tác cảm ứng
+  const [isMobileScreen, setIsMobileScreen] = useState(() => {
+    return typeof window !== 'undefined' ? (window.innerWidth <= 768 || 'ontouchstart' in window) : false;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileScreen(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Chế độ Dạ Tiệc Đêm (Night Gala Mode - tăng đèn, tăng LED lung linh)
   const [isNightMode, setIsNightMode] = useState(false);
   const nightModeRef = useRef(false);
@@ -586,6 +600,7 @@ export default function World3DExperience() {
 
   // Góc nhìn Toàn Cảnh Thế Giới 3D (Đưa ra thành HUD chung của Thế Giới)
   const flyToWorldScenic = () => {
+    playSoftTapSound();
     setActiveStationIndex('scenic');
     followVanRef.current = false;
     const cam = cameraRef.current;
@@ -606,6 +621,7 @@ export default function World3DExperience() {
 
   // Fly to Station Function
   const flyToStation = (idx) => {
+    playSoftTapSound();
     setActiveStationIndex(idx);
     const cam = cameraRef.current;
     const ctrl = controlsRef.current;
@@ -1855,6 +1871,7 @@ export default function World3DExperience() {
 
       // Click tương tác mở hộp quà
       const onGiftClick = () => {
+        playSparkleSound();
         giftAnimationRef.current.opened = true;
         confetti({
           particleCount: 120,
@@ -2016,6 +2033,7 @@ export default function World3DExperience() {
       interactiveMeshes.push({
         mesh: leftWing,
         onClick: () => {
+          playLetterOpenSound();
           confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
           showToast(`🌸 Vinh danh đóa hoa rạng rỡ: ${sisterName}!`);
         }
@@ -2023,6 +2041,7 @@ export default function World3DExperience() {
       interactiveMeshes.push({
         mesh: rightWing,
         onClick: () => {
+          playLetterOpenSound();
           confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
           showToast('💌 Thư ngỏ chân tình từ toàn thể anh em công ty gửi tặng chị em!');
         }
@@ -2094,6 +2113,7 @@ export default function World3DExperience() {
           mesh: bMesh,
           onClick: () => {
             bMesh.visible = false;
+            playPopSound();
             confetti({
               particleCount: 80,
               spread: 90,
@@ -2472,6 +2492,7 @@ export default function World3DExperience() {
       scene.add(st5Group);
 
       const onPartyClick = () => {
+        playSparkleSound();
         setActivePartyCardModal(true);
         confetti({
           particleCount: 110,
@@ -2543,8 +2564,12 @@ export default function World3DExperience() {
         // Kiểm tra click xe hoa
         const hitsVan = raycaster.intersectObjects([vanRoot], true);
         if (hitsVan.length > 0) {
+          playTruckHonkSound();
           confetti({ particleCount: 75, spread: 85, origin: { y: 0.55 } });
-          setIsMailboxOpen(true);
+          setTimeout(() => {
+            playLetterOpenSound();
+            setIsMailboxOpen(true);
+          }, 350);
           return;
         }
 
@@ -2988,15 +3013,37 @@ export default function World3DExperience() {
 
             <div>
               <span className="hud-interaction-hint">
-                🖱️ Giữ chuột trái để xoay 360° • Cuộn chuột để phóng to/thu nhỏ • Chạm vật thể 3D để tương tác
+                {isMobileScreen
+                  ? '📱 1 ngón tay xoay 360° • 2 ngón tay thu/phóng • Chạm vật thể để mở quà'
+                  : '🖱️ Giữ chuột trái để xoay 360° • Cuộn chuột để phóng to/thu nhỏ • Chạm vật thể 3D để tương tác'}
               </span>
             </div>
+
+            {/* Gợi ý tinh tế trên thiết bị di động */}
+            {isMobileScreen && (
+              <div style={{ marginTop: '2px' }}>
+                <span
+                  className="hud-interaction-hint"
+                  style={{
+                    background: 'rgba(140, 47, 75, 0.92)',
+                    color: '#FDE68A',
+                    border: '1px solid rgba(253, 230, 138, 0.45)',
+                    fontSize: '0.72rem',
+                    lineHeight: '1.4',
+                    display: 'inline-block',
+                    maxWidth: '92vw'
+                  }}
+                >
+                  💡 Mẹo: Xoay ngang màn hình hoặc xem trên máy tính để chiêm ngưỡng thế giới 3D lộng lẫy nhất!
+                </span>
+              </div>
+            )}
           </div>
         )}
 
         {/* Bottom Action Bar */}
         <div className="hud-bottom-bar">
-          <button className="btn-hud-mailbox" onClick={() => setIsMailboxOpen(true)}>
+          <button className="btn-hud-mailbox" onClick={() => { playLetterOpenSound(); setIsMailboxOpen(true); }}>
             <span>🕊️ Hòm Thư Bưu Điện</span>
             <span className="mailbox-badge">{messages.length} Món Quà</span>
           </button>
@@ -3046,7 +3093,10 @@ export default function World3DExperience() {
                 return (
                   <div
                     key={msg.id || idx}
-                    onClick={() => setReadingMessage(msg)}
+                    onClick={() => {
+                      playLetterOpenSound();
+                      setReadingMessage(msg);
+                    }}
                     className="winged-card"
                   >
                     <svg className="mini-wing left" viewBox="0 0 100 100" width="34" height="34" fill="#fda4af">

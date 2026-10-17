@@ -31,7 +31,7 @@ function MainAppContent() {
   }
 
   // Kịch bản 1: THẾ GIỚI 3D LIỀN MẠCH (Unified 3D World Journey)
-  if (experienceMode === '3d') {
+  if (experienceMode === '3d' || location.pathname === '/3d') {
     return <World3DExperience />;
   }
 
@@ -39,10 +39,12 @@ function MainAppContent() {
   return (
     <Routes>
       <Route path="/" element={<GiftPage />} />
+      <Route path="/3d" element={<World3DExperience />} />
       <Route path="/letter" element={<LetterPage />} />
       <Route path="/balloons" element={<BalloonsPage />} />
       <Route path="/private" element={<PrivateHeartPage />} />
       <Route path="/video" element={<VideoPage />} />
+      <Route path="/slideshow" element={<VideoPage />} />
       <Route path="/party" element={<PartyPage />} />
       <Route path="/sender" element={<SenderStudioPage />} />
     </Routes>

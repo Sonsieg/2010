@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { fetchPrivateWishes } from '../api.js';
 import confetti from 'canvas-confetti';
+import { playTruckHonkSound, playLetterOpenSound, playSoftTapSound } from '../utils/soundEffects.js';
 import GardenScene, { BotanicalRose } from './GardenScene.jsx';
 import './garden-scene.css';
 
@@ -34,6 +35,7 @@ export default function PrivateGarden2D() {
   // Nhấn vào xe hoa: Dừng xe, nổ pháo hoa và BUNG MỞ KHO BƯU KIỆN
   const handleTruckClick = (e) => {
     if (e) e.stopPropagation();
+    playTruckHonkSound();
     setIsTruckStopped(true);
     setTruckHonked(true);
 
@@ -47,15 +49,18 @@ export default function PrivateGarden2D() {
     setTimeout(() => {
       setTruckHonked(false);
       setIsChestModalOpen(true);
+      playLetterOpenSound();
     }, 450);
   };
 
   const handleOpenChest = () => {
+    playLetterOpenSound();
     setIsTruckStopped(true);
     setIsChestModalOpen(true);
   };
 
   const handleCloseChest = () => {
+    playSoftTapSound();
     setIsChestModalOpen(false);
   };
 
@@ -392,7 +397,7 @@ export default function PrivateGarden2D() {
           </button>
 
           <button
-            onClick={() => navigateWithFlowerTransition('/slideshow')}
+            onClick={() => navigateWithFlowerTransition('/video')}
             className="btn-rose"
           >
             <span>Tiếp tục: Video &amp; Slideshow Tri Ân 🎬 →</span>
@@ -472,7 +477,10 @@ export default function PrivateGarden2D() {
                 return (
                   <div
                     key={msg.id || idx}
-                    onClick={() => setReadingMessage(msg)}
+                    onClick={() => {
+                      playLetterOpenSound();
+                      setReadingMessage(msg);
+                    }}
                     className="winged-card"
                   >
                     {/* SVG Fluttering Wings */}

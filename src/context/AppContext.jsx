@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchPeople, fetchPublicWishes } from '../api.js';
 import confetti from 'canvas-confetti';
+import { playPopSound, playSparkleSound } from '../utils/soundEffects.js';
 
 const AppContext = createContext();
 
@@ -24,7 +25,7 @@ export function AppProvider({ children, navigate }) {
       return modeParam;
     }
     const saved = localStorage.getItem('tribute_mode');
-    return saved === '2d' ? '2d' : '3d';
+    return saved === '3d' ? '3d' : '2d';
   });
 
   const updateExperienceMode = (mode) => {
@@ -72,6 +73,7 @@ export function AppProvider({ children, navigate }) {
   // Hàm chuyển trang kèm hiệu ứng Bão Cánh Hoa Điện Ảnh (Cinematic Floral Wipe)
   const navigateWithFlowerTransition = (targetPath) => {
     setIsTransitioning(true);
+    playSparkleSound();
 
     // Kích hoạt pháo hoa cánh hoa tung bay toàn màn hình
     confetti({
@@ -98,6 +100,7 @@ export function AppProvider({ children, navigate }) {
   const popBalloon = (wish, coords) => {
     setOpenedBalloons(prev => new Set([...prev, wish.id]));
     setActiveModalWish(wish);
+    playPopSound();
 
     // Bắn hạt cánh hoa tại tọa độ bóng
     const origin = coords || { x: 0.5, y: 0.5 };

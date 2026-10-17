@@ -586,11 +586,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  animation: vaultPulse 2.8s infinite ease-in-out;
 }
 .btn-open-truck-vault:hover {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 16px 36px rgba(225, 29, 72, 0.5);
   border-color: #FFFFFF;
+}
+
+@keyframes vaultPulse {
+  0%, 100% { box-shadow: 0 10px 28px rgba(225, 29, 72, 0.35); }
+  50% { box-shadow: 0 14px 36px rgba(225, 29, 72, 0.55), 0 0 18px rgba(253, 164, 175, 0.5); }
 }
 
 .gift-reminder-box {
@@ -1388,4 +1394,349 @@
   background: linear-gradient(135deg, var(--rose-500), var(--rose-600));
   color: #FFF;
 }
+
+/* ----------------------------------------------------------
+   13. RESPONSIVE DESIGN CHO ĐIỆN THOẠI (MOBILE OPTIMIZATIONS)
+   ---------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* 2D VƯỜN HOA & XE THƯ TRÊN MOBILE */
+  .garden-2d-screen {
+    padding: 70px 12px 35px;
+  }
+
+  .garden-honor-badge {
+    font-size: 0.72rem;
+    padding: 4px 14px;
+    margin-bottom: 8px;
+  }
+
+  .garden-2d-title {
+    font-size: clamp(1.4rem, 6vw, 1.85rem);
+    margin-bottom: 8px;
+  }
+
+  .garden-2d-sub {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    padding: 0 4px;
+  }
+
+  .garden-demo-switcher {
+    gap: 8px;
+  }
+
+  .demo-pill-tag {
+    font-size: 0.75rem;
+    padding: 4px 12px;
+  }
+
+  .btn-switch-3d {
+    font-size: 0.78rem;
+    padding: 6px 14px;
+  }
+
+  .garden-diorama-wrapper {
+    margin: 8px auto 14px;
+  }
+
+  .garden-diorama {
+    height: clamp(340px, 48vh, 390px);
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2);
+  }
+
+  .diorama-top-bar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .station-badge {
+    font-size: 0.68rem;
+    padding: 4px 10px;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .btn-station-truck {
+    display: none; /* Đã có nút bấm lớn chuyên dụng ngay dưới khung cảnh */
+  }
+
+  .garden-road {
+    height: 65px;
+  }
+
+  .truck-lane {
+    height: 180px;
+    bottom: 15px;
+  }
+
+  .mail-truck {
+    width: 165px;
+    height: 90px;
+    left: -190px;
+    bottom: 5px;
+  }
+
+  .mail-truck.driving {
+    animation: deliveryToPavilionMobile 16s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  }
+
+  .truck-bubble {
+    font-size: 0.68rem;
+    padding: 4px 10px;
+    top: -26px;
+  }
+
+  .diorama-bottom-status {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    justify-content: center;
+  }
+
+  .status-hint {
+    display: none;
+  }
+
+  .status-pill {
+    font-size: 0.75rem;
+    padding: 5px 14px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .btn-open-truck-vault {
+    font-size: 0.95rem;
+    padding: 12px 18px;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .gift-reminder-box {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .reminder-icon {
+    font-size: 1.5rem;
+  }
+
+  .reminder-text {
+    font-size: 0.82rem;
+  }
+
+  .garden-bottom-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .garden-bottom-actions .btn-rose {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* MODAL BƯU KIỆN TRÊN MOBILE */
+  .parcel-chest-box {
+    border-radius: 24px;
+    max-height: 88dvh;
+    width: 95vw;
+  }
+
+  .parcel-chest-header {
+    padding: 16px 18px 12px;
+  }
+
+  .parcel-chest-header h3 {
+    font-size: 1.15rem !important;
+  }
+
+  .parcel-chest-header p {
+    font-size: 0.78rem !important;
+  }
+
+  .parcel-chest-body {
+    grid-template-columns: 1fr;
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .winged-card {
+    min-height: auto;
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+
+  .winged-card-title {
+    font-size: 1.05rem;
+  }
+
+  .winged-card-snippet {
+    font-size: 0.82rem;
+  }
+
+  .parcel-chest-footer {
+    padding: 12px 18px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .parcel-chest-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* THƯ HOÀNG GIA DẤU SÁP */
+  .royal-parchment-box {
+    padding: 24px 18px;
+    border-radius: 24px;
+    max-width: 94vw;
+  }
+
+  .parchment-wax-seal {
+    width: 46px;
+    height: 46px;
+    top: -14px;
+    right: 16px;
+    font-size: 1.05rem;
+  }
+
+  /* 3D WORLD HUD TRÊN MOBILE */
+  .hud-top-console-wrapper {
+    padding-top: 52px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .hud-top-console {
+    padding: 8px 12px 10px;
+    border-radius: 20px;
+    gap: 6px;
+    max-width: 98vw;
+  }
+
+  .hud-console-header {
+    font-size: 0.85rem;
+    gap: 6px;
+  }
+
+  .hud-console-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+  }
+
+  .hud-camera-toolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 4px 6px;
+    gap: 5px;
+  }
+
+  .hud-camera-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .btn-cam-preset {
+    font-size: 0.74rem;
+    padding: 5px 11px;
+    flex-shrink: 0;
+  }
+
+  .hud-interaction-guide-group {
+    margin-bottom: 8px;
+    gap: 6px;
+  }
+
+  .cart-floating-indicator {
+    font-size: 0.75rem;
+    padding: 6px 14px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .hud-interaction-hint {
+    font-size: 0.72rem;
+    padding: 4px 12px;
+  }
+
+  .hud-bottom-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .btn-hud-mailbox {
+    justify-content: center;
+    width: 100%;
+    padding: 10px 18px;
+    font-size: 0.86rem;
+  }
+
+  .hud-bottom-bar .btn-rose {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.88rem !important;
+    padding: 10px 18px !important;
+  }
+
+  .hud-cinema-reopen-bar {
+    top: 52px;
+  }
+}
+
+@keyframes deliveryToPavilionMobile {
+  0% {
+    left: -190px;
+    bottom: 5px;
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  38% {
+    left: 25%;
+    bottom: 5px;
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    left: 40%;
+    bottom: 12px;
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  68% {
+    left: 55%;
+    bottom: 35px;
+    transform: scale(0.82) rotate(-6deg);
+    opacity: 1;
+  }
+  84% {
+    left: 64%;
+    bottom: 55px;
+    transform: scale(0.72) rotate(-3deg);
+    opacity: 1;
+  }
+  92% {
+    left: 64%;
+    bottom: 55px;
+    transform: scale(0.72) rotate(-3deg);
+    opacity: 1;
+  }
+  100% {
+    left: 110%;
+    bottom: 65px;
+    transform: scale(0.68);
+    opacity: 0;
+  }
+}
+
 
