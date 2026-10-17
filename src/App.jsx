@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 
@@ -7,15 +7,20 @@ import FloralTransition from './components/FloralTransition.jsx';
 import TopNav from './components/TopNav.jsx';
 import WishModal from './components/WishModal.jsx';
 import ArchiveDrawer from './components/ArchiveDrawer.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import PageLoader from './components/PageLoader.jsx';
 
+// Direct import for instantaneous initial landing render
 import GiftPage from './pages/GiftPage.jsx';
-import LetterPage from './pages/LetterPage.jsx';
-import BalloonsPage from './pages/BalloonsPage.jsx';
-import PrivateHeartPage from './pages/PrivateHeartPage.jsx';
-import VideoPage from './pages/VideoPage.jsx';
-import PartyPage from './pages/PartyPage.jsx';
-import SenderStudioPage from './pages/SenderStudioPage.jsx';
-import World3DExperience from './pages/World3DExperience.jsx';
+
+// Enterprise Code-Splitting: Lazy-load route pages to keep initial bundle tiny
+const World3DExperience = lazy(() => import('./pages/World3DExperience.jsx'));
+const LetterPage = lazy(() => import('./pages/LetterPage.jsx'));
+const BalloonsPage = lazy(() => import('./pages/BalloonsPage.jsx'));
+const PrivateHeartPage = lazy(() => import('./pages/PrivateHeartPage.jsx'));
+const VideoPage = lazy(() => import('./pages/VideoPage.jsx'));
+const PartyPage = lazy(() => import('./pages/PartyPage.jsx'));
+const SenderStudioPage = lazy(() => import('./pages/SenderStudioPage.jsx'));
 
 function MainAppContent() {
   const { experienceMode } = useApp();
@@ -36,30 +41,38 @@ function MainAppContent() {
   // Trang soạn thảo của anh em luôn mở trực tiếp
   if (location.pathname === '/sender') {
     return (
-      <Routes>
-        <Route path="/sender" element={<SenderStudioPage />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/sender" element={<SenderStudioPage />} />
+        </Routes>
+      </Suspense>
     );
   }
 
   // Kịch bản 1: THẾ GIỚI 3D LIỀN MẠCH (Chỉ render khi người dùng đang ở route /3d)
   if (location.pathname === '/3d') {
-    return <World3DExperience />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <World3DExperience />
+      </Suspense>
+    );
   }
 
   // Kịch bản 2: TẠP CHÍ 2D CỔ TÍCH (Cinematic Editorial 2D Pages)
   return (
-    <Routes>
-      <Route path="/" element={<GiftPage />} />
-      <Route path="/3d" element={<World3DExperience />} />
-      <Route path="/letter" element={<LetterPage />} />
-      <Route path="/balloons" element={<BalloonsPage />} />
-      <Route path="/private" element={<PrivateHeartPage />} />
-      <Route path="/video" element={<VideoPage />} />
-      <Route path="/slideshow" element={<VideoPage />} />
-      <Route path="/party" element={<PartyPage />} />
-      <Route path="/sender" element={<SenderStudioPage />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<GiftPage />} />
+        <Route path="/3d" element={<World3DExperience />} />
+        <Route path="/letter" element={<LetterPage />} />
+        <Route path="/balloons" element={<BalloonsPage />} />
+        <Route path="/private" element={<PrivateHeartPage />} />
+        <Route path="/video" element={<VideoPage />} />
+        <Route path="/slideshow" element={<VideoPage />} />
+        <Route path="/party" element={<PartyPage />} />
+        <Route path="/sender" element={<SenderStudioPage />} />
+      </Routes>
+    </Suspense>
   );
 }
 
@@ -67,24 +80,26 @@ export default function App() {
   const navigate = useNavigate();
 
   return (
-    <AppProvider navigate={navigate}>
-      <div className="app-container">
-        {/* Continuous ambient falling petals */}
-        <AmbientPetals />
+    <ErrorBoundary>
+      <AppProvider navigate={navigate}>
+        <div className="app-container">
+          {/* Continuous ambient falling petals */}
+          <AmbientPetals />
 
-        {/* Top floating control bar */}
-        <TopNav />
+          {/* Top floating control bar */}
+          <TopNav />
 
-        {/* Cinematic floral curtain transition */}
-        <FloralTransition />
+          {/* Cinematic floral curtain transition */}
+          <FloralTransition />
 
-        {/* Main Application: 3D Unified World vs 2D Editorial Pages */}
-        <MainAppContent />
+          {/* Main Application: 3D Unified World vs 2D Editorial Pages */}
+          <MainAppContent />
 
-        {/* Global modals & drawer */}
-        <WishModal />
-        <ArchiveDrawer />
-      </div>
-    </AppProvider>
+          {/* Global modals & drawer */}
+          <WishModal />
+          <ArchiveDrawer />
+        </div>
+      </AppProvider>
+    </ErrorBoundary>
   );
 }

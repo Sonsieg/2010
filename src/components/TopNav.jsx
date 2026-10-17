@@ -3,12 +3,14 @@ import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import AudioController from './AudioController.jsx';
 
+import { NAV_STAGES } from '../config/routes.config.js';
+
 export default function TopNav() {
   const { 
     setIsArchiveOpen, 
     openedBalloons, 
     experienceMode, 
-    toggleExperienceMode,
+    updateExperienceMode,
     navigateWithFlowerTransition
   } = useApp();
   const location = useLocation();
@@ -16,14 +18,12 @@ export default function TopNav() {
   // Ẩn top nav nếu đang ở trang Sender Studio
   if (location.pathname === '/sender') return null;
 
-  const stages = [
-    { path: '/', label: 'Hộp Quà', icon: '🎁' },
-    { path: '/letter', label: 'Thư Ngỏ', icon: '💌' },
-    { path: '/balloons', label: 'Bóng Bay', icon: '🎈' },
-    { path: '/private', label: experienceMode === '3d' ? 'Xe Hoa 3D' : 'Xe Thư 2D', icon: experienceMode === '3d' ? '🚐' : '🌸' },
-    { path: '/video', label: 'Phim Tri Ân', icon: '🎬' },
-    { path: '/party', label: 'Màn Kết', icon: '💐' }
-  ];
+  const stages = NAV_STAGES.map(s => {
+    if (s.path === '/private') {
+      return { ...s, label: experienceMode === '3d' ? 'Xe Hoa 3D' : 'Xe Thư 2D', icon: experienceMode === '3d' ? '🚐' : '🌸' };
+    }
+    return s;
+  });
 
   const is3D = location.pathname === '/3d';
 
