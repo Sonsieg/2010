@@ -611,9 +611,9 @@ export default function World3DExperience() {
     transRef.current.t0 = performance.now();
     transRef.current.dur = 1600;
     transRef.current.fromCam = cam.position.clone();
-    transRef.current.toCam = new THREE.Vector3(0, 48, 86);
+    transRef.current.toCam = new THREE.Vector3(0, 36, 68);
     transRef.current.fromTgt = ctrl.target.clone();
-    transRef.current.toTgt = new THREE.Vector3(0, 2, 4);
+    transRef.current.toTgt = new THREE.Vector3(0, 3, 0);
     transRef.current.isVanRelative = false;
 
     showToast('🌄 Đang chuyển sang Góc Nhìn Toàn Cảnh Vương Quốc Hoa 3D!');
@@ -3049,11 +3049,20 @@ export default function World3DExperience() {
           </button>
 
           <button
-            onClick={() => flyToStation((activeStationIndex + 1) % STATIONS.length)}
+            onClick={() => {
+              const nextIndex = typeof activeStationIndex === 'number'
+                ? (activeStationIndex + 1) % STATIONS.length
+                : 0;
+              flyToStation(nextIndex);
+            }}
             className="btn-rose"
             style={{ fontSize: '0.98rem', padding: '12px 26px' }}
           >
-            <span>Trạm Tiếp Theo: {STATIONS[(activeStationIndex + 1) % STATIONS.length].name} ➔</span>
+            <span>
+              {typeof activeStationIndex === 'number' && STATIONS[(activeStationIndex + 1) % STATIONS.length]
+                ? `Trạm Tiếp Theo: ${STATIONS[(activeStationIndex + 1) % STATIONS.length].name} ➔`
+                : 'Khám Phá Các Trạm: Hộp Quà ➔'}
+            </span>
           </button>
         </div>
       </div>
