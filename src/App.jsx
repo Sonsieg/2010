@@ -21,6 +21,18 @@ function MainAppContent() {
   const { experienceMode } = useApp();
   const location = useLocation();
 
+  // Khi người dùng vào trang chủ (/), dọn dẹp cờ cũ để không bị kẹt ở chế độ 3D
+  React.useEffect(() => {
+    if (location.pathname === '/' && experienceMode === '3d') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('mode') !== '3d') {
+        try {
+          localStorage.removeItem('tribute_mode');
+        } catch (e) {}
+      }
+    }
+  }, [location.pathname, experienceMode]);
+
   // Trang soạn thảo của anh em luôn mở trực tiếp
   if (location.pathname === '/sender') {
     return (
@@ -30,8 +42,8 @@ function MainAppContent() {
     );
   }
 
-  // Kịch bản 1: THẾ GIỚI 3D LIỀN MẠCH (Unified 3D World Journey)
-  if (experienceMode === '3d' || location.pathname === '/3d') {
+  // Kịch bản 1: THẾ GIỚI 3D LIỀN MẠCH (Chỉ render khi người dùng đang ở route /3d)
+  if (location.pathname === '/3d') {
     return <World3DExperience />;
   }
 

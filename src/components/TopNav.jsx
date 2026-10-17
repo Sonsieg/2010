@@ -25,23 +25,33 @@ export default function TopNav() {
     { path: '/party', label: 'Màn Kết', icon: '💐' }
   ];
 
+  const is3D = location.pathname === '/3d';
+
+  const handleToggleMode = () => {
+    if (is3D) {
+      updateExperienceMode('2d');
+    } else {
+      updateExperienceMode('3d');
+    }
+  };
+
   return (
     <nav className="royal-top-nav" aria-label="Điều khiển đầu trang">
       {/* 1. Toggle Mode 2D / 3D */}
       <button
-        onClick={toggleExperienceMode}
-        className={`royal-nav-pill mode-switch-pill ${experienceMode === '3d' ? 'mode-3d-active' : 'mode-2d-active'}`}
-        title={`Đang xem chế độ ${experienceMode.toUpperCase()} - Nhấn để đổi sang ${experienceMode === '3d' ? '2D Cổ Tích' : '3D Điện Ảnh'}`}
+        onClick={handleToggleMode}
+        className={`royal-nav-pill mode-switch-pill ${is3D ? 'mode-3d-active' : 'mode-2d-active'}`}
+        title={`Đang xem chế độ ${is3D ? '3D Điện Ảnh' : '2D Cổ Tích'} - Nhấn để đổi sang ${is3D ? '2D Cổ Tích' : '3D Điện Ảnh'}`}
       >
         <span className="mode-badge-dot"></span>
-        <span className="mode-icon">{experienceMode === '3d' ? '✨ 3D' : '🌸 2D'}</span>
+        <span className="mode-icon">{is3D ? '✨ 3D' : '🌸 2D'}</span>
         <span className="btn-label mode-text-label">
-          {experienceMode === '3d' ? '3D Điện Ảnh' : '2D Cổ Tích'}
+          {is3D ? '3D Điện Ảnh' : '2D Cổ Tích'}
         </span>
       </button>
 
       {/* 2. Quick Demo Stages Navigator (Hiển thị ở chế độ 2D Editorial) */}
-      {experienceMode !== '3d' && (
+      {!is3D && (
         <div className="royal-stages-pill-group">
           {stages.map((st) => {
             const isActive = location.pathname === st.path;

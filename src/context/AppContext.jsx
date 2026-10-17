@@ -24,15 +24,24 @@ export function AppProvider({ children, navigate }) {
     if (modeParam === '2d' || modeParam === '3d') {
       return modeParam;
     }
-    const saved = localStorage.getItem('tribute_mode');
-    return saved === '3d' ? '3d' : '2d';
+    // Nếu truy cập trực tiếp route #/3d
+    if (typeof window !== 'undefined' && window.location.hash.includes('/3d')) {
+      return '3d';
+    }
+    // MẶC ĐỊNH LUÔN LÀ '2d' để trang chủ luôn mở Hộp Quà 20/10 đầu tiên cho tất cả mọi người
+    return '2d';
   });
 
   const updateExperienceMode = (mode) => {
     setExperienceMode(mode);
-    localStorage.setItem('tribute_mode', mode);
-    if (navigate) {
-      navigate('/');
+    try {
+      localStorage.setItem('tribute_mode', mode);
+    } catch (e) {}
+
+    if (mode === '3d') {
+      navigateWithFlowerTransition('/3d');
+    } else {
+      navigateWithFlowerTransition('/');
     }
   };
 
