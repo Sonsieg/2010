@@ -9,6 +9,7 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+const mergeGeos = BufferGeometryUtils.mergeGeometries;
 import confetti from 'canvas-confetti';
 import html2canvas from 'html2canvas';
 import { playPopSound, playLetterOpenSound, playTruckHonkSound, playSparkleSound, playSoftTapSound } from '../utils/soundEffects.js';
@@ -617,6 +618,8 @@ export default function World3DExperience() {
     buildVegetationField({ scene, scatter, scatterLandscape, timeU, rand, Q });
 
     /* ---------- Cherry Blossom Trees with Petals ---------- */
+    const dummy = new THREE.Object3D();
+    const tint = new THREE.Color();
     const treeGroup = new THREE.Group();
     const barkMat = new THREE.MeshStandardMaterial({ color: 0x4b2f23, roughness: 1 });
     const blossomGeo = new THREE.IcosahedronGeometry(1, 1);
@@ -1045,7 +1048,7 @@ export default function World3DExperience() {
 
     {
       const nR = 120;
-      const roofRoses = new THREE.InstancedMesh(roseHeadBase.clone(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, side: THREE.DoubleSide }), nR);
+      const roofRoses = new THREE.InstancedMesh(makeRoseHead(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, side: THREE.DoubleSide }), nR);
       const palRoof = [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xf43f5e, 0xfcd34d].map((h) => new THREE.Color(h));
       for (let i = 0; i < nR; i++) {
         const px = (rand() * 2 - 1) * (RX - 0.1);
@@ -1587,7 +1590,7 @@ export default function World3DExperience() {
       // Điểm camera lùi xa bao quát trọn vẹn toàn bộ tấm thiệp và bệ hoa hoàng gia
       stationCameraPositions[1] = {
         targetPos: st1Center.clone().add(new THREE.Vector3(0, 2.2, 0)),
-        camPos: st1Center.clone().add(norm.clone().multiplyScalar(10.2)).add(new THREE.Vector3(0, 3.8, 0))
+        camPos: st1Center.clone().add(norm.clone().multiplyScalar(14)).add(new THREE.Vector3(0, 3.8, 0))
       };
     }
 
@@ -1640,11 +1643,11 @@ export default function World3DExperience() {
         const wishData = (wishes && wishes.length > 0)
           ? wishes[i % wishes.length]
           : {
-              id: `wish_${i}`,
-              name: 'Đồng Nghiệp IT',
-              dept: 'Engineering Team',
-              text: 'Chúc bạn ngày 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
-            };
+            id: `wish_${i}`,
+            name: 'Đồng Nghiệp IT',
+            dept: 'Engineering Team',
+            text: 'Chúc bạn ngày 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
+          };
 
         interactiveMeshes.push({
           mesh: bMesh,
