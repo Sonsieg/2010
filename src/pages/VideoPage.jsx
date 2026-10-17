@@ -35,16 +35,17 @@ export default function VideoPage() {
     }
   ];
 
+  const [viewMode, setViewMode] = useState('video'); // 'video' hoặc 'quotes'
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
 
   useEffect(() => {
-    if (!isAutoPlay) return;
+    if (!isAutoPlay || viewMode !== 'quotes') return;
     const timer = setInterval(() => {
       setCurrentIndex(prev => (prev + 1) % quotes.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, [isAutoPlay, quotes.length]);
+  }, [isAutoPlay, quotes.length, viewMode]);
 
   const currentQuote = quotes[currentIndex];
 
@@ -60,15 +61,60 @@ export default function VideoPage() {
           <p className="cinema-sub">
             Những xúc cảm, lời trân trọng chân thành nhất được gửi gắm trong từng khung hình điện ảnh dành tặng các chị em.
           </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '16px' }}>
+            <button
+              onClick={() => setViewMode('video')}
+              className={`btn-rose ${viewMode === 'video' ? 'active' : ''}`}
+              style={{
+                padding: '8px 20px',
+                fontSize: '0.88rem',
+                background: viewMode === 'video' ? 'linear-gradient(135deg, #BE123C, #8C2F4B)' : 'rgba(255,255,255,0.08)',
+                color: '#FFF',
+                border: '1.5px solid rgba(253, 230, 138, 0.4)'
+              }}
+            >
+              🎬 Xem Video Tri Ân 20/10
+            </button>
+            <button
+              onClick={() => setViewMode('quotes')}
+              className={`btn-rose ${viewMode === 'quotes' ? 'active' : ''}`}
+              style={{
+                padding: '8px 20px',
+                fontSize: '0.88rem',
+                background: viewMode === 'quotes' ? 'linear-gradient(135deg, #BE123C, #8C2F4B)' : 'rgba(255,255,255,0.08)',
+                color: '#FFF',
+                border: '1.5px solid rgba(253, 230, 138, 0.4)'
+              }}
+            >
+              💬 Thước Phim Lời Chúc
+            </button>
+          </div>
         </div>
 
-        {/* Khung Chiếu Phim Sweet Rose & Champagne */}
-        <div className="cinema-theatre-box">
-          {/* Badge Thể Loại */}
-          <div className="theatre-badge-pill">
-            <span>{currentQuote.icon}</span>
-            <span>{currentQuote.category}</span>
+        {viewMode === 'video' ? (
+          <div className="cinema-theatre-box" style={{ padding: '16px', background: 'rgba(20, 8, 18, 0.85)' }}>
+            <div style={{ aspectRatio: '16/9', width: '100%', borderRadius: '16px', overflow: 'hidden', background: '#000' }}>
+              <video
+                src="/videochucmung.mp4"
+                controls
+                autoPlay
+                playsInline
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
+            <p style={{ textAlign: 'center', margin: '14px 0 6px', fontSize: '0.9rem', color: 'var(--champagne-gold)', fontStyle: 'italic' }}>
+              ✨ Video tri ân ngày Phụ nữ Việt Nam 20/10 dành tặng phái đẹp TechCorp
+            </p>
           </div>
+        ) : (
+          /* Khung Chiếu Phim Sweet Rose & Champagne */
+          <div className="cinema-theatre-box">
+            {/* Badge Thể Loại */}
+            <div className="theatre-badge-pill">
+              <span>{currentQuote.icon}</span>
+              <span>{currentQuote.category}</span>
+            </div>
 
           {/* Trích Dẫn Tri Ân */}
           <div className="theatre-quote-box">
@@ -127,6 +173,7 @@ export default function VideoPage() {
             </button>
           </div>
         </div>
+      )}
 
         {/* Nút Chuyển Màn Tiếp Theo */}
         <div style={{ textAlign: 'center' }}>

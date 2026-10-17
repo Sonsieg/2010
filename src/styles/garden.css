@@ -937,123 +937,571 @@
   padding: 24px;
 }
 
-/* KHUNG CONSOLE ĐIỀU KHIỂN & TIÊU ĐỀ DÓNG GỌN Ở GIỮA PHÍA TRÊN */
-.hud-top-console-wrapper {
-  pointer-events: auto;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-top: clamp(68px, 9.5vh, 85px);
-  margin: 0 auto;
-}
-
-.hud-top-console {
-  background: rgba(26, 10, 20, 0.88);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1.5px solid var(--champagne-gold);
-  border-radius: 26px;
-  padding: 10px 20px 12px;
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55), 0 0 25px rgba(201, 166, 107, 0.25);
+/* ==================================================================
+   VERTICAL ASIDE DOCK HUD (THANH ASIDE DỌC HIỆN LABEL TRONG SUỐT GỌN GÀNG)
+   ================================================================== */
+.hud-aside-dock {
+  position: fixed;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  max-width: 95vw;
-  text-align: center;
-  animation: consoleSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  align-items: stretch;
+  gap: 5px;
+  width: 168px;
+  padding: 10px 8px;
+  background: rgba(22, 9, 18, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(201, 166, 107, 0.45);
+  border-radius: 20px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(201, 166, 107, 0.2);
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: asideSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
-@keyframes consoleSlideDown {
-  from { opacity: 0; transform: translateY(-16px); }
+@keyframes asideSlideIn {
+  from { opacity: 0; transform: translateY(-50%) translateX(-24px); }
+  to { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.hud-aside-dock.hud-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-30px);
+}
+
+.hud-dock-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(190, 18, 60, 0.4), rgba(140, 29, 64, 0.5));
+  border: 1px solid rgba(201, 166, 107, 0.45);
+  margin-bottom: 2px;
+  cursor: default;
+}
+
+.hud-dock-logo {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.hud-dock-brand-text {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #FDE68A;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px rgba(253, 230, 138, 0.5);
+}
+
+.hud-dock-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 166, 107, 0.4), transparent);
+  margin: 3px 0;
+}
+
+.hud-dock-stations,
+.hud-dock-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.hud-dock-station-btn,
+.hud-dock-tool-btn {
+  position: relative;
+  width: 100%;
+  height: 33px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  padding: 0 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.hud-dock-station-btn .station-icon,
+.hud-dock-tool-btn .tool-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  opacity: 0.8;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.hud-dock-station-btn .station-label,
+.hud-dock-tool-btn .tool-label {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgba(250, 243, 234, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.hud-dock-station-btn:hover,
+.hud-dock-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(201, 166, 107, 0.55);
+}
+
+.hud-dock-station-btn:hover .station-label,
+.hud-dock-tool-btn:hover .tool-label {
+  color: #FAF3EA;
+  opacity: 0.95;
+}
+
+.hud-dock-station-btn:hover .station-icon,
+.hud-dock-tool-btn:hover .tool-icon {
+  transform: scale(1.12);
+  opacity: 1;
+}
+
+/* TRẠM ACTIVE NỔI BẬT ĐẬM HƠN */
+.hud-dock-station-btn.active {
+  background: linear-gradient(135deg, rgba(190, 18, 60, 0.95), rgba(140, 29, 64, 0.98));
+  border-color: #FDE68A;
+  box-shadow: 0 4px 14px rgba(190, 18, 60, 0.45), 0 0 10px rgba(253, 230, 138, 0.35);
+}
+
+.hud-dock-station-btn.active .station-icon {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(253, 230, 138, 0.8));
+  transform: scale(1.1);
+}
+
+.hud-dock-station-btn.active .station-label {
+  color: #FFFFFF;
+  font-weight: 700;
+  opacity: 1;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 8px rgba(253, 230, 138, 0.6);
+}
+
+.hud-dock-station-btn .active-glow-pip,
+.hud-dock-tool-btn .active-glow-pip {
+  width: 4px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #FDE68A;
+  box-shadow: 0 0 7px #FDE68A;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* NÚT TOOLS ACTIVE */
+.hud-dock-tool-btn.active-night {
+  background: linear-gradient(135deg, rgba(59, 17, 84, 0.92), rgba(140, 47, 75, 0.95));
+  border-color: #FDE68A;
+  box-shadow: 0 0 12px rgba(253, 230, 138, 0.4);
+}
+.hud-dock-tool-btn.active-night .tool-label {
+  color: #FFF;
+  font-weight: 700;
+}
+
+.hud-dock-tool-btn.active-scenic {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.92), rgba(4, 120, 87, 0.95));
+  border-color: #A7F3D0;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+}
+.hud-dock-tool-btn.active-scenic .tool-label {
+  color: #FFF;
+  font-weight: 700;
+}
+
+.hud-dock-tool-btn.btn-2d-mode {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(244, 63, 94, 0.4);
+}
+.hud-dock-tool-btn.btn-2d-mode:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--rose-400);
+}
+
+/* ==================================================================
+   CAMERA SKY TOGGLE CAPSULE (HẠ GÓC NHÌN / NGƯỚC XEM PHÁO HOA)
+   ================================================================== */
+.btn-camera-sky-toggle {
+  position: fixed;
+  bottom: 124px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 105;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, rgba(190, 18, 60, 0.94), rgba(140, 29, 64, 0.98));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid #FDE68A;
+  border-radius: 9999px;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(253, 230, 138, 0.5);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: skyPillBounce 2.5s infinite ease-in-out;
+  pointer-events: auto;
+}
+
+@keyframes skyPillBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+.btn-camera-sky-toggle:hover {
+  background: linear-gradient(135deg, #E11D48, #BE123C);
+  box-shadow: 0 0 25px rgba(253, 230, 138, 0.8), 0 8px 32px rgba(190, 18, 60, 0.6);
+  transform: translateX(-50%) scale(1.05);
+}
+
+/* ==================================================================
+   TRANSLUCENT CENTER GUIDE PILL (THẺ HƯỚNG DẪN ĐIỀU KHIỂN & CUỘN TRONG SUỐT)
+   ================================================================== */
+.hud-center-guide-pill {
+  position: fixed;
+  bottom: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  background: rgba(18, 7, 15, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(201, 166, 107, 0.38);
+  border-radius: 9999px;
+  color: #FAF3EA;
+  font-family: var(--font-sans, "Be Vietnam Pro", sans-serif);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.38);
+  user-select: none;
+}
+
+.hud-center-guide-pill .guide-sep {
+  color: rgba(201, 166, 107, 0.55);
+}
+
+.hud-center-guide-pill .guide-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .btn-camera-sky-toggle {
+    bottom: 116px;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+  }
+  .hud-center-guide-pill {
+    bottom: 74px;
+    font-size: 0.72rem;
+    padding: 5px 12px;
+    gap: 6px;
+  }
+}
+
+/* ==================================================================
+   VIRTUAL D-PAD NAVIGATION CLUSTER (BÀN PHÍM ẢO TRONG SUỐT QUAN SÁT)
+   ================================================================== */
+.hud-nav-pad-cluster {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.btn-nav-pad-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(24, 10, 20, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(201, 166, 107, 0.5);
+  border-radius: 9999px;
+  color: #FAF3EA;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: all 0.2s ease;
+}
+
+.btn-nav-pad-toggle:hover {
+  background: rgba(190, 18, 60, 0.85);
+  border-color: #FDE68A;
+  box-shadow: 0 0 16px rgba(253, 230, 138, 0.5);
+  transform: translateY(-2px);
+}
+
+.nav-pad-controls {
+  padding: 10px 12px;
+  background: rgba(22, 8, 18, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(201, 166, 107, 0.45);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(201, 166, 107, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: asideSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nav-pad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(201, 166, 107, 0.25);
+}
+
+.nav-pad-title {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #FDE68A;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.btn-nav-reset {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  color: #FAF3EA;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-nav-reset:hover {
+  background: rgba(201, 166, 107, 0.3);
+  border-color: #FDE68A;
+}
+
+.nav-pad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(3, 36px);
+  gap: 5px;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFF;
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  transition: all 0.15s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(201, 166, 107, 0.7);
+  transform: scale(1.06);
+}
+
+.nav-btn:active {
+  background: linear-gradient(135deg, #BE123C, #8C1D40);
+  border-color: #FDE68A;
+  box-shadow: 0 0 12px rgba(253, 230, 138, 0.6);
+  transform: scale(0.95);
+}
+
+.nav-btn-elevate-up,
+.nav-btn-elevate-down {
+  background: rgba(201, 166, 107, 0.15);
+  border-color: rgba(201, 166, 107, 0.35);
+  font-size: 0.9rem;
+}
+
+/* THANH TIÊU ĐỀ TỐI GIẢN TRÊN CÙNG (GỌN GÀNG BÊN CẠNH DOCK, KHÔNG CẢN TẦM NHÌN) */
+.hud-top-minimal-pill {
+  position: fixed;
+  top: 18px;
+  left: 84px;
+  z-index: 95;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(24, 10, 20, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(201, 166, 107, 0.4);
+  border-radius: 9999px;
+  padding: 6px 18px;
+  color: #FAF3EA;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(201, 166, 107, 0.15);
+  animation: pillFadeDown 0.4s ease;
+  user-select: none;
+}
+
+@keyframes pillFadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.hud-console-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: var(--font-serif);
-  font-size: clamp(0.95rem, 2vw, 1.15rem);
-  color: var(--champagne-light);
-  letter-spacing: 0.02em;
-}
-
-.hud-console-badge {
+.pill-badge {
   background: linear-gradient(135deg, var(--rose-600), var(--rose-700));
   color: #FFF;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 800;
-  padding: 3px 10px;
+  padding: 2px 9px;
   border-radius: 9999px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
 }
 
-.hud-console-title strong {
-  color: #FDA4AF;
-  font-weight: 700;
-  text-decoration: underline wavy var(--rose-400) 1.5px;
-  text-underline-offset: 3px;
+.pill-text {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: var(--champagne-light);
 }
 
-.hud-camera-toolbar {
+.pill-text strong {
+  color: #FDA4AF;
+  font-weight: 700;
+}
+
+/* NÚT HIỆN HUD KHI ĐANG ẨN (GỌN GÀNG GÓC TRÊN TRÁI) */
+.btn-hud-reopen-floating {
+  position: fixed;
+  left: 18px;
+  top: 18px;
+  z-index: 102;
+  pointer-events: auto;
+  background: rgba(26, 10, 20, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid var(--champagne-gold);
+  color: #FDE68A;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(201, 166, 107, 0.3);
+  transition: all 0.22s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-hud-reopen-floating:hover {
+  background: rgba(140, 47, 75, 0.95);
+  color: #FFF;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(244, 63, 94, 0.5);
+}
+
+/* THANH ĐIỀU KHIỂN GÓC NHÌN XE HOA (CHỈ XUẤT HIỆN KHI Ở TRẠM 3) */
+.hud-van-angles-dock {
+  position: fixed;
+  bottom: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
   pointer-events: auto;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(201, 166, 107, 0.35);
+  gap: 8px;
+  background: rgba(24, 10, 20, 0.84);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(201, 166, 107, 0.45);
   border-radius: 9999px;
-  padding: 4px 8px;
-  flex-wrap: wrap;
+  padding: 6px 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 18px rgba(201, 166, 107, 0.2);
+  animation: pillFadeDown 0.3s ease;
 }
 
-.btn-cam-preset {
-  background: transparent;
-  border: none;
+.van-angle-title {
+  font-size: 0.8rem;
+  color: var(--champagne-light);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 2px;
+}
+
+.btn-van-angle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #E2E8F0;
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 9999px;
   font-family: var(--font-sans);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  white-space: nowrap;
 }
 
-.btn-cam-preset:hover {
-  background: rgba(255, 255, 255, 0.15);
+.btn-van-angle:hover {
+  background: rgba(255, 255, 255, 0.2);
   color: #FFF;
 }
 
-.btn-cam-preset.active {
+.btn-van-angle.active {
   background: linear-gradient(135deg, var(--rose-500), var(--rose-600));
+  border-color: #FDE68A;
   color: #FFF;
-  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.45);
-}
-
-.btn-cam-preset.autorotate-active {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
-  color: #FFF;
-  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.45);
-}
-
-.btn-cam-switch-2d {
-  background: #FFFFFF !important;
-  color: var(--rose-800) !important;
-  border: 1.5px solid var(--rose-300) !important;
-  font-weight: 800 !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-.btn-cam-switch-2d:hover {
-  background: var(--rose-50) !important;
-  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(225, 29, 72, 0.5);
 }
 
 .hud-interaction-guide-group {
@@ -1110,12 +1558,17 @@
 }
 
 .hud-bottom-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
   pointer-events: auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  max-width: 960px;
-  width: 100%;
+  max-width: 92vw;
+  width: auto;
   margin: 0 auto;
   gap: 14px;
   flex-wrap: wrap;
@@ -1607,49 +2060,79 @@
     font-size: 1.05rem;
   }
 
-  /* 3D WORLD HUD TRÊN MOBILE */
-  .hud-top-console-wrapper {
-    padding-top: 52px;
-    padding-left: 8px;
-    padding-right: 8px;
+  /* 3D WORLD HUD TRÊN MOBILE: DOCK CHUYỂN THÀNH THANH NGANG GỌN GÀNG Ở ĐÁY */
+  .hud-aside-dock {
+    left: 50% !important;
+    top: auto !important;
+    bottom: 84px !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    padding: 6px 10px !important;
+    border-radius: 9999px !important;
+    width: auto !important;
+    max-width: 95vw !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 6px !important;
   }
-
-  .hud-top-console {
-    padding: 8px 12px 10px;
-    border-radius: 20px;
-    gap: 6px;
-    max-width: 98vw;
-  }
-
-  .hud-console-header {
-    font-size: 0.85rem;
-    gap: 6px;
-  }
-
-  .hud-console-badge {
-    font-size: 0.65rem;
-    padding: 2px 8px;
-  }
-
-  .hud-camera-toolbar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    width: 100%;
-    justify-content: flex-start;
-    padding: 4px 6px;
-    gap: 5px;
-  }
-
-  .hud-camera-toolbar::-webkit-scrollbar {
+  .hud-aside-dock::-webkit-scrollbar {
     display: none;
   }
-
-  .btn-cam-preset {
-    font-size: 0.74rem;
-    padding: 5px 11px;
-    flex-shrink: 0;
+  .hud-dock-stations,
+  .hud-dock-tools {
+    flex-direction: row !important;
+    gap: 6px !important;
+    width: auto !important;
+  }
+  .hud-dock-divider {
+    width: 1px !important;
+    height: 22px !important;
+    margin: 0 3px !important;
+  }
+  .hud-dock-brand {
+    width: auto !important;
+    height: 34px !important;
+    padding: 0 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .hud-dock-brand .hud-dock-brand-text {
+    display: none !important;
+  }
+  .hud-dock-station-btn,
+  .hud-dock-tool-btn {
+    width: auto !important;
+    height: 34px !important;
+    padding: 0 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .hud-dock-station-btn .station-label,
+  .hud-dock-tool-btn .tool-label {
+    display: none !important;
+  }
+  .hud-dock-station-btn.active .station-label {
+    display: inline-block !important;
+    max-width: 90px !important;
+  }
+  .hud-nav-pad-cluster {
+    right: 12px !important;
+    bottom: 84px !important;
+  }
+  .hud-top-minimal-pill {
+    top: 8px !important;
+    padding: 4px 14px !important;
+    font-size: 0.82rem !important;
+    max-width: 94vw !important;
+  }
+  .pill-text {
+    font-size: 0.82rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .hud-van-angles-dock {
+    bottom: 138px !important;
+    padding: 4px 10px !important;
   }
 
   .hud-interaction-guide-group {

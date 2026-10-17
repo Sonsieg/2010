@@ -77,24 +77,32 @@ export function cloudTexture() {
 
 export function signTexture(text) {
   const c = document.createElement('canvas');
-  c.width = 640;
-  c.height = 160;
+  c.width = 800;
+  c.height = 180;
   const g = c.getContext('2d');
   g.fillStyle = '#7a1f3d';
   g.beginPath();
-  g.roundRect ? g.roundRect(6, 6, 628, 148, 28) : g.rect(6, 6, 628, 148);
+  g.roundRect ? g.roundRect(8, 8, 784, 164, 32) : g.rect(8, 8, 784, 164);
   g.fill();
   g.strokeStyle = '#e8c27a';
   g.lineWidth = 6;
   g.stroke();
   g.strokeStyle = 'rgba(232,194,122,0.55)';
   g.lineWidth = 2;
-  g.strokeRect(22, 22, 596, 116);
+  g.strokeRect(22, 22, 756, 136);
+
+  // Đo độ dài text và tự động co dãn cỡ chữ để không bao giờ bị tràn lề
+  let fontSize = 44;
+  g.font = `italic 700 ${fontSize}px Georgia, "Times New Roman", serif`;
+  while (g.measureText(text).width > 720 && fontSize > 20) {
+    fontSize -= 2;
+    g.font = `italic 700 ${fontSize}px Georgia, "Times New Roman", serif`;
+  }
+
   g.fillStyle = '#f4d58d';
-  g.font = 'italic 600 56px Georgia, "Times New Roman", serif';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText(text, 320, 84);
+  g.fillText(text, 400, 92);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 4;
