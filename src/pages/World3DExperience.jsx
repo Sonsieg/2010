@@ -1307,28 +1307,256 @@ export default function World3DExperience() {
     const interactiveMeshes = [];
     const stationCameraPositions = {};
 
-    /* --- HỆ THỐNG PHÁO HOA 3D HOÀNG GIA (CASTLE FIREWORKS) --- */
-    const FW_MAX = 240;
-    const fwPos = new Float32Array(FW_MAX * 3);
-    const fwCol = new Float32Array(FW_MAX * 3);
-    for (let i = 0; i < FW_MAX; i++) {
-      fwPos[i * 3 + 1] = -999;
-    }
+    /* --- BEACON HALOS & INTERACTION GUIDANCE REFS --- */
+    let chestAura1 = null, chestAura2 = null, cakeAura = null;
+
+    /* ================= FIREWORKS SYSTEM (CHUYÊN NGHIỆP, RỰC RỠ, ĐỦ TIẾNG VÚT - BÙM - LÁCH TÁCH) ================= */
+    const FW = { max: 7000, parts: [], rockets: [], lights: [], li: 0 };
+
+    // --- sprite tròn mềm cho hạt ---
+    const fwTex = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 64;
+      const g = c.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, 'rgba(255,255,255,1)');
+      gr.addColorStop(0.25, 'rgba(255,255,255,0.85)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    })();
+
     const fwGeo = new THREE.BufferGeometry();
+    const fwPos = new Float32Array(FW.max * 3);
+    const fwCol = new Float32Array(FW.max * 3);
     fwGeo.setAttribute('position', new THREE.BufferAttribute(fwPos, 3));
     fwGeo.setAttribute('color', new THREE.BufferAttribute(fwCol, 3));
-    const fwMat = new THREE.PointsMaterial({
-      size: 0.85,
-      map: glowTex,
-      vertexColors: true,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    const fwPoints = new THREE.Points(fwGeo, fwMat);
+    fwGeo.setDrawRange(0, 0);
+    const fwPoints = new THREE.Points(fwGeo, new THREE.PointsMaterial({
+      size: 1.15, map: fwTex, vertexColors: true, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+    }));
     fwPoints.frustumCulled = false;
     scene.add(fwPoints);
-    const fireworksList = [];
+
+    // --- đèn chớp môi trường (xoay vòng 4 đèn PointLight) ---
+    for (let i = 0; i < 4; i++) {
+      const l = new THREE.PointLight(0xffffff, 0, 160, 1.5);
+      scene.add(l); FW.lights.push(l);
+    }
+    const fwFlash = (pos, color) => {
+      const l = FW.lights[FW.li++ % FW.lights.length];
+      l.position.copy(pos); l.color.copy(color); l.intensity = 14;
+    };
+
+    /* ---------------- ÂM THANH (WebAudio tổng hợp âm chân thực, không cần tải file ngoài) ---------------- */
+    let fwAC = null, fwNoise = null, lastCrackle = 0;
+    const getAC = () => {
+      if (!fwAC) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          fwAC = new AudioContextClass();
+          const len = fwAC.sampleRate * 2;
+          fwNoise = fwAC.createBuffer(1, len, fwAC.sampleRate);
+          const d = fwNoise.getChannelData(0);
+          for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        }
+      }
+      if (fwAC && fwAC.state === 'suspended') {
+        fwAC.resume().catch(() => {});
+      }
+      return fwAC;
+    };
+    const noiseSrc = (ac) => { const s = ac.createBufferSource(); s.buffer = fwNoise; return s; };
+
+    const soundLaunch = () => {
+      const ac = getAC(); if (!ac) return;
+      const t = ac.currentTime;
+      try {
+        const s = noiseSrc(ac), f = ac.createBiquadFilter(), g = ac.createGain();
+        f.type = 'bandpass'; f.Q.value = 2;
+        f.frequency.setValueAtTime(500, t);
+        f.frequency.exponentialRampToValueAtTime(2500, t + 1.0);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+        s.connect(f).connect(g).connect(ac.destination);
+        s.start(t); s.stop(t + 1.2);
+      } catch (e) {}
+    };
+    const soundBoom = (delay = 0.05, vol = 0.7) => {
+      const ac = getAC(); if (!ac) return;
+      const t = ac.currentTime + delay;
+      try {
+        const s = noiseSrc(ac), f = ac.createBiquadFilter(), g = ac.createGain();
+        f.type = 'lowpass'; f.frequency.setValueAtTime(900, t);
+        f.frequency.exponentialRampToValueAtTime(80, t + 1.2);
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+        s.connect(f).connect(g).connect(ac.destination);
+        s.start(t); s.stop(t + 1.5);
+        const o = ac.createOscillator(), og = ac.createGain();
+        o.frequency.setValueAtTime(110, t);
+        o.frequency.exponentialRampToValueAtTime(28, t + 0.6);
+        og.gain.setValueAtTime(vol * 0.9, t);
+        og.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
+        o.connect(og).connect(ac.destination); o.start(t); o.stop(t + 0.8);
+      } catch (e) {}
+    };
+    const soundCrackle = () => {
+      const now = performance.now();
+      if (now - lastCrackle < 120) return; lastCrackle = now;
+      const ac = getAC(); if (!ac) return;
+      const t0 = ac.currentTime;
+      try {
+        for (let i = 0; i < 8; i++) {
+          const t = t0 + Math.random() * 0.6;
+          const s = noiseSrc(ac), f = ac.createBiquadFilter(), g = ac.createGain();
+          f.type = 'highpass'; f.frequency.value = 2500;
+          g.gain.setValueAtTime(0.25, t);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+          s.connect(f).connect(g).connect(ac.destination);
+          s.start(t, Math.random()); s.stop(t + 0.05);
+        }
+      } catch (e) {}
+    };
+
+    const soundClink = () => {
+      const ac = getAC(); if (!ac) return;
+      const t = ac.currentTime;
+      try {
+        const o1 = ac.createOscillator(), g1 = ac.createGain();
+        o1.type = 'sine';
+        o1.frequency.setValueAtTime(2800, t);
+        o1.frequency.exponentialRampToValueAtTime(2200, t + 0.9);
+        g1.gain.setValueAtTime(0.35, t);
+        g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+        o1.connect(g1).connect(ac.destination);
+        o1.start(t); o1.stop(t + 0.95);
+
+        const o2 = ac.createOscillator(), g2 = ac.createGain();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(3600, t + 0.04);
+        o2.frequency.exponentialRampToValueAtTime(2900, t + 0.85);
+        g2.gain.setValueAtTime(0.2, t + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.85);
+        o2.connect(g2).connect(ac.destination);
+        o2.start(t + 0.04); o2.stop(t + 0.9);
+      } catch (e) {}
+    };
+
+    /* ---------------- HẠT PHÁO HOA ---------------- */
+    const addPart = (pos, vel, color, life, decay, drag, grav, flicker = false, crackle = false) => {
+      if (FW.parts.length >= FW.max) return;
+      FW.parts.push({ pos: pos.clone(), vel, color, life, decay, drag, grav, flicker, crackle });
+    };
+
+    const PALETTES = [
+      [0xF43F5E, 0xFDE68A], [0x38BDF8, 0xFFFFFF], [0xC084FC, 0xFDE047],
+      [0x34D399, 0xFEF08A], [0xFB923C, 0xFDE68A], [0xFF4D8D, 0x60A5FA], [0xFFD700, 0xFFFFFF]
+    ];
+    const pickPal = () => PALETTES[Math.floor(rand() * PALETTES.length)].map(c => new THREE.Color(c));
+
+    const randDir = () => {
+      const th = rand() * Math.PI * 2, ph = Math.acos(2 * rand() - 1);
+      return new THREE.Vector3(Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th));
+    };
+
+    const explode = (pos, type) => {
+      const pal = pickPal();
+      fwFlash(pos, pal[0]);
+      addPart(pos, new THREE.Vector3(), new THREE.Color(0xffffff), 1, 6, 0, 0); // chớp tâm nổ
+      soundBoom(0.08 + rand() * 0.1);
+
+      if (type === 'sphere') {
+        for (let i = 0; i < 160; i++)
+          addPart(pos, randDir().multiplyScalar(13 + rand() * 4), pal[i % pal.length].clone(), 1, 0.45 + rand() * 0.3, 1.3, 7, true);
+      } else if (type === 'double') {
+        for (let i = 0; i < 120; i++)
+          addPart(pos, randDir().multiplyScalar(15), pal[0].clone(), 1, 0.5, 1.3, 7, true);
+        for (let i = 0; i < 80; i++)
+          addPart(pos, randDir().multiplyScalar(7), pal[1].clone(), 1, 0.6, 1.3, 7, true);
+      } else if (type === 'ring') {
+        const axis = randDir(), u = new THREE.Vector3().crossVectors(axis, new THREE.Vector3(0, 1, 0.3)).normalize(), v = new THREE.Vector3().crossVectors(axis, u);
+        for (let i = 0; i < 90; i++) {
+          const a = (i / 90) * Math.PI * 2;
+          const d = u.clone().multiplyScalar(Math.cos(a)).add(v.clone().multiplyScalar(Math.sin(a)));
+          addPart(pos, d.multiplyScalar(14), pal[0].clone(), 1, 0.5, 1.2, 5, true);
+        }
+      } else if (type === 'willow') {
+        const gold = new THREE.Color(0xFFB938);
+        for (let i = 0; i < 130; i++)
+          addPart(pos, randDir().multiplyScalar(8 + rand() * 4), gold.clone(), 1, 0.22 + rand() * 0.1, 1.6, 10, true);
+      } else if (type === 'crackle') {
+        for (let i = 0; i < 100; i++)
+          addPart(pos, randDir().multiplyScalar(12 + rand() * 4), pal[i % 2].clone(), 1, 0.6 + rand() * 0.3, 1.3, 7, true, true);
+      }
+    };
+
+    const launchRocket = (x, z, targetY) => {
+      const baseH = heightAt(x, z);
+      const types = ['sphere', 'sphere', 'double', 'ring', 'willow', 'crackle'];
+      FW.rockets.push({
+        pos: new THREE.Vector3(x, baseH + 18, z),
+        vel: new THREE.Vector3((rand() - 0.5) * 4, 32 + rand() * 8, (rand() - 0.5) * 4),
+        fuse: 1.1 + rand() * 0.5,
+        type: types[Math.floor(rand() * types.length)],
+        y: targetY
+      });
+      soundLaunch();
+    };
+
+    /* ---------------- CẬP NHẬT PHÁO HOA MỖI FRAME ---------------- */
+    const updateFireworks = (dt) => {
+      dt = Math.min(dt, 0.05);
+
+      // pháo đang bay + đuôi lửa vàng
+      for (let i = FW.rockets.length - 1; i >= 0; i--) {
+        const r = FW.rockets[i];
+        r.pos.addScaledVector(r.vel, dt);
+        r.vel.y -= 6 * dt;
+        r.fuse -= dt;
+        for (let k = 0; k < 3; k++)
+          addPart(r.pos, new THREE.Vector3((rand() - 0.5) * 2, -2 - rand() * 3, (rand() - 0.5) * 2),
+            new THREE.Color(0xFFC857), 0.8, 2.5 + rand(), 1, 2, true);
+        if (r.fuse <= 0) { explode(r.pos, r.type); FW.rockets.splice(i, 1); }
+      }
+
+      // hạt rơi và lấp lánh
+      for (let i = FW.parts.length - 1; i >= 0; i--) {
+        const p = FW.parts[i];
+        p.vel.multiplyScalar(Math.max(0, 1 - p.drag * dt));
+        p.vel.y -= p.grav * dt;
+        p.pos.addScaledVector(p.vel, dt);
+        p.life -= p.decay * dt;
+        if (p.life <= 0) {
+          if (p.crackle) {
+            soundCrackle();
+            for (let k = 0; k < 3; k++)
+              addPart(p.pos, randDir().multiplyScalar(5), new THREE.Color(0xffffff), 0.5, 3, 1, 4, true);
+          }
+          FW.parts[i] = FW.parts[FW.parts.length - 1]; FW.parts.pop();
+        }
+      }
+
+      // nạp dữ liệu vào BufferAttribute
+      const n = FW.parts.length;
+      for (let i = 0; i < n; i++) {
+        const p = FW.parts[i];
+        const f = p.life * (p.flicker ? (0.4 + Math.random() * 0.8) : 1);
+        fwPos[i * 3] = p.pos.x; fwPos[i * 3 + 1] = p.pos.y; fwPos[i * 3 + 2] = p.pos.z;
+        fwCol[i * 3] = p.color.r * f; fwCol[i * 3 + 1] = p.color.g * f; fwCol[i * 3 + 2] = p.color.b * f;
+      }
+      fwGeo.setDrawRange(0, n);
+      fwGeo.attributes.position.needsUpdate = true;
+      fwGeo.attributes.color.needsUpdate = true;
+
+      // đèn chớp tắt dần
+      FW.lights.forEach(l => { l.intensity *= Math.pow(0.02, dt); });
+    };
+
+    let triggerCastleFireworks = () => {};
 
     /* ------------------------------------------------------------------ */
     /*  1. TRẠM 0: HỘP QUÀ HOÀNG GIA (Mở nắp, bướm & bóng bay ra)        */
@@ -2025,95 +2253,289 @@ export default function World3DExperience() {
       grandFlag.position.set(1.2, 30.2, -2.5);
       st5Group.add(grandFlag);
 
-      /* --- E. BÀN ĐẠI YẾN HOÀNG GIA (GRAND BANQUET TABLE) --- */
+      /* --- E. BÀN ĐẠI YẾN HOÀNG GIA & KHÔNG GIAN DẠ TIỆC (GRAND LUXURY BANQUET) --- */
       const banquetTable = new THREE.Mesh(
-        new RoundedBoxGeometry(8.0, 0.9, 2.6, 4, 0.12),
-        new THREE.MeshStandardMaterial({ color: 0xFFFAF3, roughness: 0.45 })
+        new RoundedBoxGeometry(8.6, 0.9, 2.8, 4, 0.14),
+        new THREE.MeshStandardMaterial({ color: 0xFFFDF8, roughness: 0.55 }) // Khăn trải bàn lụa tơ tằm kem ngà
       );
-      banquetTable.position.set(0, 2.45, 1.2);
+      banquetTable.position.set(0, 2.45, 3.0);
       st5Group.add(banquetTable);
 
-      // Bánh kem tiệc 20.10 4 tầng trang trí hoa hồng
-      const cakeColors = [0xFFF1F2, 0xFB7185, 0xE11D48, 0xC9A66B];
-      [
-        [1.1, 0.38, 3.09],
-        [0.82, 0.32, 3.44],
-        [0.55, 0.28, 3.74],
-        [0.32, 0.22, 3.99]
-      ].forEach(([r, h, y], ci) => {
-        const tier = new THREE.Mesh(
-          new THREE.CylinderGeometry(r, r, h, 24),
-          new THREE.MeshStandardMaterial({ color: cakeColors[ci], roughness: 0.35 })
-        );
-        tier.position.set(-1.8, y, 1.2);
-        st5Group.add(tier);
-      });
-      // Nến số 20.10 phát sáng trên đỉnh bánh
-      const candleFlame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, blending: THREE.AdditiveBlending }));
-      candleFlame.scale.set(0.9, 0.9, 1);
-      candleFlame.position.set(-1.8, 4.3, 1.2);
-      st5Group.add(candleFlame);
+      // Dải khăn nhung đỏ rượu vang (Royal Burgundy Table Runner) trải giữa bàn tiệc
+      const tableRunner = new THREE.Mesh(
+        new RoundedBoxGeometry(8.62, 0.04, 1.35, 4, 0.02),
+        new THREE.MeshStandardMaterial({ color: 0x8C2F4B, roughness: 0.5 })
+      );
+      tableRunner.position.set(0, 2.92, 3.0);
+      st5Group.add(tableRunner);
 
-      // Tháp 24 ly Champagne pha lê kim tự tháp phát sáng
-      for (let g = 0; g < 20; g++) {
-        const glass = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.065, 0.02, 0.24, 8),
-          new THREE.MeshPhysicalMaterial({ color: 0xFDE68A, transmission: 0.9, roughness: 0.1, thickness: 0.3 })
+      // Viền đăng ten dát vàng dọc hai mép dải nhung
+      [-0.68, 0.68].forEach(rz => {
+        const goldLace = new THREE.Mesh(new THREE.BoxGeometry(8.62, 0.02, 0.04), goldTrimMat);
+        goldLace.position.set(0, 2.95, 3.0 + rz);
+        st5Group.add(goldLace);
+      });
+
+      /* ===== 1. BÁNH ĐẠI TIỆC NGHỆ THUẬT 4 TẦNG (ARTISAN GALA CAKE) ===== */
+      const cakeGroup = new THREE.Group();
+      cakeGroup.position.set(-2.5, 2.92, 3.0);
+
+      // Khay đỡ bánh bằng bạc viền vàng hoàng gia
+      const cakeStand = new THREE.Mesh(new THREE.CylinderGeometry(1.48, 1.62, 0.16, 32), goldTrimMat);
+      cakeStand.position.y = 0.08;
+      cakeGroup.add(cakeStand);
+
+      const cakeColors = [0xFFFDF7, 0x9E1B32, 0xFAF3EA, 0xFFE4E6]; // Kem vani, Nhung đỏ ruby, Kem champagne, Hồng phấn
+      const cakeTiersData = [
+        { r: 1.25, h: 0.44, y: 0.38 }, // Tầng 1 (đáy)
+        { r: 0.94, h: 0.40, y: 0.80 }, // Tầng 2
+        { r: 0.68, h: 0.36, y: 1.18 }, // Tầng 3
+        { r: 0.44, h: 0.30, y: 1.51 }  // Tầng 4 (vương miện)
+      ];
+
+      cakeTiersData.forEach((t, ti) => {
+        const tierMesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(t.r, t.r, t.h, 32),
+          new THREE.MeshStandardMaterial({ color: cakeColors[ti], roughness: 0.32, metalness: 0.04 })
         );
-        const gx = 1.0 + (g % 5) * 0.28;
-        const gz = 0.8 + Math.floor(g / 5) * 0.28;
-        glass.position.set(gx, 3.02, gz);
-        st5Group.add(glass);
+        tierMesh.position.y = t.y;
+        cakeGroup.add(tierMesh);
+
+        // Vòng chuỗi ngọc trai đường vân kem uốn quanh chân mỗi tầng
+        const pearlRing = new THREE.Mesh(
+          new THREE.TorusGeometry(t.r + 0.015, 0.032, 12, 36),
+          ti === 1 ? goldTrimMat : new THREE.MeshStandardMaterial({ color: 0xFFFAF0, roughness: 0.25 })
+        );
+        pearlRing.rotation.x = Math.PI / 2;
+        pearlRing.position.y = t.y - t.h * 0.48;
+        cakeGroup.add(pearlRing);
+      });
+
+      // Dải 10 đóa hoa hồng đường thủ công uốn lượn mềm mại từ đỉnh bánh xuống chân bánh
+      const cakeRoseColors = [0xFFFAF0, 0xFDA4AF, 0xBE123C, 0xFED7AA].map(c => new THREE.Color(c));
+      for (let cr = 0; cr < 10; cr++) {
+        const rHead = new THREE.Mesh(makeRoseHead(), new THREE.MeshStandardMaterial({
+          color: cakeRoseColors[cr % cakeRoseColors.length],
+          roughness: 0.35,
+          side: THREE.DoubleSide
+        }));
+        const t = cr / 9;
+        const cy = 0.35 + t * 1.25;
+        const cradius = 1.25 - t * 0.85 + 0.08;
+        const cangle = t * Math.PI * 2.8 + 0.2;
+        rHead.position.set(Math.sin(cangle) * cradius, cy, Math.cos(cangle) * cradius);
+        rHead.rotation.set(-0.2 + (rand() - 0.5) * 0.3, cangle, 0.3);
+        rHead.scale.setScalar(1.2 + (cr % 3) * 0.2);
+        cakeGroup.add(rHead);
       }
 
+      // Vương miện dát vàng & biểu tượng "20.10" trên đỉnh cao nhất
+      const topperCrown = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.025, 12, 24), goldTrimMat);
+      topperCrown.rotation.x = Math.PI / 2;
+      topperCrown.position.y = 1.72;
+      cakeGroup.add(topperCrown);
+
+      const topperStar = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), goldTrimMat);
+      topperStar.position.y = 1.84;
+      cakeGroup.add(topperStar);
+
+      // 6 Cây nến thon dài cắm trên các tầng bánh với đế đồng & tim nến thật
+      for (let cn = 0; cn < 6; cn++) {
+        const ca = (cn / 6) * Math.PI * 2;
+        const cRad = cn < 4 ? 0.82 : 0.56;
+        const cBaseY = cn < 4 ? 1.0 : 1.36;
+
+        // Đế cắm nến mạ vàng
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.045, 0.03, 10), goldTrimMat);
+        cup.position.set(Math.sin(ca) * cRad, cBaseY, Math.cos(ca) * cRad);
+        cakeGroup.add(cup);
+
+        // Thân nến sáp trắng ngà
+        const wax = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.022, 0.026, 0.36, 10),
+          new THREE.MeshStandardMaterial({ color: 0xFFFBF2, roughness: 0.35 })
+        );
+        wax.position.set(Math.sin(ca) * cRad, cBaseY + 0.18, Math.cos(ca) * cRad);
+        cakeGroup.add(wax);
+
+        // Tim nến đen nhỏ
+        const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.003, 0.003, 0.04, 6), new THREE.MeshBasicMaterial({ color: 0x1F2937 }));
+        wick.position.set(Math.sin(ca) * cRad, cBaseY + 0.38, Math.cos(ca) * cRad);
+        cakeGroup.add(wick);
+
+        // Ngọn lửa nến lung linh ấm áp
+        const cFlame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, blending: THREE.AdditiveBlending }));
+        cFlame.scale.set(0.65, 0.65, 1);
+        cFlame.position.set(Math.sin(ca) * cRad, cBaseY + 0.44, Math.cos(ca) * cRad);
+        cakeGroup.add(cFlame);
+      }
+
+      // Ngọn nến chủ trên đỉnh tháp bánh
+      const topFlame = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, blending: THREE.AdditiveBlending }));
+      topFlame.scale.set(0.95, 0.95, 1);
+      topFlame.position.y = 1.96;
+      cakeGroup.add(topFlame);
+
+      // HÀO QUANG VÀNG - ĐỎ CHÓI LÓE LIÊN TỤC TRÊN ĐỈNH BÁNH
+      cakeAura = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFBBF24, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending }));
+      cakeAura.scale.set(4.2, 4.2, 1);
+      cakeAura.position.y = 1.85;
+      cakeGroup.add(cakeAura);
+
+      const cakeRubyAura = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xEF4444, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending }));
+      cakeRubyAura.scale.set(3.2, 3.2, 1);
+      cakeRubyAura.position.y = 1.85;
+      cakeGroup.add(cakeRubyAura);
+
+      st5Group.add(cakeGroup);
+
+      /* ===== 2. THÁP RƯỢU CHAMPAGNE KIM TỰ THÁP 4 TẦNG (30 LY PHA LÊ RỰC RỠ) ===== */
+      const champagneGroup = new THREE.Group();
+      champagneGroup.position.set(2.5, 2.92, 3.0);
+
+      // Bục trưng bày tháp rượu bằng cẩm thạch trắng viền đồng mạ vàng
+      const standRiser = new THREE.Mesh(new RoundedBoxGeometry(1.68, 0.12, 1.68, 4, 0.03), marbleMat);
+      standRiser.position.y = 0.06;
+      champagneGroup.add(standRiser);
+
+      const standGoldTrim = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.03, 1.7), goldTrimMat);
+      standGoldTrim.position.y = 0.11;
+      champagneGroup.add(standGoldTrim);
+
+      // Vật liệu ly pha lê trong suốt cao cấp
+      const crystalMat = new THREE.MeshPhysicalMaterial({
+        color: 0xFFFFFF,
+        transmission: 0.94,
+        opacity: 1,
+        transparent: true,
+        roughness: 0.06,
+        ior: 1.52,
+        thickness: 0.2
+      });
+
+      // Vật liệu rượu champagne vàng óng ánh sủi bọt
+      const champagneLiquidMat = new THREE.MeshPhysicalMaterial({
+        color: 0xF59E0B,
+        transmission: 0.85,
+        roughness: 0.12,
+        ior: 1.45,
+        thickness: 0.3
+      });
+
+      // Hàm tạo 1 ly Champagne Coupe pha lê hoàng gia
+      const createFlute = () => {
+        const flute = new THREE.Group();
+        // Chân đế
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.052, 0.012, 12), crystalMat);
+        base.position.y = 0.006;
+        flute.add(base);
+        // Thân cuống thanh mảnh
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.12, 8), crystalMat);
+        stem.position.y = 0.07;
+        flute.add(stem);
+        // Bầu ly Coupe
+        const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.02, 0.12, 12), crystalMat);
+        cup.position.y = 0.18;
+        flute.add(cup);
+        // Rượu champagne sóng sánh bên trong
+        const wine = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.022, 0.09, 10), champagneLiquidMat);
+        wine.position.y = 0.17;
+        flute.add(wine);
+        return flute;
+      };
+
+      // Xếp 4 tầng Kim Tự Tháp Champagne chuẩn tiệc Gala:
+      // Tầng 1: 4x4 = 16 ly | Tầng 2: 3x3 = 9 ly | Tầng 3: 2x2 = 4 ly | Tầng 4: 1x1 = 1 ly -> Tổng: 30 ly!
+      const SPAN = 0.23;
+      const FLUTE_H = 0.245;
+      const pyramidTiers = [
+        { count: 4, y: 0.12 },
+        { count: 3, y: 0.12 + FLUTE_H },
+        { count: 2, y: 0.12 + FLUTE_H * 2 },
+        { count: 1, y: 0.12 + FLUTE_H * 3 }
+      ];
+
+      pyramidTiers.forEach((tier) => {
+        const offset = ((tier.count - 1) * SPAN) / 2;
+        for (let gx = 0; gx < tier.count; gx++) {
+          for (let gz = 0; gz < tier.count; gz++) {
+            const flute = createFlute();
+            flute.position.set(gx * SPAN - offset, tier.y, gz * SPAN - offset);
+            champagneGroup.add(flute);
+          }
+        }
+      });
+
+      // Bọt sâm panh tràn tỏa sáng lung linh trên đỉnh tháp ly
+      const champBubbles = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, blending: THREE.AdditiveBlending }));
+      champBubbles.scale.set(1.4, 1.4, 1);
+      champBubbles.position.y = 0.12 + FLUTE_H * 4.1;
+      champagneGroup.add(champBubbles);
+
+      st5Group.add(champagneGroup);
+
       // Giỏ hoa hồng lớn ở hai đầu bàn tiệc
-      [-3.4, 3.4].forEach(fx => {
-        const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.3, 0.5, 12), goldTrimMat);
-        basket.position.set(fx, 3.15, 1.2);
+      [-3.8, 3.8].forEach(fx => {
+        const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.32, 0.52, 16), goldTrimMat);
+        basket.position.set(fx, 3.18, 3.0);
         st5Group.add(basket);
         const bouquet = new THREE.Mesh(
-          new THREE.SphereGeometry(0.55, 12, 10),
-          new THREE.MeshStandardMaterial({ color: 0xE11D48, roughness: 0.5 })
+          new THREE.SphereGeometry(0.58, 14, 12),
+          new THREE.MeshStandardMaterial({ color: 0xBE123C, roughness: 0.45 })
         );
-        bouquet.position.set(fx, 3.5, 1.2);
+        bouquet.position.set(fx, 3.55, 3.0);
         st5Group.add(bouquet);
       });
 
-      // 6 Chân nến đồng hoàng gia phát sáng
-      [-2.6, 0, 2.6].forEach(nx => {
-        [-0.8, 0.8].forEach(nz => {
+      // 4 Chân nến đồng hoàng gia phát sáng dọc bàn tiệc
+      [-1.3, 1.3].forEach(nx => {
+        [-0.85, 0.85].forEach(nz => {
           const cand = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.08, 0.55, 8), goldTrimMat);
-          cand.position.set(nx, 3.18, 1.2 + nz);
+          cand.position.set(nx, 3.18, 3.0 + nz);
           st5Group.add(cand);
           const cF = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, blending: THREE.AdditiveBlending }));
           cF.scale.set(0.7, 0.7, 1);
-          cF.position.set(nx, 3.55, 1.2 + nz);
+          cF.position.set(nx, 3.55, 3.0 + nz);
           st5Group.add(cF);
         });
       });
 
-      /* --- F. BỤC VINH DANH & RƯƠNG BÁU DÁT VÀNG PHÁT HÀO QUANG --- */
-      const altarBase = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 0.45, 24), marbleMat);
-      altarBase.position.set(0, 2.22, 6.2);
-      st5Group.add(altarBase);
+      /* --- F. RƯƠNG BÁU HOÀNG GIA DÁT VÀNG & HÀO QUANG KÉP VÀNG - ĐỎ RỰC RỠ TRÊN BÀN TIỆC --- */
+      const chestStand = new THREE.Mesh(new RoundedBoxGeometry(2.2, 0.22, 1.4, 4, 0.04), goldTrimMat);
+      chestStand.position.set(0, 3.03, 3.0);
+      st5Group.add(chestStand);
 
-      const chestMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, metalness: 0.9, roughness: 0.22, envMap: envTex });
-      const royalChest = new THREE.Mesh(new RoundedBoxGeometry(1.8, 1.2, 1.2, 4, 0.12), chestMat);
-      royalChest.position.set(0, 3.05, 6.2);
+      const chestMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, metalness: 0.92, roughness: 0.2, envMap: envTex });
+      const royalChest = new THREE.Mesh(new RoundedBoxGeometry(1.85, 1.2, 1.2, 4, 0.12), chestMat);
+      royalChest.position.set(0, 3.74, 3.0);
       royalChest.castShadow = true;
       st5Group.add(royalChest);
 
-      // Luồng hào quang ánh kim xoay tròn quanh rương báu
-      const chestHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending }));
-      chestHalo.scale.set(4.2, 4.2, 1);
-      chestHalo.position.set(0, 3.6, 6.2);
-      st5Group.add(chestHalo);
+      // Khóa và nẹp rương báu bằng vàng đính hồng ngọc
+      const chestBandMat = new THREE.MeshStandardMaterial({ color: 0xBE123C, roughness: 0.3, metalness: 0.5 });
+      const chestBand1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.24, 1.24), chestBandMat);
+      chestBand1.position.set(-0.52, 3.74, 3.0);
+      st5Group.add(chestBand1);
+      const chestBand2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.24, 1.24), chestBandMat);
+      chestBand2.position.set(0.52, 3.74, 3.0);
+      st5Group.add(chestBand2);
 
-      // Biển hiệu vương giả chào mừng
-      const partySignTex = signTexture('Tiệc Mừng 20/10 & Nhận Quà');
+      // HÀO QUANG KÉP VÀNG - ĐỎ CHÓI LỌI LIÊN TỤC GỢI Ý MỌI NGƯỜI ẤN VÀO RƯƠNG BÁU
+      chestAura1 = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xF59E0B, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending }));
+      chestAura1.scale.set(5.2, 5.2, 1);
+      chestAura1.position.set(0, 3.85, 3.0);
+      st5Group.add(chestAura1);
+
+      chestAura2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xEF4444, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending }));
+      chestAura2.scale.set(4.2, 4.2, 1);
+      chestAura2.position.set(0, 3.85, 3.0);
+      st5Group.add(chestAura2);
+
+      // Biển hiệu vương giả chào mừng mời mở rương báu
+      const partySignTex = signTexture('✨ CHẠM RƯƠNG BÁU • MỞ ĐẠI TIỆC 20/10 ✨');
       const partySignSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: partySignTex, transparent: true }));
-      partySignSprite.position.set(0, 6.8, 6.2);
-      partySignSprite.scale.set(4.8, 1.2, 1);
+      partySignSprite.position.set(0, 5.85, 3.0);
+      partySignSprite.scale.set(5.2, 1.3, 1);
       st5Group.add(partySignSprite);
 
       /* --- G. KHUNG TRANH EASEL 3 CHÂN GỖ MỸ THUẬT & HOA TƯƠI CẮM CHÂN ĐẾ (THEO ẢNH MẪU) --- */
@@ -2280,39 +2702,22 @@ export default function World3DExperience() {
       st5Group.add(sealGroup);
 
       /* --- I. HỆ THỐNG PHÁO HOA 3D HOÀNG GIA (CASTLE FIREWORKS) --- */
-      const triggerCastleFireworks = () => {
-        playSparkleSound();
-        const baseH = heightAt(st5Center.x, st5Center.z);
-        const burstOrigins = [
-          new THREE.Vector3(st5Center.x - 7, baseH + 26, st5Center.z - 4),
-          new THREE.Vector3(st5Center.x + 7, baseH + 28, st5Center.z - 4),
-          new THREE.Vector3(st5Center.x, baseH + 32, st5Center.z - 6)
-        ];
-        const fPalettes = [
-          [new THREE.Color(0xF43F5E), new THREE.Color(0xFDE68A), new THREE.Color(0xFFFFFF)],
-          [new THREE.Color(0x38BDF8), new THREE.Color(0xC084FC), new THREE.Color(0xFDE047)],
-          [new THREE.Color(0xBE123C), new THREE.Color(0xE11D48), new THREE.Color(0xFDE68A)]
-        ];
-        burstOrigins.forEach((bPos, bi) => {
-          const pal = fPalettes[bi];
-          for (let p = 0; p < 50; p++) {
-            const th = rand() * Math.PI * 2;
-            const ph = Math.acos(2 * rand() - 1);
-            const spd = 5.0 + rand() * 9.0;
-            const vel = new THREE.Vector3(
-              Math.sin(ph) * Math.cos(th) * spd,
-              Math.cos(ph) * spd + 2.5,
-              Math.sin(ph) * Math.sin(th) * spd
-            );
-            fireworksList.push({
-              pos: bPos.clone().add(new THREE.Vector3((rand() - 0.5) * 1.5, (rand() - 0.5) * 1.5, (rand() - 0.5) * 1.5)),
-              vel,
-              color: pal[Math.floor(rand() * pal.length)].clone(),
-              life: 1.0,
-              decay: 0.45 + rand() * 0.35
-            });
+      triggerCastleFireworks = () => {
+        getAC(); // Kích hoạt WebAudio từ tương tác người dùng
+        const cx = st5Center.x, cz = st5Center.z;
+        const volley = (count) => {
+          for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+              launchRocket(cx + (rand() - 0.5) * 32, cz - 6 + (rand() - 0.5) * 14, 38 + rand() * 12);
+            }, i * (120 + rand() * 180));
           }
-        });
+        };
+        // 12 đợt bắn liên tiếp, mỗi đợt 1-3 quả pháo bay lên từ thung lũng
+        for (let w = 0; w < 12; w++) {
+          setTimeout(() => volley(1 + Math.floor(rand() * 3)), w * 800);
+        }
+        // Loạt Finale rực rỡ nhất: 10 quả pháo đồng loạt khai hỏa sau 11s!
+        setTimeout(() => volley(10), 11000);
       };
 
       scene.add(st5Group);
@@ -2322,12 +2727,36 @@ export default function World3DExperience() {
         triggerCastleFireworks();
         setActivePartyCardModal(true);
         confetti({
-          particleCount: 140,
-          spread: 120,
+          particleCount: 160,
+          spread: 130,
           origin: { y: 0.5 },
           colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#BE123C']
         });
-        showToast('💐 Đang mở cổng Tiệc Mừng 20/10 & xuất thiệp Retina 2x!');
+        showToast('💐 Đang mở rương báu & xuất thiệp chúc mừng Retina 2x!');
+      };
+
+      const onCakeClick = () => {
+        soundClink();
+        triggerCastleFireworks();
+        confetti({
+          particleCount: 130,
+          spread: 100,
+          origin: { y: 0.5 },
+          colors: ['#FDE68A', '#FDA4AF', '#BE123C', '#FFF1F2']
+        });
+        showToast('🎂 Đã cắt bánh đại tiệc 20/10! Chúc chị em mãi trẻ trung, rạng ngời và ngập tràn hạnh phúc!');
+      };
+
+      const onChampagneClick = () => {
+        soundClink();
+        triggerCastleFireworks();
+        confetti({
+          particleCount: 140,
+          spread: 110,
+          origin: { y: 0.52 },
+          colors: ['#F59E0B', '#FDE68A', '#FFFFFF', '#BE123C']
+        });
+        showToast('🥂 Nâng ly Champagne hảo hạng chúc mừng phái đẹp TechCorp ngày 20/10!');
       };
 
       const onEaselClick = () => {
@@ -2356,14 +2785,18 @@ export default function World3DExperience() {
 
       interactiveMeshes.push({ mesh: royalChest, onClick: onPartyClick });
       interactiveMeshes.push({ mesh: banquetTable, onClick: onPartyClick });
+      interactiveMeshes.push({ mesh: cakeStand, onClick: onCakeClick });
+      interactiveMeshes.push({ mesh: standRiser, onClick: onChampagneClick });
       interactiveMeshes.push({ mesh: partySignSprite, onClick: onPartyClick });
       interactiveMeshes.push({ mesh: artBoard, onClick: onEaselClick });
       interactiveMeshes.push({ mesh: waxSealMesh, onClick: onWaxSealClick });
 
-      // Vị trí camera vàng: Đứng lùi 24.0m, cao 8.5m bao quát toàn cảnh đại tiệc và lâu đài hoàng gia tráng lệ
+      // Vị trí camera vàng: Đứng ngay trên thảm đỏ sân thượng (cách 5.4m, cao 3.8m) ngắm trọn vẹn toàn bộ bàn đại tiệc
+      const camLocal = new THREE.Vector3(0, 3.8, 8.4);
+      const tgtLocal = new THREE.Vector3(0, 3.3, 3.0);
       stationCameraPositions[5] = {
-        targetPos: st5Center.clone().add(new THREE.Vector3(0, 4.8, 0)),
-        camPos: st5Center.clone().add(norm.clone().multiplyScalar(24.0)).add(new THREE.Vector3(0, 8.5, 0))
+        targetPos: tgtLocal.applyEuler(st5Group.rotation).add(st5Group.position),
+        camPos: camLocal.applyEuler(st5Group.rotation).add(st5Group.position)
       };
     }
 
@@ -2679,34 +3112,22 @@ export default function World3DExperience() {
       lastVan.copy(vanPos);
       lastYaw = yaw;
 
-      /* --- 7. Cập nhật Pháo hoa 3D Lâu Đài --- */
-      if (fireworksList.length > 0) {
-        for (let i = fireworksList.length - 1; i >= 0; i--) {
-          const fw = fireworksList[i];
-          fw.life -= dt * fw.decay;
-          if (fw.life <= 0) {
-            fireworksList.splice(i, 1);
-            continue;
-          }
-          fw.vel.y -= 7.8 * dt; // Trọng lực rơi
-          fw.pos.addScaledVector(fw.vel, dt);
-        }
-        for (let i = 0; i < FW_MAX; i++) {
-          if (i < fireworksList.length) {
-            const fw = fireworksList[i];
-            fwPos[i * 3] = fw.pos.x;
-            fwPos[i * 3 + 1] = fw.pos.y;
-            fwPos[i * 3 + 2] = fw.pos.z;
-            const b = fw.life * 1.5;
-            fwCol[i * 3] = fw.color.r * b;
-            fwCol[i * 3 + 1] = fw.color.g * b;
-            fwCol[i * 3 + 2] = fw.color.b * b;
-          } else {
-            fwPos[i * 3 + 1] = -999;
-          }
-        }
-        fwGeo.attributes.position.needsUpdate = true;
-        fwGeo.attributes.color.needsUpdate = true;
+      /* --- 7. Cập nhật Hệ Thống Pháo Hoa 3D Đa Tầng Bay & Nổ Chuyên Nghiệp --- */
+      updateFireworks(dt);
+
+      /* --- 8. Hào quang vàng - đỏ chói lọi nhấp nháy liên tục ở Rương Báu & Bánh Kem --- */
+      if (chestAura1 && chestAura2) {
+        const p1 = Math.sin(elapsed * 5.2);
+        const p2 = Math.cos(elapsed * 4.4);
+        chestAura1.scale.setScalar(5.0 + p1 * 1.2);
+        chestAura1.material.opacity = 0.75 + p1 * 0.25;
+        chestAura2.scale.setScalar(4.0 + p2 * 1.0);
+        chestAura2.material.opacity = 0.85 + p2 * 0.15;
+      }
+      if (cakeAura) {
+        const cp = Math.sin(elapsed * 5.8);
+        cakeAura.scale.setScalar(4.2 + cp * 0.9);
+        cakeAura.material.opacity = 0.75 + cp * 0.25;
       }
 
       controls.autoRotate = autoRotateRef.current;
