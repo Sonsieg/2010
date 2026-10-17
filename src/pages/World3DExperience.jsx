@@ -63,6 +63,17 @@ export default function World3DExperience() {
   const autoRotateRef = useRef(false);
   autoRotateRef.current = autoRotate;
 
+  // Guided tour pulse state: sau 8.5s tại mỗi trạm, nút "Trạm Tiếp Theo" nhấp nháy dẫn dắt người xem
+  const [shouldPulseNext, setShouldPulseNext] = useState(false);
+
+  useEffect(() => {
+    setShouldPulseNext(false);
+    const timer = setTimeout(() => {
+      setShouldPulseNext(true);
+    }, 8500);
+    return () => clearTimeout(timer);
+  }, [activeStationIndex]);
+
   // Phát hiện thiết bị di động / màn hình nhỏ để tối ưu chỉ dẫn thao tác cảm ứng
   const [isMobileScreen, setIsMobileScreen] = useState(() => {
     return typeof window !== 'undefined' ? (window.innerWidth <= 768 || 'ontouchstart' in window) : false;
@@ -120,7 +131,10 @@ export default function World3DExperience() {
     lidMesh: null,
     butterflies: [],
     balloons: [],
-    openProgress: 0
+    openProgress: 0,
+    crystalHeart: null,
+    heartHalo: null,
+    welcomeSign: null
   });
 
   // Tải danh sách thư riêng
@@ -1211,6 +1225,13 @@ export default function World3DExperience() {
       floatingItems.push({ ...it, ...def, baseV: new THREE.Vector3(...def.base) });
     });
 
+    // Biển hiệu 3D phát sáng chỉ dẫn mở thư trên nóc cỗ xe hoa
+    const vanSignTex = signTexture('Chạm Mở Hòm Thư Mật 💌');
+    const vanSignSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: vanSignTex, transparent: true }));
+    vanSignSprite.position.set(0, 3.8, -0.6);
+    vanSignSprite.scale.set(4.4, 1.1, 1);
+    vanRoot.add(vanSignSprite);
+
     scene.add(vanRoot);
 
     /* ---------- Vọng Lâu (Gazebo) bên vệ đường gần xe hoa ---------- */
@@ -1285,6 +1306,29 @@ export default function World3DExperience() {
     /* ================================================================== */
     const interactiveMeshes = [];
     const stationCameraPositions = {};
+
+    /* --- HỆ THỐNG PHÁO HOA 3D HOÀNG GIA (CASTLE FIREWORKS) --- */
+    const FW_MAX = 240;
+    const fwPos = new Float32Array(FW_MAX * 3);
+    const fwCol = new Float32Array(FW_MAX * 3);
+    for (let i = 0; i < FW_MAX; i++) {
+      fwPos[i * 3 + 1] = -999;
+    }
+    const fwGeo = new THREE.BufferGeometry();
+    fwGeo.setAttribute('position', new THREE.BufferAttribute(fwPos, 3));
+    fwGeo.setAttribute('color', new THREE.BufferAttribute(fwCol, 3));
+    const fwMat = new THREE.PointsMaterial({
+      size: 0.85,
+      map: glowTex,
+      vertexColors: true,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const fwPoints = new THREE.Points(fwGeo, fwMat);
+    fwPoints.frustumCulled = false;
+    scene.add(fwPoints);
+    const fireworksList = [];
 
     /* ------------------------------------------------------------------ */
     /*  1. TRẠM 0: HỘP QUÀ HOÀNG GIA (Mở nắp, bướm & bóng bay ra)        */
@@ -1400,6 +1444,47 @@ export default function World3DExperience() {
       }
       giftAnimationRef.current.balloons = balloonObjs;
 
+      // Trái Tim Pha Lê Phát Sáng (Crystal Heart Hologram) bay vút lên từ lòng hộp quà
+      const crystalHeartGeo = makeHeartGeometry(0.55, 0.2);
+      const crystalHeartMat = new THREE.MeshPhysicalMaterial({
+        color: 0xFF2A55,
+        roughness: 0.12,
+        metalness: 0.2,
+        transmission: 0.75,
+        thickness: 0.6,
+        emissive: 0xBE123C,
+        emissiveIntensity: 1.4,
+        envMap: envTex
+      });
+      const crystalHeart = new THREE.Mesh(crystalHeartGeo, crystalHeartMat);
+      crystalHeart.position.set(0, 1.2, 0);
+      crystalHeart.visible = false;
+      st0Group.add(crystalHeart);
+      giftAnimationRef.current.crystalHeart = crystalHeart;
+
+      // Hào quang vàng kim lung linh quanh trái tim
+      const heartHalo = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTex,
+        color: 0xFDE68A,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      }));
+      heartHalo.scale.set(3.4, 3.4, 1);
+      heartHalo.position.set(0, 1.2, 0);
+      heartHalo.visible = false;
+      st0Group.add(heartHalo);
+      giftAnimationRef.current.heartHalo = heartHalo;
+
+      // Biển thông điệp chào mừng kỳ diệu
+      const welcomeSignTex = signTexture(`Chào Mừng ${sisterName} • Hành Trình 20/10 ✨`);
+      const welcomeSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: welcomeSignTex, transparent: true }));
+      welcomeSprite.position.set(0, 1.2, 0);
+      welcomeSprite.scale.set(5.6, 1.4, 1);
+      welcomeSprite.visible = false;
+      st0Group.add(welcomeSprite);
+      giftAnimationRef.current.welcomeSign = welcomeSprite;
+
       // Bảng chỉ dẫn trên hộp quà
       const giftSignTex = signTexture('Mở Hộp Quà 20/10');
       const giftSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: giftSignTex, transparent: true }));
@@ -1414,20 +1499,21 @@ export default function World3DExperience() {
         playSparkleSound();
         giftAnimationRef.current.opened = true;
         confetti({
-          particleCount: 120,
-          spread: 100,
+          particleCount: 140,
+          spread: 110,
           origin: { y: 0.55 },
           colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#E11D48']
         });
-        showToast('🎁 Hộp quà đã mở! Đang đưa bạn đến Thư Ngỏ Tri Ân...');
+        showToast(`🎁 Điều kỳ diệu đã xuất hiện! Dành tặng riêng đóa hoa ${sisterName}...`);
         setTimeout(() => {
           flyToStation(1); // Tự động chuyển chặng 2
-        }, 1600);
+        }, 3400);
       };
 
       interactiveMeshes.push({ mesh: bodyBox, onClick: onGiftClick });
       interactiveMeshes.push({ mesh: lidBox, onClick: onGiftClick });
       interactiveMeshes.push({ mesh: giftSprite, onClick: onGiftClick });
+      interactiveMeshes.push({ mesh: crystalHeart, onClick: onGiftClick });
 
       // Lưu góc camera bao quát toàn cảnh quảng trường và hộp quà hoàng gia
       stationCameraPositions[0] = {
@@ -2030,13 +2116,213 @@ export default function World3DExperience() {
       partySignSprite.scale.set(4.8, 1.2, 1);
       st5Group.add(partySignSprite);
 
+      /* --- G. KHUNG TRANH EASEL 3 CHÂN GỖ MỸ THUẬT & HOA TƯƠI CẮM CHÂN ĐẾ (THEO ẢNH MẪU) --- */
+      const easelGroup = new THREE.Group();
+      easelGroup.position.set(-4.5, 2.0, 5.2);
+      easelGroup.rotation.y = 0.28;
+
+      const easelWoodMat = new THREE.MeshStandardMaterial({
+        color: 0x8C5E3C, // Gỗ sồi ấm áp tự nhiên
+        roughness: 0.65,
+        metalness: 0.05
+      });
+
+      // 1. Chân trước bên trái & bên phải
+      const legGeo = new THREE.BoxGeometry(0.065, 3.8, 0.065);
+      const leftLeg = new THREE.Mesh(legGeo, easelWoodMat);
+      leftLeg.position.set(-0.68, 1.85, 0.12);
+      leftLeg.rotation.z = -0.15;
+      leftLeg.rotation.x = -0.08;
+      easelGroup.add(leftLeg);
+
+      const rightLeg = new THREE.Mesh(legGeo, easelWoodMat);
+      rightLeg.position.set(0.68, 1.85, 0.12);
+      rightLeg.rotation.z = 0.15;
+      rightLeg.rotation.x = -0.08;
+      easelGroup.add(rightLeg);
+
+      // 2. Chân chống đỡ phía sau (Tripod mast)
+      const backLeg = new THREE.Mesh(new THREE.BoxGeometry(0.065, 3.6, 0.065), easelWoodMat);
+      backLeg.position.set(0, 1.75, -0.75);
+      backLeg.rotation.x = 0.28;
+      easelGroup.add(backLeg);
+
+      // 3. Thanh ngang đỡ tranh & Cột sống đứng kẹp tranh
+      const shelf = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.07, 0.14), easelWoodMat);
+      shelf.position.set(0, 1.45, 0.22);
+      easelGroup.add(shelf);
+
+      const centerMast = new THREE.Mesh(new THREE.BoxGeometry(0.065, 4.0, 0.065), easelWoodMat);
+      centerMast.position.set(0, 1.95, -0.02);
+      centerMast.rotation.x = -0.08;
+      easelGroup.add(centerMast);
+
+      const topClamp = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.12), easelWoodMat);
+      topClamp.position.set(0, 3.42, 0.08);
+      easelGroup.add(topClamp);
+
+      // 4. Tấm bảng tranh nghệ thuật (Canvas Board tỷ lệ dọc thanh lịch y hệt ảnh mẫu)
+      const boardMat = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.85 });
+      const artBoard = new THREE.Mesh(new RoundedBoxGeometry(1.85, 2.55, 0.05, 3, 0.02), boardMat);
+      artBoard.position.set(0, 2.45, 0.16);
+      artBoard.rotation.x = -0.08;
+      easelGroup.add(artBoard);
+
+      // Lồng ảnh chân dung vinh danh / ảnh kỷ niệm với viền nghệ thuật
+      const canvasLoader = new THREE.TextureLoader();
+      canvasLoader.load('/images.jpg', (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        const pMat = new THREE.MeshBasicMaterial({ map: tex });
+        pMat.polygonOffset = true;
+        pMat.polygonOffsetFactor = -1;
+        const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 2.05), pMat);
+        pMesh.position.set(0, 0.15, 0.035);
+        artBoard.add(pMesh);
+      });
+
+      // Chân bảng tranh: Dòng chữ thư pháp vinh danh
+      const captionCanvas = document.createElement('canvas');
+      captionCanvas.width = 512;
+      captionCanvas.height = 128;
+      const cG = captionCanvas.getContext('2d');
+      cG.fillStyle = '#FFFFFF';
+      cG.fillRect(0, 0, 512, 128);
+      cG.fillStyle = '#8C2F4B';
+      cG.font = 'italic bold 26px "Playfair Display", Georgia, serif';
+      cG.textAlign = 'center';
+      cG.fillText(`Đóa Hoa Rực Rỡ • ${sisterName}`, 256, 52);
+      cG.fillStyle = '#6B4226';
+      cG.font = '600 16px "Be Vietnam Pro", sans-serif';
+      cG.fillText('TECHCORP GALA TRIBUTE 20.10', 256, 88);
+
+      const captionTex = new THREE.CanvasTexture(captionCanvas);
+      captionTex.colorSpace = THREE.SRGBColorSpace;
+      const capMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 0.42), new THREE.MeshBasicMaterial({ map: captionTex }));
+      capMesh.position.set(0, -1.02, 0.035);
+      artBoard.add(capMesh);
+
+      // 5. CỤM HOA TƯƠI CẮM DƯỚI CHÂN GIÁ VẼ (Đúng theo ảnh bạn gửi!)
+      const baseFlowerGroup = new THREE.Group();
+      baseFlowerGroup.position.set(0, 0.15, 0.25);
+
+      const easelRosePal = [0xFFE4E6, 0xFDA4AF, 0xFFFAF0, 0xFBCFE8].map(h => new THREE.Color(h));
+      for (let r = 0; r < 14; r++) {
+        const rMesh = new THREE.Mesh(makeRoseHead(), new THREE.MeshStandardMaterial({
+          color: easelRosePal[r % easelRosePal.length],
+          roughness: 0.4,
+          side: THREE.DoubleSide
+        }));
+        const ra = -0.8 + (r / 13) * 1.6;
+        const rr = 0.4 + (r % 3) * 0.18;
+        rMesh.position.set(Math.sin(ra) * rr, 0.12 + (r % 4) * 0.15, Math.cos(ra) * rr * 0.6);
+        rMesh.rotation.set(-0.2 + (rand() - 0.5) * 0.4, rand() * Math.PI, 0.1);
+        rMesh.scale.setScalar(1.6 + (r % 3) * 0.3);
+        baseFlowerGroup.add(rMesh);
+      }
+
+      // Hoa ly trắng (White Calla Lilies)
+      for (let l = 0; l < 6; l++) {
+        const lily = new THREE.Group();
+        const petalLily = new THREE.Mesh(
+          new THREE.ConeGeometry(0.12, 0.42, 16, 1, true),
+          new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.3, side: THREE.DoubleSide })
+        );
+        petalLily.rotation.x = Math.PI + 0.3;
+        lily.add(petalLily);
+        const pistil = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.02, 0.35, 8), new THREE.MeshBasicMaterial({ color: 0xFDE047 }));
+        pistil.position.y = 0.05;
+        lily.add(pistil);
+        const la = -0.6 + (l / 5) * 1.2;
+        lily.position.set(Math.sin(la) * 0.65, 0.35 + (l % 3) * 0.2, Math.cos(la) * 0.4);
+        lily.rotation.set(-0.35, la, 0.2);
+        baseFlowerGroup.add(lily);
+      }
+
+      // Lá dương xỉ & lan xanh mướt uốn lượn dưới chân giá vẽ
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x2A6228, roughness: 0.6 });
+      for (let f = 0; f < 10; f++) {
+        const leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.55), leafMat);
+        leaf.position.set((f - 4.5) * 0.15, 0.2 + (f % 3) * 0.08, 0.1 + (f % 2) * 0.2);
+        leaf.rotation.set(-0.4, (f - 4.5) * 0.3, 0.2);
+        baseFlowerGroup.add(leaf);
+      }
+      easelGroup.add(baseFlowerGroup);
+      st5Group.add(easelGroup);
+
+      /* --- H. BỤC THƯ NGỎ THƯ PHÁP & CON DẤU SÁP ĐỎ 3D --- */
+      const sealGroup = new THREE.Group();
+      sealGroup.position.set(4.5, 2.0, 5.2);
+      sealGroup.rotation.y = -0.28;
+
+      const pedestalMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 1.35, 20), marbleMat);
+      pedestalMesh.position.y = 0.68;
+      sealGroup.add(pedestalMesh);
+
+      // Cuộn thư hoàng gia trải rộng
+      const scrollMesh = new THREE.Mesh(
+        new RoundedBoxGeometry(1.6, 0.08, 1.2, 4, 0.04),
+        new THREE.MeshStandardMaterial({ color: 0xFFFDF5, roughness: 0.75 })
+      );
+      scrollMesh.position.set(0, 1.4, 0);
+      sealGroup.add(scrollMesh);
+
+      // Con dấu sáp đỏ 3D hình tròn nổi chữ 20.10
+      const sealWaxMat = new THREE.MeshStandardMaterial({ color: 0xBE123C, roughness: 0.35, metalness: 0.15 });
+      const waxSealMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.08, 24), sealWaxMat);
+      waxSealMesh.position.set(0, 1.48, 0.2);
+      sealGroup.add(waxSealMesh);
+
+      const sealGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xFDE68A, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending }));
+      sealGlow.scale.set(1.4, 1.4, 1);
+      sealGlow.position.set(0, 1.55, 0.2);
+      sealGroup.add(sealGlow);
+
+      st5Group.add(sealGroup);
+
+      /* --- I. HỆ THỐNG PHÁO HOA 3D HOÀNG GIA (CASTLE FIREWORKS) --- */
+      const triggerCastleFireworks = () => {
+        playSparkleSound();
+        const baseH = heightAt(st5Center.x, st5Center.z);
+        const burstOrigins = [
+          new THREE.Vector3(st5Center.x - 7, baseH + 26, st5Center.z - 4),
+          new THREE.Vector3(st5Center.x + 7, baseH + 28, st5Center.z - 4),
+          new THREE.Vector3(st5Center.x, baseH + 32, st5Center.z - 6)
+        ];
+        const fPalettes = [
+          [new THREE.Color(0xF43F5E), new THREE.Color(0xFDE68A), new THREE.Color(0xFFFFFF)],
+          [new THREE.Color(0x38BDF8), new THREE.Color(0xC084FC), new THREE.Color(0xFDE047)],
+          [new THREE.Color(0xBE123C), new THREE.Color(0xE11D48), new THREE.Color(0xFDE68A)]
+        ];
+        burstOrigins.forEach((bPos, bi) => {
+          const pal = fPalettes[bi];
+          for (let p = 0; p < 50; p++) {
+            const th = rand() * Math.PI * 2;
+            const ph = Math.acos(2 * rand() - 1);
+            const spd = 5.0 + rand() * 9.0;
+            const vel = new THREE.Vector3(
+              Math.sin(ph) * Math.cos(th) * spd,
+              Math.cos(ph) * spd + 2.5,
+              Math.sin(ph) * Math.sin(th) * spd
+            );
+            fireworksList.push({
+              pos: bPos.clone().add(new THREE.Vector3((rand() - 0.5) * 1.5, (rand() - 0.5) * 1.5, (rand() - 0.5) * 1.5)),
+              vel,
+              color: pal[Math.floor(rand() * pal.length)].clone(),
+              life: 1.0,
+              decay: 0.45 + rand() * 0.35
+            });
+          }
+        });
+      };
+
       scene.add(st5Group);
 
       const onPartyClick = () => {
         playSparkleSound();
+        triggerCastleFireworks();
         setActivePartyCardModal(true);
         confetti({
-          particleCount: 110,
+          particleCount: 140,
           spread: 120,
           origin: { y: 0.5 },
           colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#BE123C']
@@ -2044,9 +2330,35 @@ export default function World3DExperience() {
         showToast('💐 Đang mở cổng Tiệc Mừng 20/10 & xuất thiệp Retina 2x!');
       };
 
+      const onEaselClick = () => {
+        playSparkleSound();
+        triggerCastleFireworks();
+        confetti({
+          particleCount: 100,
+          spread: 90,
+          origin: { y: 0.55 },
+          colors: ['#FDE68A', '#FDA4AF', '#FFFFFF', '#BE123C']
+        });
+        showToast(`👑 Bức họa vinh danh: Đóa hoa ngát hương ${sisterName}!`);
+      };
+
+      const onWaxSealClick = () => {
+        playLetterOpenSound();
+        triggerCastleFireworks();
+        confetti({
+          particleCount: 110,
+          spread: 90,
+          origin: { y: 0.5 },
+          colors: ['#BE123C', '#F43F5E', '#FDE68A', '#FFFFFF']
+        });
+        showToast('💌 Con dấu sáp đỏ 20.10 đã mở! Triệu đóa hồng gửi trao phái đẹp!');
+      };
+
       interactiveMeshes.push({ mesh: royalChest, onClick: onPartyClick });
       interactiveMeshes.push({ mesh: banquetTable, onClick: onPartyClick });
       interactiveMeshes.push({ mesh: partySignSprite, onClick: onPartyClick });
+      interactiveMeshes.push({ mesh: artBoard, onClick: onEaselClick });
+      interactiveMeshes.push({ mesh: waxSealMesh, onClick: onWaxSealClick });
 
       // Vị trí camera vàng: Đứng lùi 24.0m, cao 8.5m bao quát toàn cảnh đại tiệc và lâu đài hoàng gia tráng lệ
       stationCameraPositions[5] = {
@@ -2230,10 +2542,10 @@ export default function World3DExperience() {
         }
       });
 
-      /* --- 3. Animation Hộp Quà bung nắp & bướm bóng bay vọt --- */
+      /* --- 3. Animation Hộp Quà bung nắp, Trái tim pha lê & bướm vút bay --- */
       const giftAnim = giftAnimationRef.current;
       if (giftAnim.opened && giftAnim.openProgress < 1.0) {
-        giftAnim.openProgress = Math.min(1.0, giftAnim.openProgress + dt * 1.8);
+        giftAnim.openProgress = Math.min(1.0, giftAnim.openProgress + dt * 0.9);
         const prog = giftAnim.openProgress;
         const easeProg = 1 - Math.pow(1 - prog, 3);
 
@@ -2242,6 +2554,24 @@ export default function World3DExperience() {
           giftAnim.lidMesh.position.y = 2.25 + easeProg * 2.8;
           giftAnim.lidMesh.rotation.x = -easeProg * 1.1;
           giftAnim.lidMesh.rotation.z = easeProg * 0.35;
+        }
+
+        // Trái tim pha lê vút bay lên từ lòng hộp quà và tỏa hào quang
+        if (giftAnim.crystalHeart) {
+          giftAnim.crystalHeart.visible = true;
+          giftAnim.crystalHeart.position.y = 1.2 + easeProg * 3.4;
+          giftAnim.crystalHeart.rotation.y = elapsed * 2.5;
+          const beat = 1.0 + Math.sin(elapsed * 6) * 0.12;
+          giftAnim.crystalHeart.scale.setScalar(beat);
+        }
+        if (giftAnim.heartHalo) {
+          giftAnim.heartHalo.visible = true;
+          giftAnim.heartHalo.position.y = 1.2 + easeProg * 3.4;
+          giftAnim.heartHalo.scale.setScalar(3.2 + Math.sin(elapsed * 4) * 0.5);
+        }
+        if (giftAnim.welcomeSign) {
+          giftAnim.welcomeSign.visible = true;
+          giftAnim.welcomeSign.position.y = 1.2 + easeProg * 4.9;
         }
 
         // Bướm bay vút lên bầu trời
@@ -2258,6 +2588,12 @@ export default function World3DExperience() {
           bm.mesh.visible = true;
           bm.mesh.position.lerpVectors(bm.initialPos, bm.targetOffset, easeProg);
         });
+      } else if (giftAnim.opened) {
+        if (giftAnim.crystalHeart) {
+          giftAnim.crystalHeart.rotation.y = elapsed * 2.5;
+          const beat = 1.0 + Math.sin(elapsed * 6) * 0.1;
+          giftAnim.crystalHeart.scale.setScalar(beat);
+        }
       }
 
       /* --- 4. Bụi sao lấp lánh (Sparkle trail) đuôi xe --- */
@@ -2329,11 +2665,49 @@ export default function World3DExperience() {
         const dyaw = normAngle(yaw - lastYaw);
         camTmpA.copy(camera.position).sub(lastVan).applyAxisAngle(Y_AXIS, dyaw);
         camTmpB.copy(controls.target).sub(lastVan).applyAxisAngle(Y_AXIS, dyaw);
+
+        // THUẬT TOÁN TỰ ĐỔI GÓC QUAY TRÁNH BỊ LÂU ĐÀI CHE KHUẤT (Auto-Pan / Drone Altitude):
+        if (vanU >= 0.78 && vanU <= 0.94) {
+          const prox = Math.sin(((vanU - 0.78) / 0.16) * Math.PI);
+          camTmpA.y += prox * 5.2; // Nâng camera cao thêm 5.2m góc ngắm drone bao quát
+          camTmpA.x = THREE.MathUtils.lerp(camTmpA.x, -6.2, prox * 0.7); // Chếch sang hướng thung lũng mở, không bị tháp che
+        }
+
         camera.position.copy(vanPos).add(camTmpA);
         controls.target.copy(vanPos).add(camTmpB);
       }
       lastVan.copy(vanPos);
       lastYaw = yaw;
+
+      /* --- 7. Cập nhật Pháo hoa 3D Lâu Đài --- */
+      if (fireworksList.length > 0) {
+        for (let i = fireworksList.length - 1; i >= 0; i--) {
+          const fw = fireworksList[i];
+          fw.life -= dt * fw.decay;
+          if (fw.life <= 0) {
+            fireworksList.splice(i, 1);
+            continue;
+          }
+          fw.vel.y -= 7.8 * dt; // Trọng lực rơi
+          fw.pos.addScaledVector(fw.vel, dt);
+        }
+        for (let i = 0; i < FW_MAX; i++) {
+          if (i < fireworksList.length) {
+            const fw = fireworksList[i];
+            fwPos[i * 3] = fw.pos.x;
+            fwPos[i * 3 + 1] = fw.pos.y;
+            fwPos[i * 3 + 2] = fw.pos.z;
+            const b = fw.life * 1.5;
+            fwCol[i * 3] = fw.color.r * b;
+            fwCol[i * 3 + 1] = fw.color.g * b;
+            fwCol[i * 3 + 2] = fw.color.b * b;
+          } else {
+            fwPos[i * 3 + 1] = -999;
+          }
+        }
+        fwGeo.attributes.position.needsUpdate = true;
+        fwGeo.attributes.color.needsUpdate = true;
+      }
 
       controls.autoRotate = autoRotateRef.current;
       controls.autoRotateSpeed = 1.2;
@@ -2545,6 +2919,26 @@ export default function World3DExperience() {
         {/* Guide Prompt at Bottom Center (Chỉ hiển thị khi không ẩn HUD) */}
         {!isHudHidden && (
           <div className="hud-interaction-guide-group">
+            {/* Callout Banner đặc biệt khi đang ở Trạm 3 (Cỗ Xe Hoa 20/10) */}
+            {activeStationIndex === 3 && (
+              <div
+                className="hud-van-guide-banner"
+                onClick={() => {
+                  playLetterOpenSound();
+                  setIsMailboxOpen(true);
+                }}
+                title="Bấm để mở hòm thư và đọc lời chúc từ anh em!"
+              >
+                <span className="van-guide-icon">💌</span>
+                <span className="van-guide-text">
+                  <strong>Bạn đang du hành cùng Cỗ Xe Hoa 20/10!</strong>
+                  <br />
+                  Chạm trực tiếp vào <em>Hòm Thư Bưu Điện</em> hoặc <em>Trái Tim trên xe</em> để mở phong thư bí mật!
+                </span>
+                <span className="van-guide-btn">Mở Thư Ngay ➔</span>
+              </div>
+            )}
+
             <div
               className="cart-floating-indicator"
               style={{ cursor: 'default', userSelect: 'none' }}
@@ -2596,9 +2990,12 @@ export default function World3DExperience() {
                 : 0;
               flyToStation(nextIndex);
             }}
-            className="btn-rose"
+            className={`btn-rose ${shouldPulseNext ? 'pulse-guide-attention' : ''}`}
             style={{ fontSize: '0.98rem', padding: '12px 26px' }}
           >
+            {shouldPulseNext && (
+              <span className="pulse-guide-tag">✨ Tiếp tục theo kịch bản!</span>
+            )}
             <span>
               {typeof activeStationIndex === 'number' && STATIONS[(activeStationIndex + 1) % STATIONS.length]
                 ? `Trạm Tiếp Theo: ${STATIONS[(activeStationIndex + 1) % STATIONS.length].name} ➔`

@@ -1739,4 +1739,94 @@
   }
 }
 
+/* ==========================================================
+   GUIDED TOUR PULSE & VAN CALLOUT STYLES
+   ========================================================== */
+@keyframes pulseHeartbeatGlow {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7), 0 8px 24px rgba(244, 63, 94, 0.4);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 25px 8px rgba(253, 230, 138, 0.9), 0 12px 30px rgba(225, 29, 72, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0), 0 8px 24px rgba(244, 63, 94, 0.4);
+  }
+}
+
+.pulse-guide-attention {
+  animation: pulseHeartbeatGlow 1.35s infinite ease-in-out !important;
+  border: 2px solid #FDE68A !important;
+  position: relative;
+}
+
+.pulse-guide-tag {
+  position: absolute;
+  top: -34px;
+  right: 12px;
+  background: linear-gradient(135deg, #BE123C, #881337);
+  color: #FDE68A;
+  border: 1.5px solid rgba(253, 230, 138, 0.7);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  animation: bounceMini 1.2s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes bounceMini {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Callout banner for Station 3 (Đại Lộ Xe Hoa) */
+.hud-van-guide-banner {
+  background: linear-gradient(135deg, rgba(140, 47, 75, 0.95), rgba(76, 17, 48, 0.96));
+  border: 1.5px solid var(--champagne-gold);
+  border-radius: 16px;
+  padding: 10px 18px;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(244, 63, 94, 0.4);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  animation: pulseHeartbeatGlow 2.5s infinite ease-in-out;
+  max-width: 90vw;
+  margin-bottom: 6px;
+  transition: transform 0.2s ease;
+}
+.hud-van-guide-banner:hover {
+  transform: scale(1.02);
+}
+.hud-van-guide-banner .van-guide-icon {
+  font-size: 1.8rem;
+}
+.hud-van-guide-banner .van-guide-text {
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: #FAF3EA;
+}
+.hud-van-guide-banner .van-guide-text strong {
+  color: #FDE68A;
+}
+.hud-van-guide-banner .van-guide-btn {
+  background: linear-gradient(135deg, #F43F5E, #E11D48);
+  color: #FFF;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
+}
+
+
 
