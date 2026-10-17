@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 
 export default function WishModal() {
-  const { activeModalWish, setActiveModalWish, wishes } = useApp();
+  const { activeModalWish, setActiveModalWish, wishes, markWishOpened } = useApp();
   const cardRef = useRef(null);
   const [tiltStyle, setTiltStyle] = useState({});
 
@@ -43,6 +43,9 @@ export default function WishModal() {
     const curIdx = wishes.findIndex(w => w.id === activeModalWish.id);
     const nextWish = wishes[(curIdx + 1) % wishes.length];
     setActiveModalWish(nextWish);
+    if (nextWish) {
+      markWishOpened(nextWish.id);
+    }
   };
 
   return (

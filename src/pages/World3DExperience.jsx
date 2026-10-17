@@ -913,6 +913,20 @@ export default function World3DExperience() {
       return out;
     };
 
+    // Hàm rải hoa toàn cảnh khắp toàn bộ thế giới 240x240 (đồi núi, bình nguyên, chân trời)
+    const scatterLandscape = (count, minDistFromRoad = 2.4, maxExtent = 115) => {
+      const out = [];
+      let guard = 0;
+      while (out.length < count && guard++ < count * 8) {
+        const x = (rand() - 0.5) * 2 * maxExtent;
+        const z = (rand() - 0.5) * 2 * maxExtent;
+        const d = distToPath(x, z);
+        if (d < minDistFromRoad) continue;
+        out.push({ x, z, d, y: heightAt(x, z, d) });
+      }
+      return out;
+    };
+
     /* ---------- Ground Mesh ---------- */
     const groundGeo = new THREE.PlaneGeometry(240, 240, lowPower ? 110 : 180, lowPower ? 110 : 180);
     groundGeo.rotateX(-Math.PI / 2);
@@ -992,20 +1006,20 @@ export default function World3DExperience() {
       scene.add(m);
     }
 
-    /* ---------- Grass Instanced Fields ---------- */
+    /* ---------- Grass Instanced Fields (Dịu nhẹ làm nền, không lấn át hoa) ---------- */
     const bladeGeo = makeBlade();
     const dummy = new THREE.Object3D();
     const tint = new THREE.Color();
     {
-      const GN = Math.floor(48000 * Q);
-      const pts = scatter(GN, 2.0, 26, 1.8);
+      const GN = Math.floor(13500 * Q); // Giảm cỏ từ 48.000 xuống 13.500 để nhường trọn vẻ đẹp cho hoa
+      const pts = scatter(GN, 2.0, 32, 1.4);
       const mat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, side: THREE.DoubleSide }), timeU, 0.3);
       const grass = new THREE.InstancedMesh(bladeGeo, mat, pts.length);
       pts.forEach((p, i) => {
         dummy.position.set(p.x, p.y, p.z);
         dummy.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, 0);
-        const h = 0.7 + rand() * 1.1;
-        dummy.scale.set(0.9 + rand() * 0.6, h, 1);
+        const h = 0.65 + rand() * 0.9;
+        dummy.scale.set(0.85 + rand() * 0.5, h, 1);
         dummy.updateMatrix();
         grass.setMatrixAt(i, dummy.matrix);
         tint.setRGB(0.75 + rand() * 0.4, 0.85 + rand() * 0.3, 0.65 + rand() * 0.25);
@@ -1015,51 +1029,73 @@ export default function World3DExperience() {
       scene.add(grass);
     }
 
-    /* ---------- 4 Real Flower Species (Roses, Tulips, Daisies, Lavender) ---------- */
+    /* ---------- 4 Real Flower Species (Hơn 23.000 đóa hoa phủ trọn đồi núi & chân trời) ---------- */
     const roseHeadBase = makeRoseHead();
     const species = [
       {
-        count: 1400,
-        stemH: 0.7,
+        name: 'Roses',
+        count: 5500,
+        stemH: 0.72,
         head: roseHeadBase.clone(),
         leaves: true,
         tint: true,
-        pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4],
-        sc: [1.2, 1.9]
+        pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4, 0xff2442],
+        sc: [1.3, 2.1]
       },
       {
-        count: 1500,
-        stemH: 0.62,
+        name: 'Tulips',
+        count: 5500,
+        stemH: 0.64,
         head: makeTulipHead(),
         leaves: true,
         tint: true,
-        pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9],
-        sc: [1.3, 2.0]
+        pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9, 0xfacc15],
+        sc: [1.4, 2.2]
       },
-      { count: 1800, stemH: 0.5, head: makeDaisyHead(), leaves: false, tint: false, pal: null, sc: [1.1, 1.8] },
+      { 
+        name: 'Daisies',
+        count: 6500, 
+        stemH: 0.52, 
+        head: makeDaisyHead(), 
+        leaves: false, 
+        tint: false, 
+        pal: null, 
+        sc: [1.2, 2.0] 
+      },
       {
-        count: 1400,
-        stemH: 0.95,
+        name: 'Lavender',
+        count: 5500,
+        stemH: 0.98,
         head: makeLavenderHead(),
         leaves: true,
         tint: true,
-        pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe],
-        sc: [1.2, 1.9]
+        pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe, 0x8b5cf6, 0xa855f7],
+        sc: [1.3, 2.2]
       }
     ];
+
     species.forEach((sp, si) => {
-      const n = Math.floor(sp.count * Q);
-      const pts = scatter(n, 2.0, 24, 1.5);
+      // Phân bổ: 30% hoa tập trung ven đường và quảng trường, 70% hoa trải thảm khắp núi đồi đến tận chân trời
+      const nTotal = Math.floor(sp.count * Q);
+      const nNear = Math.floor(nTotal * 0.3);
+      const nFar = nTotal - nNear;
+      const ptsNear = scatter(nNear, 2.0, 26, 1.2);
+      const ptsFar = scatterLandscape(nFar, 2.4, 115);
+      const pts = ptsNear.concat(ptsFar);
+
       const stemGeo = makeStem(sp.stemH, sp.leaves);
       sp.head.translate(0, sp.stemH, 0);
       const stemMat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }), timeU, 0.2);
       const headMat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, side: THREE.DoubleSide }), timeU, 0.2);
       const stems = new THREE.InstancedMesh(stemGeo, stemMat, pts.length);
       const heads = new THREE.InstancedMesh(sp.head, headMat, pts.length);
+
       pts.forEach((p, i) => {
         dummy.position.set(p.x, p.y, p.z);
         dummy.rotation.set((rand() - 0.5) * 0.35, rand() * Math.PI * 2, (rand() - 0.5) * 0.35);
-        const s = sp.sc[0] + rand() * (sp.sc[1] - sp.sc[0]);
+        // Hoa ở xa phóng to hơn một chút để tạo biển hoa rực rỡ nhìn từ đằng xa không bị trống
+        const distScale = p.d > 22 ? 1.35 : 1.0;
+        const s = (sp.sc[0] + rand() * (sp.sc[1] - sp.sc[0])) * distScale;
         dummy.scale.setScalar(s);
         dummy.updateMatrix();
         stems.setMatrixAt(i, dummy.matrix);
@@ -1889,10 +1925,10 @@ export default function World3DExperience() {
       interactiveMeshes.push({ mesh: lidBox, onClick: onGiftClick });
       interactiveMeshes.push({ mesh: giftSprite, onClick: onGiftClick });
 
-      // Lưu góc camera nhìn thẳng mặt trước hộp quà
+      // Lưu góc camera bao quát toàn cảnh quảng trường và hộp quà hoàng gia
       stationCameraPositions[0] = {
-        targetPos: st0Center.clone().add(new THREE.Vector3(0, 1.8, 0)),
-        camPos: st0Center.clone().add(norm.clone().multiplyScalar(5.8)).add(new THREE.Vector3(0, 2.2, 0))
+        targetPos: st0Center.clone().add(new THREE.Vector3(0, 1.6, 0)),
+        camPos: st0Center.clone().add(norm.clone().multiplyScalar(10.5)).add(new THREE.Vector3(0, 4.2, 0))
       };
     }
 
@@ -2047,10 +2083,10 @@ export default function World3DExperience() {
         }
       });
 
-      // Điểm camera đứng TRƯỚC MẶT CHÍNH DIỆN tấm thiệp
+      // Điểm camera lùi xa bao quát trọn vẹn toàn bộ tấm thiệp và bệ hoa hoàng gia
       stationCameraPositions[1] = {
         targetPos: st1Center.clone().add(new THREE.Vector3(0, 2.2, 0)),
-        camPos: st1Center.clone().add(norm.clone().multiplyScalar(5.5)).add(new THREE.Vector3(0, 2.2, 0))
+        camPos: st1Center.clone().add(norm.clone().multiplyScalar(10.2)).add(new THREE.Vector3(0, 3.8, 0))
       };
     }
 
@@ -2129,10 +2165,10 @@ export default function World3DExperience() {
 
       scene.add(st2Group);
 
-      // Điểm camera đứng góc thoáng đãng, lùi xa bao quát trọn vẹn cụm bóng bay
+      // Điểm camera đứng góc đại cảnh, lùi xa bao quát cụm bóng bay và biển hoa
       stationCameraPositions[2] = {
-        targetPos: st2Center.clone().add(new THREE.Vector3(0, 2.2, 0)),
-        camPos: st2Center.clone().add(norm.clone().multiplyScalar(8.2)).add(new THREE.Vector3(0, 3.0, 0))
+        targetPos: st2Center.clone().add(new THREE.Vector3(0, 2.6, 0)),
+        camPos: st2Center.clone().add(norm.clone().multiplyScalar(14.5)).add(new THREE.Vector3(0, 5.5, 0))
       };
     }
 
@@ -2209,9 +2245,10 @@ export default function World3DExperience() {
         }
       });
 
+      // Vị trí camera rạp chiếu phim ngoài trời: Lùi xa ngắm trọn màn hình và khán đài
       stationCameraPositions[4] = {
         targetPos: st4Center.clone().add(new THREE.Vector3(0, 2.5, 0)),
-        camPos: st4Center.clone().add(norm.clone().multiplyScalar(6.5)).add(new THREE.Vector3(0, 2.8, 0))
+        camPos: st4Center.clone().add(norm.clone().multiplyScalar(12.8)).add(new THREE.Vector3(0, 4.8, 0))
       };
     }
 
@@ -2507,10 +2544,10 @@ export default function World3DExperience() {
       interactiveMeshes.push({ mesh: banquetTable, onClick: onPartyClick });
       interactiveMeshes.push({ mesh: partySignSprite, onClick: onPartyClick });
 
-      // Vị trí camera vàng: Đứng lùi 16.5m, cao 5.5m bao quát trọn vẹn tòa lâu đài 24m tráng lệ
+      // Vị trí camera vàng: Đứng lùi 24.0m, cao 8.5m bao quát toàn cảnh đại tiệc và lâu đài hoàng gia tráng lệ
       stationCameraPositions[5] = {
-        targetPos: st5Center.clone().add(new THREE.Vector3(0, 4.2, 0)),
-        camPos: st5Center.clone().add(norm.clone().multiplyScalar(16.5)).add(new THREE.Vector3(0, 5.5, 0))
+        targetPos: st5Center.clone().add(new THREE.Vector3(0, 4.8, 0)),
+        camPos: st5Center.clone().add(norm.clone().multiplyScalar(24.0)).add(new THREE.Vector3(0, 8.5, 0))
       };
     }
 

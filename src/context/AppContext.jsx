@@ -121,6 +121,12 @@ export function AppProvider({ children, navigate }) {
     });
   };
 
+  // Đánh dấu lời chúc đã mở khi chuyển thư tiếp theo trong modal
+  const markWishOpened = (wishId) => {
+    if (!wishId) return;
+    setOpenedBalloons(prev => new Set([...prev, wishId]));
+  };
+
   return (
     <AppContext.Provider value={{
       people,
@@ -129,6 +135,7 @@ export function AppProvider({ children, navigate }) {
       setSelectedSister,
       openedBalloons,
       popBalloon,
+      markWishOpened,
       activeModalWish,
       setActiveModalWish,
       isArchiveOpen,

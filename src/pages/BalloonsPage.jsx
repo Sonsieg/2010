@@ -144,7 +144,12 @@ export default function BalloonsPage() {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [wishes, openedBalloons]);
+  }, [wishes]);
+
+  // Khi có lời chúc được mở từ Modal hoặc Drawer, lọc bỏ bóng tương ứng mà KHÔNG làm reset vị trí bay của các bóng khác
+  useEffect(() => {
+    activeBalloonsRef.current = activeBalloonsRef.current.filter(b => !openedBalloons.has(b.wish.id));
+  }, [openedBalloons]);
 
   const handleCanvasClick = (e) => {
     const canvas = canvasRef.current;

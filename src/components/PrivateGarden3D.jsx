@@ -539,6 +539,20 @@ function PrivateGarden3D() {
       return out;
     };
 
+    // Hàm rải hoa toàn cảnh khắp núi đồi đến chân trời
+    const scatterLandscape = (count, minDistFromRoad = 2.4, maxExtent = 115) => {
+      const out = [];
+      let guard = 0;
+      while (out.length < count && guard++ < count * 8) {
+        const x = (rand() - 0.5) * 2 * maxExtent;
+        const z = (rand() - 0.5) * 2 * maxExtent;
+        const d = distToPath(x, z);
+        if (d < minDistFromRoad) continue;
+        out.push({ x, z, d, y: heightAt(x, z, d) });
+      }
+      return out;
+    };
+
     /* ---------- Mặt đất đồi cỏ ---------- */
     const groundGeo = new THREE.PlaneGeometry(240, 240, lowPower ? 120 : 190, lowPower ? 120 : 190);
     groundGeo.rotateX(-Math.PI / 2);
@@ -618,20 +632,20 @@ function PrivateGarden3D() {
       scene.add(m);
     }
 
-    /* ---------- Cỏ (hàng chục nghìn lá cỏ lay theo gió) ---------- */
+    /* ---------- Cỏ (Dịu nhẹ làm nền) ---------- */
     const bladeGeo = makeBlade();
     const dummy = new THREE.Object3D();
     const tint = new THREE.Color();
     {
-      const GN = Math.floor(52000 * Q);
-      const pts = scatter(GN, 2.0, 26, 1.8);
+      const GN = Math.floor(13000 * Q); // Giảm cỏ để nhường chỗ cho hoa
+      const pts = scatter(GN, 2.0, 30, 1.4);
       const mat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, side: THREE.DoubleSide }), timeU, 0.3);
       const grass = new THREE.InstancedMesh(bladeGeo, mat, pts.length);
       pts.forEach((p, i) => {
         dummy.position.set(p.x, p.y, p.z);
         dummy.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, 0);
-        const h = 0.7 + rand() * 1.1;
-        dummy.scale.set(0.9 + rand() * 0.6, h, 1);
+        const h = 0.65 + rand() * 0.9;
+        dummy.scale.set(0.85 + rand() * 0.5, h, 1);
         dummy.updateMatrix();
         grass.setMatrixAt(i, dummy.matrix);
         tint.setRGB(0.75 + rand() * 0.4, 0.85 + rand() * 0.3, 0.65 + rand() * 0.25);
@@ -639,63 +653,57 @@ function PrivateGarden3D() {
       });
       grass.frustumCulled = false;
       scene.add(grass);
-
-      // cỏ ngắn trên chính con đường
-      const PN = Math.floor(16000 * Q);
-      const pathGrass = new THREE.InstancedMesh(bladeGeo, mat, PN);
-      for (let i = 0; i < PN; i++) {
-        const idx = Math.floor(rand() * SAMPLES);
-        const p = samplePts[idx];
-        const q = samplePts[idx + 1];
-        tmpV.set(q.x - p.x, 0, q.z - p.z).normalize();
-        const lat = (rand() - 0.5) * 3.3;
-        dummy.position.set(p.x + tmpV.z * lat, 0.04, p.z - tmpV.x * lat);
-        dummy.rotation.set((rand() - 0.5) * 0.3, rand() * Math.PI * 2, 0);
-        dummy.scale.set(0.8 + rand() * 0.5, 0.3 + rand() * 0.3, 1);
-        dummy.updateMatrix();
-        pathGrass.setMatrixAt(i, dummy.matrix);
-        tint.setRGB(0.95 + rand() * 0.25, 1.0 + rand() * 0.2, 0.75 + rand() * 0.2);
-        pathGrass.setColorAt(i, tint);
-      }
-      pathGrass.frustumCulled = false;
-      scene.add(pathGrass);
     }
 
-    /* ---------- Vườn hoa thật: hồng, tulip, cúc, oải hương ---------- */
+    /* ---------- Vườn hoa thật: hồng, tulip, cúc, oải hương phủ khắp thế giới ---------- */
     const roseHeadBase = makeRoseHead();
     const species = [
       {
-        count: 750,
-        stemH: 0.7,
+        count: 4000,
+        stemH: 0.72,
         head: roseHeadBase.clone(),
         leaves: true,
         tint: true,
-        pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4],
-        sc: [1.2, 1.9]
+        pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4, 0xff2442],
+        sc: [1.3, 2.1]
       },
       {
-        count: 850,
-        stemH: 0.62,
+        count: 4000,
+        stemH: 0.64,
         head: makeTulipHead(),
         leaves: true,
         tint: true,
-        pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9],
-        sc: [1.3, 2.0]
+        pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9, 0xfacc15],
+        sc: [1.4, 2.2]
       },
-      { count: 1100, stemH: 0.5, head: makeDaisyHead(), leaves: false, tint: false, pal: null, sc: [1.1, 1.8] },
+      { 
+        count: 5000, 
+        stemH: 0.52, 
+        head: makeDaisyHead(), 
+        leaves: false, 
+        tint: false, 
+        pal: null, 
+        sc: [1.2, 2.0] 
+      },
       {
-        count: 750,
-        stemH: 0.95,
+        count: 4000,
+        stemH: 0.98,
         head: makeLavenderHead(),
         leaves: true,
         tint: true,
-        pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe],
-        sc: [1.2, 1.9]
+        pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe, 0x8b5cf6, 0xa855f7],
+        sc: [1.3, 2.2]
       }
     ];
+
     species.forEach((sp, si) => {
-      const n = Math.floor(sp.count * Q);
-      const pts = scatter(n, 2.0, 24, 1.5);
+      const nTotal = Math.floor(sp.count * Q);
+      const nNear = Math.floor(nTotal * 0.3);
+      const nFar = nTotal - nNear;
+      const ptsNear = scatter(nNear, 2.0, 26, 1.2);
+      const ptsFar = scatterLandscape(nFar, 2.4, 115);
+      const pts = ptsNear.concat(ptsFar);
+
       const stemGeo = makeStem(sp.stemH, sp.leaves);
       sp.head.translate(0, sp.stemH, 0);
       const stemMat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }), timeU, 0.2);
@@ -705,7 +713,8 @@ function PrivateGarden3D() {
       pts.forEach((p, i) => {
         dummy.position.set(p.x, p.y, p.z);
         dummy.rotation.set((rand() - 0.5) * 0.35, rand() * Math.PI * 2, (rand() - 0.5) * 0.35);
-        const s = sp.sc[0] + rand() * (sp.sc[1] - sp.sc[0]);
+        const distScale = p.d > 22 ? 1.35 : 1.0;
+        const s = (sp.sc[0] + rand() * (sp.sc[1] - sp.sc[0])) * distScale;
         dummy.scale.setScalar(s);
         dummy.updateMatrix();
         stems.setMatrixAt(i, dummy.matrix);
