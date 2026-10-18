@@ -121,7 +121,7 @@ export default function BalloonsPage() {
         ctx.ellipse(x - r * 0.35, y - r * 0.35, r * 0.3, r * 0.15, -Math.PI / 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // 7. Tên người gửi trên bóng
+        // 7. Tên người gửi trên bóng (hỗ trợ cả from_name, sender, name hoặc fallback an toàn)
         ctx.font = '700 11.5px "Be Vietnam Pro", sans-serif';
         ctx.fillStyle = '#FFFFFF';
         ctx.textAlign = 'center';
@@ -129,7 +129,8 @@ export default function BalloonsPage() {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
         ctx.shadowBlur = 4;
 
-        const shortName = b.wish.name.split(' ').slice(-1)[0];
+        const senderRaw = (b.wish && (b.wish.from_name || b.wish.name || b.wish.sender)) || 'Tech';
+        const shortName = String(senderRaw).trim().split(' ').slice(-1)[0] || '20.10';
         ctx.fillText(shortName, x, y + 2);
 
         ctx.restore();

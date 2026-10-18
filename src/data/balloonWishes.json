@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "from_name": "Anh em Frontend & Mobile Team",
+    "text": "Chúc các chị em một ngày 20/10 ngập tràn niềm vui, nụ cười luôn nở trên môi và cuộc sống thảnh thơi an lành!",
+    "color": "#F43F5E"
+  },
+  {
+    "id": 2,
+    "from_name": "Team Backend & DevOps",
+    "text": "Chúc các đóa hoa công nghệ của công ty luôn xinh đẹp, hạnh phúc, code chạy mượt mà và không bao giờ gặp bug!",
+    "color": "#C9A66B"
+  },
+  {
+    "id": 3,
+    "from_name": "Hội Anh Em AI & Data",
+    "text": "Cảm ơn sự dịu dàng và năng lượng tích cực của các chị em đã thắp sáng cả văn phòng mỗi ngày. Chúc 20/10 rực rỡ!",
+    "color": "#8C2F4B"
+  },
+  {
+    "id": 4,
+    "from_name": "Đội Ngũ Product & Design",
+    "text": "Chúc phái đẹp công ty luôn tỏa sáng với vẻ đẹp tự tin, trí tuệ sắc sảo và luôn là nguồn cảm hứng bất tận!",
+    "color": "#F59E0B"
+  },
+  {
+    "id": 5,
+    "from_name": "Một người đồng nghiệp giấu tên",
+    "text": "Chúc các chị em luôn nhận được thật nhiều hoa, nhiều quà và tình cảm chân thành nhất trong ngày đặc biệt này!",
+    "color": "#EC4899"
+  },
+  {
+    "id": 6,
+    "from_name": "Tập thể Anh Em Công Ty",
+    "text": "Ngày nào ở công ty có các chị em cũng là ngày vui. Chúc các chị em luôn trẻ trung, yêu đời và hạnh phúc viên mãn!",
+    "color": "#BE123C"
+  },
+  {
+    "id": 7,
+    "from_name": "Team QA & Tester",
+    "text": "Chúc các chị em luôn giữ mãi nụ cười rạng ngời, việc gì khó cũng hóa dễ, luôn được yêu thương và chiều chuộng!",
+    "color": "#8B5CF6"
+  },
+  {
+    "id": 8,
+    "from_name": "Anh Em Khối Kinh Doanh & Vận Hành",
+    "text": "Gửi ngàn đóa hoa và lời tri ân chân thành nhất đến các chị em - những đóa hồng rạng ngời nhất của công ty chúng ta!",
+    "color": "#10B981"
+  }
+]

@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import FloralWreathBorder from '../components/FloralWreathBorder.jsx';
+import ArtisticSignatureCard from '../components/ArtisticSignatureCard.jsx';
 import defaultSisterPhoto from '../assets/images.jpg';
+import { getRandomCardWish } from '../api.js';
 
 export default function LetterPage() {
   const { selectedSister, navigateWithFlowerTransition } = useApp();
+  const [cardWish] = useState(() => getRandomCardWish());
+  const [imageError, setImageError] = useState(false);
 
   // Thông tin chị em được vinh danh (ưu tiên dữ liệu từ context)
   const sisterName = selectedSister ? selectedSister.name : 'Nguyễn Thị Lan Anh';
   const roleText = (selectedSister && (selectedSister.role || selectedSister.dept)) || 'PRODUCT MANAGER';
   
-  // Mock ảnh chân dung người thật: Ưu tiên ảnh của chị nếu có consent, mặc định là images.jpg người dùng vừa tải về!
-  const photoUrl = (selectedSister && selectedSister.has_consent && selectedSister.photo)
+  // Kiểm tra ảnh chân dung: Nếu có ảnh & consent & không lỗi -> dùng ảnh thật; Nếu thiếu -> fallback thẻ chữ ký nghệ thuật!
+  const hasExplicitPhoto = Boolean(selectedSister && selectedSister.photo && selectedSister.has_consent !== false);
+  const photoUrl = hasExplicitPhoto
     ? selectedSister.photo
-    : defaultSisterPhoto;
+    : (!selectedSister ? defaultSisterPhoto : '');
+  const hasValidPhoto = Boolean(photoUrl && !imageError);
 
   // Câu quote vinh danh ấm áp
   const sisterQuote = selectedSister?.quote || '“Nụ cười của bạn là ánh sáng của cả văn phòng”';
@@ -43,18 +49,25 @@ export default function LetterPage() {
                 {/* GIÀN CÀNH HOA UỐN LƯỢN CỰC ĐẸP BỌC XUNG QUANH */}
                 <FloralWreathBorder />
 
-                {/* KHUNG ẢNH CHÂN DUNG THỰC TẾ (SẠCH SẼ, KHÔNG BỊ CHỮ ĐÈ LÊN MẶT) */}
+                {/* KHUNG ẢNH CHÂN DUNG THỰC TẾ HOẶC THẺ CHỮ KÝ NGHỆ THUẬT FALLBACK */}
                 <div className="portrait-display-frame">
-                  <img
-                    src={photoUrl}
-                    alt={sisterName}
-                    className="portrait-display-img"
-                    onError={(e) => {
-                      e.currentTarget.src = '/images.jpg';
-                    }}
-                  />
-                  {/* Viền sáng bóng kính mờ nhẹ */}
-                  <div className="portrait-glass-shine"></div>
+                  {hasValidPhoto ? (
+                    <>
+                      <img
+                        src={photoUrl}
+                        alt={sisterName}
+                        className="portrait-display-img"
+                        onError={() => setImageError(true)}
+                      />
+                      {/* Viền sáng bóng kính mờ nhẹ */}
+                      <div className="portrait-glass-shine"></div>
+                    </>
+                  ) : (
+                    <ArtisticSignatureCard
+                      name={sisterName}
+                      customQuote="Luôn xinh đẹp, hạnh phúc và tỏa sáng theo cách riêng của mình! 💕"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -99,17 +112,17 @@ export default function LetterPage() {
 
               {/* Tiêu đề chính trang trọng */}
               <h1 className="letter-honor-title">
-                Gửi những người phụ nữ tuyệt vời nhất TechCorp!
+                Gửi {sisterName} — Người Phụ Nữ Tuyệt Vời!
               </h1>
 
               {/* Thư viết tay trên nền giấy da ngà viền chỉ vàng */}
               <div className="parchment-text-card">
-                <p className="parchment-lead">
-                  Nhân ngày 20/10, toàn thể anh em khối Công nghệ &amp; Sản phẩm xin gửi tới chị em lời chúc bình an, hạnh phúc và tràn đầy năng lượng rạng rỡ.
+                <p className="parchment-lead" style={{ fontStyle: 'italic', color: '#881337', fontSize: '1.2rem', lineHeight: '1.85', marginBottom: '16px', fontWeight: '600' }}>
+                  “{cardWish.highlight || cardWish}”
                 </p>
 
-                <p className="parchment-body">
-                  Cảm ơn các chị em vì đã luôn kiên nhẫn đồng hành cùng những dòng code khô khan, làm dịu đi những đợt sprint căng thẳng bằng sự tận tâm, tinh tế và nụ cười ấm áp mỗi ngày.
+                <p className="parchment-body" style={{ fontSize: '1.02rem', lineHeight: '1.8', color: '#334155' }}>
+                  {cardWish.message || 'Cảm ơn bạn vì sự nhiệt tình, những nỗ lực và nguồn năng lượng tích cực mà bạn mang đến cho mọi người. Nhân ngày 20/10, chúc bạn luôn được yêu thương, gặp thật nhiều may mắn, công việc thuận lợi và cuộc sống ngập tràn niềm vui. Chúc bạn mãi xinh đẹp, hạnh phúc và luôn tỏa sáng theo cách riêng của mình! 💗'}
                 </p>
               </div>
 

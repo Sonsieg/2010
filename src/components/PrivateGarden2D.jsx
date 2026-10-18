@@ -24,7 +24,7 @@ export default function PrivateGarden2D() {
   useEffect(() => {
     async function loadPrivate() {
       const sisterId = selectedSister ? selectedSister.id : 'lan_anh';
-      const res = await fetchPrivateWishes(sisterId, '2010');
+      const res = await fetchPrivateWishes(sisterId);
       if (res.success && Array.isArray(res.data)) {
         setMessages(res.data);
       }

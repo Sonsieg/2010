@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import html2canvas from 'html2canvas';
 import confetti from 'canvas-confetti';
+import { getRandomCardWish } from '../api.js';
 
 export default function PartyPage() {
   const { selectedSister } = useApp();
   const [recipientName, setRecipientName] = useState(
     selectedSister ? selectedSister.name : 'Chị Em IT Thân Thương'
   );
+  const [cardWish] = useState(() => getRandomCardWish());
   const [isExporting, setIsExporting] = useState(false);
   const [thanksSent, setThanksSent] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -31,7 +33,8 @@ export default function PartyPage() {
       });
 
       const link = document.createElement('a');
-      link.download = `Thiep-20-10-Tang-${recipientName.replace(/\s+/g, '_')}.png`;
+      const safeName = String(recipientName || 'Chi_Em').trim().replace(/\s+/g, '_');
+      link.download = `Thiep-20-10-Tang-${safeName}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
 
@@ -253,11 +256,11 @@ export default function PartyPage() {
 
               {/* Giấy Da Thư */}
               <div style={{ background: '#FFFDF8', border: '2px solid rgba(201, 166, 107, 0.55)', borderRadius: '24px', padding: '38px 46px', margin: '0 auto', boxShadow: '0 10px 30px rgba(244, 63, 94, 0.08)' }}>
-                <p style={{ fontSize: '22px', lineHeight: '1.85', color: '#334155', fontStyle: 'italic', margin: '0 0 16px' }}>
-                  “Cảm ơn bạn vì đã luôn là đóa hoa tỏa sắc ngát hương, mang lại nụ cười, sự êm đềm và nguồn cảm hứng bất tận cho toàn thể anh em trong công ty.”
+                <p style={{ fontSize: '22px', lineHeight: '1.85', color: '#881337', fontStyle: 'italic', margin: '0 0 16px', fontWeight: '600' }}>
+                  “{cardWish.highlight || cardWish}”
                 </p>
-                <p style={{ fontSize: '18px', lineHeight: '1.7', color: '#64748B', margin: 0 }}>
-                  Chúc bạn một ngày 20/10 ngập tràn hạnh phúc, may mắn trong sự nghiệp và luôn rạng ngời như ánh dương ban mai! 🌸
+                <p style={{ fontSize: '18px', lineHeight: '1.75', color: '#475569', margin: 0 }}>
+                  {cardWish.message || 'Cảm ơn bạn vì sự nhiệt tình, những nỗ lực và nguồn năng lượng tích cực mà bạn mang đến cho mọi người. Chúc bạn luôn xinh đẹp, hạnh phúc và luôn tỏa sáng theo cách riêng của mình!'}
                 </p>
               </div>
             </div>

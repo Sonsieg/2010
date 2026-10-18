@@ -232,7 +232,8 @@ export function initBalloonEngine(wishesList, onOpenWishModalCallback, onMilesto
         ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
         ctx.shadowBlur = 4;
 
-        const shortName = body.wishData.name.split(' ').slice(-1)[0];
+        const sName = (body.wishData && (body.wishData.from_name || body.wishData.name || body.wishData.sender)) || 'Tech';
+        const shortName = String(sName).trim().split(' ').slice(-1)[0] || '20.10';
         ctx.fillText(shortName, x, y);
 
         ctx.restore();

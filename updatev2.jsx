@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext.jsx';
-import { fetchPrivateWishes } from '../api.js';
+import { fetchPrivateWishes, getRandomCardWish } from '../api.js';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -14,6 +14,7 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 const mergeGeos = BufferGeometryUtils.mergeGeometries;
 import confetti from 'canvas-confetti';
 import { playPopSound, playLetterOpenSound, playTruckHonkSound, playSparkleSound, playSoftTapSound } from '../utils/soundEffects.js';
+import { createSignatureCardCanvas } from '../components/signatureCardUtils.js';
 
 // [TỐI ƯU CONFETTI] Tự động giảm hạt trên thiết bị di động & tôn trọng prefers-reduced-motion
 const isMobileDevice = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
@@ -363,7 +364,7 @@ export default function World3DExperience() {
   useEffect(() => {
     async function loadPrivate() {
       const sisterId = selectedSister ? selectedSister.id : 'lan_anh';
-      const res = await fetchPrivateWishes(sisterId, '2010');
+      const res = await fetchPrivateWishes(sisterId);
       if (res.success && Array.isArray(res.data)) {
         setMessages(res.data);
       }
@@ -433,21 +434,8 @@ export default function World3DExperience() {
   const [visitedStations, setVisitedStations] = useState(() => new Set([0]));
   const achievementUnlockedRef = useRef(false);
 
-  // [PERFORMANCE BENCHMARK & REAL-TIME HUD]
-  const [perfStats, setPerfStats] = useState({ fps: 60, ms: '16.0', calls: 0, tris: 0 });
-  const [showPerfBadge, setShowPerfBadge] = useState(true);
-  const [initialLoadTime, setInitialLoadTime] = useState(null);
-  const [loadingProgressText, setLoadingProgressText] = useState('Đang khởi tạo...');
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.shiftKey && (e.key === 'P' || e.key === 'p')) {
-        setShowPerfBadge((prev) => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Lời chúc thiệp ngẫu nhiên từ 50 lời chúc chọn lọc
+  const [cardWish] = useState(() => getRandomCardWish());
 
   // [P1] Personalization: Theme màu sắc & loài hoa theo tên chị em (Nhóm 5.2)
   const sisterTheme = useMemo(() => {
@@ -1342,7 +1330,9 @@ export default function World3DExperience() {
         timeU,
         rand,
         Q,
-        onProgress: (txt) => setLoadingProgressText(txt)
+        onProgress: (txt) => {
+          if (txt) console.log(`🌸 [Vegetation] ${txt}`);
+        }
       });
     }, 120);
 
@@ -2630,14 +2620,57 @@ export default function World3DExperience() {
       photoFrame.position.set(0, 0.2, 0.05);
       leftWing.add(photoFrame);
 
-      getSharedImageTexture((tex) => {
-        const photoMat = new THREE.MeshBasicMaterial({ map: tex });
-        photoMat.polygonOffset = true;
-        photoMat.polygonOffsetFactor = -1;
-        const photoMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 3.3), photoMat);
-        photoMesh.position.set(0, 0.2, 0.10);
-        leftWing.add(photoMesh);
+      // [FALLBACK THIẾU ẢNH THẬT] Hiển thị ảnh chân dung hoặc Thẻ chữ ký nghệ thuật (Mẫu chuẩn Ảnh 2)
+      const hasPhoto = Boolean(selectedSister && selectedSister.photo && selectedSister.has_consent !== false);
+      const photoMat = new THREE.MeshStandardMaterial({
+        roughness: 0.82,
+        metalness: 0.02
       });
+      photoMat.polygonOffset = true;
+      photoMat.polygonOffsetFactor = -1;
+
+      if (hasPhoto) {
+        new THREE.TextureLoader().load(
+          selectedSister.photo,
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.anisotropy = 4;
+            photoMat.map = tex;
+            photoMat.emissiveMap = tex;
+            photoMat.emissive = new THREE.Color(0xffffff);
+            photoMat.emissiveIntensity = isNightMode ? 0.45 : 0.15;
+            photoMat.needsUpdate = true;
+          },
+          undefined,
+          () => {
+            // Lỗi tải ảnh -> Fallback sang thẻ chữ ký nghệ thuật
+            const sigCanvas = createSignatureCardCanvas(sisterName, '', 800, 1060);
+            const sigTex = new THREE.CanvasTexture(sigCanvas);
+            sigTex.colorSpace = THREE.SRGBColorSpace;
+            sigTex.anisotropy = 4;
+            photoMat.map = sigTex;
+            photoMat.emissiveMap = sigTex;
+            photoMat.emissive = new THREE.Color(0xffffff);
+            photoMat.emissiveIntensity = isNightMode ? 0.45 : 0.15;
+            photoMat.needsUpdate = true;
+          }
+        );
+      } else {
+        // Chị em chưa có ảnh -> Dùng thẻ chữ ký nghệ thuật phong cách calligraphy cổ điển (chống lóa & tràn đầy)
+        const sigCanvas = createSignatureCardCanvas(sisterName, '', 800, 1060);
+        const sigTex = new THREE.CanvasTexture(sigCanvas);
+        sigTex.colorSpace = THREE.SRGBColorSpace;
+        sigTex.anisotropy = 4;
+        photoMat.map = sigTex;
+        photoMat.emissiveMap = sigTex;
+        photoMat.emissive = new THREE.Color(0xffffff);
+        photoMat.emissiveIntensity = isNightMode ? 0.45 : 0.15;
+        photoMat.needsUpdate = true;
+      }
+
+      const photoMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 3.3), photoMat);
+      photoMesh.position.set(0, 0.2, 0.10);
+      leftWing.add(photoMesh);
 
       const namePlate = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.45, 0.03), goldFrameMat);
       namePlate.position.set(0, -1.7, 0.08);
@@ -2650,52 +2683,110 @@ export default function World3DExperience() {
       rightWing.receiveShadow = true;
       bifoldRoot.add(rightWing);
 
-      // Nội dung thư
+      // Nội dung thư — Nâng cấp canvas 800x1060 trải rộng, chữ to rõ, chuẩn phong cách Editorial (giống 2D)
       const letterCanvas = document.createElement('canvas');
-      letterCanvas.width = 640;
-      letterCanvas.height = 840;
+      letterCanvas.width = 800;
+      letterCanvas.height = 1060;
       const lG = letterCanvas.getContext('2d');
-      lG.fillStyle = '#FAF3EA';
-      lG.fillRect(0, 0, 640, 840);
+
+      // 1. Nền giấy da ngà mỹ thuật cao cấp
+      const bgGrad = lG.createLinearGradient(0, 0, 0, 1060);
+      bgGrad.addColorStop(0, '#FFFFFF');
+      bgGrad.addColorStop(0.3, '#FFFDF8');
+      bgGrad.addColorStop(1, '#F6EEE3');
+      lG.fillStyle = bgGrad;
+      lG.fillRect(0, 0, 800, 1060);
+
+      // 2. Khung viền đôi mạ vàng trang nhã
       lG.strokeStyle = '#C9A66B';
-      lG.lineWidth = 6;
-      lG.strokeRect(20, 20, 600, 800);
-      lG.strokeStyle = 'rgba(201, 166, 107, 0.4)';
-      lG.lineWidth = 2;
-      lG.strokeRect(30, 30, 580, 780);
-
-      lG.fillStyle = '#8C2F4B';
-      lG.font = 'italic bold 32px "Playfair Display", Georgia, serif';
-      lG.fillText('Thân Gửi Phái Đẹp TechCorp,', 45, 95);
-
-      lG.fillStyle = '#2D1B28';
-      lG.font = '500 22px "Be Vietnam Pro", sans-serif';
-      const lines = [
-        'Nhân ngày Phụ Nữ Việt Nam 20.10,',
-        'Toàn thể anh em xin gửi ngàn đóa hoa',
-        'và những lời chúc tốt đẹp nhất tới chị em.',
-        'Cảm ơn sự rạng rỡ, năng lượng tích cực',
-        'và những đóng góp tuyệt vời của chị em',
-        'trên mỗi chặng đường phát triển công ty.',
-        'Chúc chị em luôn luôn hạnh phúc,',
-        'tươi trẻ, yêu đời và mãi tỏa sáng!'
-      ];
-      lines.forEach((l, idx) => { lG.fillText(l, 45, 170 + idx * 46); });
-
-      lG.beginPath();
-      lG.arc(320, 660, 54, 0, Math.PI * 2);
-      lG.fillStyle = '#BE123C';
-      lG.fill();
-      lG.strokeStyle = '#FDE68A';
       lG.lineWidth = 4;
+      lG.strokeRect(22, 22, 756, 1016);
+      lG.strokeStyle = 'rgba(201, 166, 107, 0.45)';
+      lG.lineWidth = 1.5;
+      lG.strokeRect(32, 32, 736, 996);
+
+      // 4 Họa tiết Baroque góc
+      lG.fillStyle = '#B8860B';
+      lG.font = '22px serif';
+      lG.fillText('❧', 42, 58);
+      lG.fillText('☙', 742, 58);
+      lG.fillText('❧', 42, 1014);
+      lG.fillText('☙', 742, 1014);
+
+      // 3. Header đề mục tri ân
+      lG.fillStyle = '#BE123C';
+      lG.font = '700 14px "Be Vietnam Pro", sans-serif';
+      lG.fillText('✦ THƯ TRI ÂN TỪ CÁNH NAM IT ✦', 55, 76);
+
+      // 4. Lời đề từ kính gửi (Salutation)
+      const cleanSisterName = (sisterName || 'Lan Anh').replace(/^(Chị\s+|Em\s+)/i, '').trim();
+      lG.fillStyle = '#881337';
+      lG.font = 'italic bold 34px "Playfair Display", Georgia, serif';
+      lG.fillText(`Thân Gửi Chị ${cleanSisterName},`, 55, 122);
+
+      // Đường kẻ chỉ vàng trang trí
+      lG.strokeStyle = 'rgba(201, 166, 107, 0.55)';
+      lG.lineWidth = 1.5;
+      lG.beginPath();
+      lG.moveTo(55, 142);
+      lG.lineTo(745, 142);
       lG.stroke();
-      lG.fillStyle = '#FFF';
-      lG.font = 'bold 28px serif';
+
+      // Hàm ngắt dòng canvas thông minh
+      const wrapCanvasText = (ctx, text, x, y, maxWidth, lineHeight) => {
+        const words = text.split(' ');
+        let line = '';
+        let curY = y;
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + ' ';
+          const metrics = ctx.measureText(testLine);
+          if (metrics.width > maxWidth && n > 0) {
+            ctx.fillText(line, x, curY);
+            line = words[n] + ' ';
+            curY += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line, x, curY);
+        return curY;
+      };
+
+      const wishHighlight = typeof cardWish === 'object' && cardWish.highlight ? cardWish.highlight : cardWish;
+      const wishMessage = typeof cardWish === 'object' && cardWish.message
+        ? cardWish.message
+        : 'Cảm ơn sự nhiệt tình, những nỗ lực và nguồn năng lượng tích cực mà bạn mang đến cho mọi người. Nhân ngày 20/10, chúc bạn luôn được yêu thương, gặp thật nhiều may mắn và cuộc sống ngập tràn niềm vui!';
+
+      // 5. Câu chúc nổi bật (Wine red, nghiêng, to rõ, độ tương phản cao)
+      lG.fillStyle = '#7A0C2E';
+      lG.font = 'italic 700 24px "Playfair Display", "Be Vietnam Pro", serif';
+      const afterWishY = wrapCanvasText(lG, `“${wishHighlight}”`, 55, 190, 690, 42);
+
+      // 6. Đoạn tâm tình chân thành (dày dặn, thoáng đãng, dễ đọc, màu đậm nét)
+      lG.fillStyle = '#0F172A';
+      lG.font = '500 21px "Be Vietnam Pro", sans-serif';
+      const afterBodyY = wrapCanvasText(lG, wishMessage, 55, afterWishY + 38, 690, 36);
+
+      // 7. Lời chúc kết và chữ ký (đồng bộ hoàn toàn với bản 2D)
+      const signY = Math.max(afterBodyY + 48, 650);
+      lG.fillStyle = '#7A0C2E';
+      lG.font = 'italic 700 22px "Playfair Display", Georgia, serif';
+      lG.fillText('Chúc chị mãi rạng rỡ, tự tin và toả sáng! 💐', 55, signY);
+
+      lG.fillStyle = '#92400E';
+      lG.font = '700 18px "Be Vietnam Pro", sans-serif';
+      lG.fillText('— Toàn thể anh em Tech & Product —', 55, signY + 36);
+
+      // 8. Họa tiết hoa văn tinh tế phía trên con dấu sáp 3D
+      lG.fillStyle = 'rgba(201, 166, 107, 0.75)';
+      lG.font = '22px serif';
       lG.textAlign = 'center';
-      lG.fillText('20.10', 320, 670);
+      lG.fillText('❖  ✦  ❖', 400, 835);
+      lG.textAlign = 'left';
 
       const letterTex = new THREE.CanvasTexture(letterCanvas);
       letterTex.colorSpace = THREE.SRGBColorSpace;
+      letterTex.anisotropy = 4;
       const letterMat = new THREE.MeshStandardMaterial({
         map: letterTex,
         emissiveMap: letterTex,
@@ -3659,14 +3750,43 @@ export default function World3DExperience() {
       artBoard.castShadow = true;
       easelGroup.add(artBoard);
 
-      getSharedImageTexture((tex) => {
-        const pMat = new THREE.MeshBasicMaterial({ map: tex });
-        pMat.polygonOffset = true;
-        pMat.polygonOffsetFactor = -1;
-        const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 2.05), pMat);
-        pMesh.position.set(0, 0.15, 0.035);
-        artBoard.add(pMesh);
+      // [FALLBACK THIẾU ẢNH THẬT TRÊN GIÁ VẼ EASEL]
+      const pMat = new THREE.MeshStandardMaterial({
+        roughness: 0.82,
+        metalness: 0.02
       });
+      pMat.polygonOffset = true;
+      pMat.polygonOffsetFactor = -1;
+
+      if (hasPhoto) {
+        new THREE.TextureLoader().load(
+          selectedSister.photo,
+          (tex) => {
+            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.anisotropy = 4;
+            pMat.map = tex;
+            pMat.needsUpdate = true;
+          },
+          undefined,
+          () => {
+            const sCanvas = createSignatureCardCanvas(sisterName, '', 512, 640);
+            const sTex = new THREE.CanvasTexture(sCanvas);
+            sTex.colorSpace = THREE.SRGBColorSpace;
+            pMat.map = sTex;
+            pMat.needsUpdate = true;
+          }
+        );
+      } else {
+        const sCanvas = createSignatureCardCanvas(sisterName, '', 512, 640);
+        const sTex = new THREE.CanvasTexture(sCanvas);
+        sTex.colorSpace = THREE.SRGBColorSpace;
+        pMat.map = sTex;
+        pMat.needsUpdate = true;
+      }
+
+      const pMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 2.05), pMat);
+      pMesh.position.set(0, 0.15, 0.035);
+      artBoard.add(pMesh);
 
       const captionCanvas = document.createElement('canvas');
       captionCanvas.width = 512; captionCanvas.height = 128;
@@ -5004,13 +5124,6 @@ export default function World3DExperience() {
     } catch (e) {
       console.warn('[First Frame Render] Warning:', e);
     }
-    const tti = ((performance.now() - benchMarks.start) / 1000).toFixed(2);
-    setInitialLoadTime(tti);
-    console.group('🌸 [20/10 3D PERFORMANCE BENCHMARK]');
-    console.log(`🚀 Scene Init -> First Frame TTI: ${tti}s (Màn hình 3D đã sẵn sàng!)`);
-    console.log(`⏱️ Setup WebGL & Scene: ${getBenchElapsed('start')} ms`);
-    console.groupEnd();
-
     setIsSceneReady(true);
     setTimeout(() => {
       setIsVeilOpen(true);
@@ -5024,8 +5137,6 @@ export default function World3DExperience() {
     const camDestA = new THREE.Vector3();
     const camDestB = new THREE.Vector3();
     const shakeOffset = new THREE.Vector3();
-    let frameCount = 0;
-    let lastPerfUpdate = performance.now();
 
     function renderLoop() {
       const now = performance.now();
@@ -5375,18 +5486,6 @@ export default function World3DExperience() {
 
       renderer.info.reset();
       composer.render();
-
-      // [PERFORMANCE MONITORING] Đo đạc FPS, Frame Time, Draw Calls, Triangles thời gian thực
-      frameCount++;
-      if (now - lastPerfUpdate > 450) {
-        const curFps = Math.min(60, Math.round((frameCount * 1000) / (now - lastPerfUpdate)));
-        const curMs = dt > 0 ? (dt * 1000).toFixed(1) : '16.0';
-        const calls = renderer.info.render.calls;
-        const tris = Math.round(renderer.info.render.triangles / 1000);
-        setPerfStats({ fps: curFps, ms: curMs, calls, tris });
-        lastPerfUpdate = now;
-        frameCount = 0;
-      }
       animId = requestAnimationFrame(renderLoop);
     }
     renderLoop();
@@ -5798,35 +5897,6 @@ export default function World3DExperience() {
             </span>
           </button>
         </div>
-
-        {/* [PERFORMANCE BADGE HUD] Theo dõi hiệu năng thời gian thực */}
-        {showPerfBadge && (
-          <aside className="perf-badge-container">
-            <div className="perf-badge-glass" title="Bấm phím Shift+P để ẩn/hiện bộ đo này">
-              <span className={`perf-dot ${perfStats.fps < 30 ? 'alert' : perfStats.fps < 48 ? 'warn' : ''}`} />
-              <span className="perf-item" style={{ fontWeight: 700 }}>{perfStats.fps} FPS</span>
-              <span className="perf-sep">•</span>
-              <span className="perf-item">{perfStats.ms}ms</span>
-              <span className="perf-sep">•</span>
-              <span className="perf-item">{perfStats.calls} Calls</span>
-              <span className="perf-sep">•</span>
-              <span className="perf-item">{perfStats.tris}k Tris</span>
-              {initialLoadTime && (
-                <>
-                  <span className="perf-sep">•</span>
-                  <span className="perf-item" style={{ color: '#FDE68A' }}>Load: {initialLoadTime}s</span>
-                </>
-              )}
-              <button
-                className="perf-close-btn"
-                onClick={() => setShowPerfBadge(false)}
-                title="Tạm ẩn bộ đo (Bấm Shift+P để mở lại)"
-              >
-                ✕
-              </button>
-            </div>
-          </aside>
-        )}
       </div>
 
       {isMailboxOpen && !readingMessage && (
@@ -6039,13 +6109,15 @@ export default function World3DExperience() {
                     textAlign: 'left'
                   }}
                 >
-                  <p style={{ margin: '0 0 8px', fontSize: '1.02rem', color: '#1E293B', lineHeight: '1.7' }}>
-                    Thân gửi <strong>{sisterName}</strong>,
+                  <p style={{ margin: '0 0 10px', fontSize: '1.05rem', color: '#881337', fontStyle: 'italic', fontWeight: '600', lineHeight: '1.75' }}>
+                    “{cardWish.highlight || cardWish}”
                   </p>
-                  <p style={{ margin: 0, fontSize: '0.94rem', color: '#475569', lineHeight: '1.7' }}>
-                    📍 <strong>Địa điểm nhận quà:</strong> Khu Vực Pantry Tầng 8 - Trụ sở TechCorp<br />
-                    ⏰ <strong>Thời gian:</strong> 15:30 Ngày 20/10/2026<br />
-                    🎁 <strong>Phần quà:</strong> Hoa tươi, set quà chăm sóc đặc quyền & tiệc trà trà bánh hoàng gia!
+                  <p style={{ margin: '0 0 12px', fontSize: '0.94rem', color: '#334155', lineHeight: '1.7' }}>
+                    {cardWish.message || 'Cảm ơn bạn vì sự nhiệt tình, những nỗ lực và nguồn năng lượng tích cực mà bạn mang đến cho mọi người. Chúc bạn luôn xinh đẹp, hạnh phúc và luôn tỏa sáng theo cách riêng của mình!'}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.92rem', color: '#64748B', lineHeight: '1.65', borderTop: '1px dashed rgba(201, 166, 107, 0.4)', paddingTop: '10px' }}>
+                    📍 <strong>Địa điểm nhận quà:</strong> Khu Vực Pantry Tầng 8 • ⏰ <strong>Thời gian:</strong> 10:00 Sáng 20/10<br />
+                    🎁 <strong>Phần quà:</strong> Hoa tươi thắm, thiệp kỷ niệm & tiệc trà ngọt ngào chào đón bạn!
                   </p>
                 </div>
 

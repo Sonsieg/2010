@@ -84,35 +84,46 @@ export default function WishModal() {
           </button>
 
           {/* Header Người Gửi */}
-          <div className="royal-wish-sender-row">
-            <div
-              className="royal-sender-monogram"
-              style={{
-                background: 'linear-gradient(135deg, #BE123C 0%, #8C2F4B 100%)',
-                border: '2px solid #E5C388'
-              }}
-            >
-              {activeModalWish.name.charAt(0)}
-            </div>
-            <div>
-              <div className="royal-sender-eyebrow">LỜI CHÚC TỪ ANH EM</div>
-              <h4 className="royal-sender-name">
-                {activeModalWish.name}
-              </h4>
-              <span className="royal-sender-dept-pill">
-                ✦ {activeModalWish.dept || activeModalWish.role || 'Engineering & Product Team'}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const senderRaw = activeModalWish.from_name || activeModalWish.name || activeModalWish.sender || 'Anh em Tech Team';
+            const senderInitial = String(senderRaw).trim().charAt(0) || '🌸';
+            const senderDept = activeModalWish.dept || activeModalWish.role || 'Engineering & Product Team';
+            const wishContent = activeModalWish.text || activeModalWish.message || activeModalWish.content || '';
 
-          {/* Nội Dung Lời Chúc (Khung Giấy Da Cẩm Thạch) */}
-          <div className="royal-wish-parchment-box">
-            <span className="royal-quote-mark open">“</span>
-            <p className="royal-wish-text">
-              {activeModalWish.text}
-            </p>
-            <span className="royal-quote-mark close">”</span>
-          </div>
+            return (
+              <>
+                <div className="royal-wish-sender-row">
+                  <div
+                    className="royal-sender-monogram"
+                    style={{
+                      background: 'linear-gradient(135deg, #BE123C 0%, #8C2F4B 100%)',
+                      border: '2px solid #E5C388'
+                    }}
+                  >
+                    {senderInitial}
+                  </div>
+                  <div>
+                    <div className="royal-sender-eyebrow">LỜI CHÚC TỪ ANH EM</div>
+                    <h4 className="royal-sender-name">
+                      {senderRaw}
+                    </h4>
+                    <span className="royal-sender-dept-pill">
+                      ✦ {senderDept}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Nội Dung Lời Chúc (Khung Giấy Da Cẩm Thạch) */}
+                <div className="royal-wish-parchment-box">
+                  <span className="royal-quote-mark open">“</span>
+                  <p className="royal-wish-text">
+                    {wishContent}
+                  </p>
+                  <span className="royal-quote-mark close">”</span>
+                </div>
+              </>
+            );
+          })()}
 
           {/* Footer Card */}
           <div className="royal-wish-footer">

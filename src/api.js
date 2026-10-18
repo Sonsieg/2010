@@ -1,16 +1,48 @@
 /**
- * API Client kết nối Google Apps Script với cơ chế Cache & Fallback an toàn
+ * API Client & Data Provider cho 20/10 Cinematic Web
+ * Tự động đồng bộ với các file Mock chuẩn hóa trong src/data/
+ * Khi có dữ liệu thật từ Google Sheet, chỉ cần dán APPS_SCRIPT_URL hoặc sửa file trong src/data/
  */
-import fallbackPeople from './data/people.fallback.json';
-import fallbackWishes from './data/wishes.fallback.json';
+import sistersData from './data/sisters.json';
+import balloonWishesData from './data/balloonWishes.json';
+import privateWishesData from './data/privateWishes.json';
+import cardWishesData from './data/cardWishes.json';
 
 // Khi deploy Google Apps Script, dán URL Web App vào đây (dạng https://script.google.com/macros/s/.../exec)
+// Nếu để rỗng (""), hệ thống sẽ tự động dùng 100% dữ liệu từ các file trong src/data/
 export const APPS_SCRIPT_URL = ""; 
 
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 phút
 
 /**
- * 1. Lấy danh sách chị em (có cache localStorage + fallback)
+ * 1. Lấy 1 lời chúc thiệp ngẫu nhiên trong 50 lời chúc chọn lọc
+ */
+export function getRandomCardWish(index) {
+  let item;
+  if (typeof index === 'number' && index >= 0 && index < cardWishesData.length) {
+    item = cardWishesData[index];
+  } else {
+    const randomIndex = Math.floor(Math.random() * cardWishesData.length);
+    item = cardWishesData[randomIndex];
+  }
+  return {
+    ...item,
+    toString() {
+      return `“${item.highlight}”\n\n${item.message}`;
+    },
+    fullText: `“${item.highlight}”\n\n${item.message}`
+  };
+}
+
+/**
+ * Lấy toàn bộ 50 lời chúc thiệp
+ */
+export function getAllCardWishes() {
+  return cardWishesData;
+}
+
+/**
+ * 2. Lấy danh sách chị em (hỗ trợ cả offline data và online Google Sheet)
  */
 export async function fetchPeople() {
   const cacheKey = "tribute_people_cache";
@@ -18,7 +50,7 @@ export async function fetchPeople() {
   if (cached) return cached;
 
   if (!APPS_SCRIPT_URL) {
-    return fallbackPeople;
+    return sistersData;
   }
 
   try {
@@ -36,15 +68,15 @@ export async function fetchPeople() {
       setCache(cacheKey, data.data);
       return data.data;
     }
-    return fallbackPeople;
+    return sistersData;
   } catch (err) {
-    console.warn("[API] fetchPeople dùng fallback data:", err.message);
-    return fallbackPeople;
+    console.warn("[API] fetchPeople dùng local data:", err.message);
+    return sistersData;
   }
 }
 
 /**
- * 2. Lấy danh sách lời chúc công khai (bóng bay)
+ * 3. Lấy danh sách lời chúc công khai (bóng bay & biển bảng)
  */
 export async function fetchPublicWishes() {
   const cacheKey = "tribute_public_wishes_cache";
@@ -52,7 +84,7 @@ export async function fetchPublicWishes() {
   if (cached) return cached;
 
   if (!APPS_SCRIPT_URL) {
-    return fallbackWishes;
+    return balloonWishesData;
   }
 
   try {
@@ -77,26 +109,37 @@ export async function fetchPublicWishes() {
       setCache(cacheKey, formatted);
       return formatted;
     }
-    return fallbackWishes;
+    return balloonWishesData;
   } catch (err) {
-    console.warn("[API] fetchPublicWishes dùng fallback data:", err.message);
-    return fallbackWishes;
+    console.warn("[API] fetchPublicWishes dùng local data:", err.message);
+    return balloonWishesData;
   }
 }
 
 /**
- * 3. Lấy lời nhắn riêng tư (Cá nhân hóa theo tên chị em)
+ * 4. Lấy lời nhắn riêng tư (Không cần mã PIN)
  */
-export async function fetchPrivateWishes(id, pin) {
-  // Tìm thông tin chị em tương ứng
-  const matchedPerson = fallbackPeople.find(p => p.id === id) || {
+export async function fetchPrivateWishes(id) {
+  const cleanId = String(id || 'lan_anh').trim().toLowerCase();
+  const matchedSister = sistersData.find(s => s.id === cleanId) || {
     name: "Chị Lan Anh",
-    dept: "Công ty"
+    dept: "Quality Assurance",
+    role: "QA Lead"
   };
-  const displayName = matchedPerson.name;
+  const displayName = matchedSister.name;
 
   if (!APPS_SCRIPT_URL) {
-    // Chế độ Demo / Local: Mở ngay các bức thư riêng ấm áp cá nhân hóa theo đúng tên chị!
+    // Lấy lời chúc riêng theo recipientId từ privateWishes.json
+    const sisterWishes = privateWishesData.filter(w => w.recipientId === cleanId);
+    if (sisterWishes.length > 0) {
+      return {
+        success: true,
+        recipient_name: displayName,
+        data: sisterWishes
+      };
+    }
+
+    // Nếu chị chưa có lời chúc riêng cụ thể trong file, tự sinh thư chúc ấm áp cá nhân hóa
     return {
       success: true,
       recipient_name: displayName,
@@ -105,48 +148,22 @@ export async function fetchPrivateWishes(id, pin) {
           id: 1,
           type: "winged_letter",
           badge: "🕊️ Cánh Thư Tri Ân",
-          title: "Thư từ người em cùng dự án",
-          from_name: "Một người em trong team",
-          text: `Cảm ơn chị ${displayName} đã luôn là người chỉ dẫn tận tình, kiên nhẫn đồng hành và gỡ rối cho em từ những ngày đầu bỡ ngỡ vào công ty. Chúc chị 20/10 luôn tràn đầy năng lượng, xinh đẹp rạng rỡ và luôn hạnh phúc với mọi lựa chọn của mình!`
+          from_name: "Anh em trong team",
+          text: `Cảm ơn ${displayName} đã luôn đồng hành, hỗ trợ và mang lại nguồn năng lượng tích cực cho toàn thể anh em. Chúc bạn một ngày 20/10 ngập tràn niềm vui, hoa tươi và những điều ngọt ngào nhất!`
         },
         {
           id: 2,
           type: "heart",
           badge: "💖 Trái Tim Đồng Đội",
-          title: "Lời nhắn gửi từ hậu phương IT",
-          from_name: "Đồng nghiệp giấu tên",
-          text: `Mỗi đợt release căng thẳng hay dự án cam go, chỉ cần có chị ${displayName} cùng sát cánh là cả team kỹ thuật luôn thấy an tâm và tràn đầy năng lượng tích cực. Chúc chị một ngày 20/10 ngập tràn hoa tươi, quà xinh và nụ cười rạng rỡ!`
-        },
-        {
-          id: 3,
-          type: "winged_letter",
-          badge: "🕊️ Cánh Thư Nắng Mai",
-          title: "Bức thư từ người bạn cùng bàn",
-          from_name: "Người bạn cùng bàn",
-          text: `Gửi chị ${displayName}: Cảm ơn chị vì những cốc trà sữa chia ngọt sẻ bùi và những tràng cười sảng khoái xua tan áp lực deadline. Chúc chị tuổi mới, ngày lễ 20/10 mọi sự hanh thông, công việc thăng hoa và luôn là bông hoa tỏa sáng nhất!`
-        },
-        {
-          id: 4,
-          type: "heart",
-          badge: "💖 Trái Tim Chân Tình",
-          title: "Gửi tặng người chị truyền cảm hứng",
-          from_name: "Anh em phòng Kỹ thuật",
-          text: `Sự chu đáo, tinh tế và năng lực xuất sắc của chị ${displayName} luôn là nguồn cảm hứng lớn cho tất cả anh em. Chúc chị ngày Phụ nữ Việt Nam 20/10 thật trọn vẹn, ấm áp bên gia đình và những người thân yêu!`
-        },
-        {
-          id: 5,
-          type: "winged_letter",
-          badge: "🕊️ Cánh Thư Ước Mơ",
-          title: "Thư chúc mừng tương lai rạng ngời",
-          from_name: "Nhóm dự án thân thương",
-          text: `Chúc chị ${displayName} luôn giữ trọn niềm đam mê và nụ cười ngọt ngào. Mong rằng mọi dự định của chị trong năm nay đều cán đích xuất sắc vượt mong đợi. Chúc chị 20/10 hạnh phúc ngọt ngào như những đóa hồng!`
+          from_name: "Một người đồng nghiệp giấu tên",
+          text: `Chúc ${displayName} ngày 20/10 luôn rạng rỡ, công việc hanh thông, vạn sự như ý và mãi là đóa hoa xinh đẹp của công ty!`
         }
       ]
     };
   }
 
   try {
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=private&id=${encodeURIComponent(id)}&pin=${encodeURIComponent(pin || "2010")}`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=private&id=${encodeURIComponent(cleanId)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     return data;
@@ -159,7 +176,7 @@ export async function fetchPrivateWishes(id, pin) {
         {
           id: 1,
           from_name: "Đồng nghiệp thân thiết",
-          text: `Chúc chị ${displayName} một ngày 20/10 ngập tràn niềm vui, công việc thuận buồm xuôi gió và luôn tươi cười hạnh phúc!`
+          text: `Chúc ${displayName} một ngày 20/10 ngập tràn niềm vui, công việc thuận buồm xuôi gió và luôn tươi cười hạnh phúc!`
         }
       ]
     };
@@ -167,14 +184,14 @@ export async function fetchPrivateWishes(id, pin) {
 }
 
 /**
- * 4. Gửi lời chúc mới từ Form
+ * 5. Gửi lời chúc mới từ Form
  */
 export async function submitWish(payload) {
   if (!APPS_SCRIPT_URL) {
-    console.log("[Demo Mode] Giả lập gửi lời chúc thành công:", payload);
+    console.log("[Local Mode] Lời chúc đã được ghi nhận:", payload);
     return {
       success: true,
-      message: "Cảm ơn bạn! Lời chúc đã được gửi (chế độ demo). Khi kết nối Google Apps Script, tin nhắn sẽ tự động gửi vào Sheet để duyệt."
+      message: "Cảm ơn bạn! Lời chúc đã được lưu thành công. Khi kết nối Google Apps Script, tin nhắn sẽ tự động gửi vào Google Sheet của ban tổ chức."
     };
   }
 

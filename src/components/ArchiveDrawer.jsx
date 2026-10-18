@@ -7,11 +7,17 @@ export default function ArchiveDrawer() {
 
   if (!isArchiveOpen) return null;
 
-  const filtered = wishes.filter(w =>
-    w.name.toLowerCase().includes(search.toLowerCase().trim()) ||
-    (w.dept && w.dept.toLowerCase().includes(search.toLowerCase().trim())) ||
-    w.text.toLowerCase().includes(search.toLowerCase().trim())
-  );
+  const filtered = wishes.filter(w => {
+    const sName = (w && (w.from_name || w.name || w.sender)) || '';
+    const sDept = (w && (w.dept || w.role)) || '';
+    const sText = (w && (w.text || w.message)) || '';
+    const term = search.toLowerCase().trim();
+    return (
+      sName.toLowerCase().includes(term) ||
+      sDept.toLowerCase().includes(term) ||
+      sText.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <>
@@ -58,23 +64,28 @@ export default function ArchiveDrawer() {
           <div className="royal-drawer-scroll-list">
             {filtered.map(w => {
               const isOpened = openedBalloons.has(w.id);
+              const senderName = w.from_name || w.name || w.sender || 'Tech Team';
+              const initial = String(senderName).trim().charAt(0) || '🌸';
+              const senderDept = w.dept || w.role || 'Tech & Product Team';
+              const wishText = w.text || w.message || '';
+
               return (
                 <div
                   key={w.id}
                   className={`royal-archive-item ${isOpened ? 'item-opened' : 'item-locked'}`}
                 >
                   <div className="archive-avatar">
-                    {w.name.charAt(0)}
+                    {initial}
                   </div>
                   <div style={{ flex: 1 }}>
                     <div className="archive-item-top">
-                      <strong className="archive-sender-name">{w.name}</strong>
+                      <strong className="archive-sender-name">{senderName}</strong>
                       <span className="archive-dept-badge">
-                        {w.dept || 'Tech Team'}
+                        {senderDept}
                       </span>
                     </div>
                     <p className="archive-quote-text">
-                      “{w.text}”
+                      “{wishText}”
                     </p>
                     {isOpened && (
                       <span className="archive-opened-indicator">

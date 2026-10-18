@@ -256,14 +256,18 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
   let spIndex = 0;
   function stepSpecies() {
     if (spIndex >= species.length) {
-      if (typeof onProgress === 'function') onProgress('Hoàn tất thảm hoa 3D!');
+      if (typeof onProgress === 'function') {
+        try { onProgress('Hoàn tất thảm hoa 3D!'); } catch (e) {}
+      }
       return;
     }
     const sp = species[spIndex];
     const si = spIndex;
     spIndex++;
 
-    if (typeof onProgress === 'function') onProgress(`Đang trải ${sp.name}...`);
+    if (typeof onProgress === 'function') {
+      try { onProgress(`Đang trải ${sp.name}...`); } catch (e) {}
+    }
 
     const nTotal = Math.floor(sp.count * Q);
     const nNear = Math.floor(nTotal * 0.35);

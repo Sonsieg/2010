@@ -46,7 +46,7 @@ export default function IdentitySelector({ onOpenGift }) {
           <div className="identity-selected-pill">
             <div className="selected-sister-info">
               <div className="selected-avatar-mini">
-                {selectedSister.name.split(' ').slice(-1)[0].charAt(0)}
+                {(selectedSister?.name || 'Chị Em').trim().split(' ').slice(-1)[0].charAt(0)}
               </div>
               <div>
                 <div className="selected-sister-name">Chị {selectedSister.name}</div>
