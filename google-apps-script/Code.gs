@@ -13,6 +13,16 @@ function getSpreadsheet() {
   return SpreadsheetApp.openById(SPREADSHEET_ID);
 }
 
+function normalizeDriveUrl(url) {
+  if (!url) return "";
+  const str = String(url).trim();
+  const match = str.match(/\/d\/([a-zA-Z0-9_-]+)/) || str.match(/id=([a-zA-Z0-9_-]+)/);
+  if (match && (str.indexOf("drive.google.com") !== -1 || str.indexOf("docs.google.com") !== -1)) {
+    return "https://lh3.googleusercontent.com/d/" + match[1];
+  }
+  return str;
+}
+
 function doGet(e) {
   try {
     const action = e.parameter.action;
@@ -34,7 +44,7 @@ function doGet(e) {
           name: String(r[1]).trim(),
           dept: String(r[2] || "").trim(),
           role: String(r[3] || "").trim(),
-          photo: r[6] ? String(r[4] || "").trim() : "", // Chỉ trả URL ảnh khi has_consent = TRUE
+          photo: r[6] ? normalizeDriveUrl(r[4]) : "", // Chỉ trả URL ảnh khi has_consent = TRUE
           has_consent: Boolean(r[6])
         }));
 
@@ -55,6 +65,7 @@ function doGet(e) {
         .map((r, idx) => ({
           id: idx + 1,
           from_name: r[2] ? "Đồng nghiệp ẩn danh" : String(r[1]).trim(),
+          dept: r[7] ? String(r[7]).trim() : "Engineering & Product Team",
           text: String(r[4]).trim(),
           color: r[6] ? String(r[6]).trim() : "#C9A66B",
           timestamp: r[0]
@@ -97,6 +108,7 @@ function doGet(e) {
         .map((r, idx) => ({
           id: idx + 1,
           from_name: r[2] ? "Một người bạn ẩn danh" : String(r[1]).trim(),
+          dept: r[7] ? String(r[7]).trim() : "Đồng nghiệp thân thiết",
           text: String(r[4]).trim(),
           timestamp: r[0]
         }));
@@ -129,6 +141,7 @@ function doPost(e) {
     }
 
     const from_name = String(payload.from_name || "Ẩn danh").trim();
+    const dept = String(payload.dept || "Engineering & Product Team").trim();
     const is_anonymous = Boolean(payload.anonymous);
     const to = String(payload.to || "ALL").trim().toLowerCase();
     const text = String(payload.text || "").trim().substring(0, 300);
@@ -151,7 +164,8 @@ function doPost(e) {
       to,
       text,
       "pending", // Cần admin chuyển thành 'approved'
-      payload.color || "#C9A66B"
+      payload.color || "#C9A66B",
+      dept
     ]);
 
     return createJsonResponse({

@@ -24,6 +24,7 @@ Hệ thống cho phép lưu trữ và duyệt lời chúc tự động mà khôn
    - **Cột E:** `text` (Nội dung lời chúc)
    - **Cột F:** `status` (Điền `approved` để hiển thị trên web, hoặc `pending`/`rejected`)
    - **Cột G:** `color` (Mã màu HEX cho quả bóng, ví dụ: `#8C2F4B`, `#C9A66B`)
+   - **Cột H:** `dept` (Phòng ban người gửi: ví dụ `Engineering (Backend/Dev)`, `Frontend Team`,...)
 
 ---
 

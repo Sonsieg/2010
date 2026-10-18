@@ -2,25 +2,68 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { submitWish } from '../api.js';
 
+const QUICK_TEMPLATES = [
+  {
+    icon: '🌸',
+    label: 'Tri ân & Đồng hành',
+    text: 'Cảm ơn các chị em luôn là chỗ dựa vững chắc, sát cánh cùng anh em qua mọi dự án. Chúc chị em 20/10 ngập tràn niềm vui, hoa tươi và những khoảnh khắc ngọt ngào nhất!'
+  },
+  {
+    icon: '✨',
+    label: 'Tỏa sáng & Rạng ngời',
+    text: 'Chúc các đóa hoa xinh đẹp của công ty ngày 20/10 luôn rạng rỡ, code mượt mà, release suôn sẻ và nụ cười tươi tắn luôn tiếp thêm năng lượng cho cả team!'
+  },
+  {
+    icon: '☕',
+    label: 'Ngọt ngào & Hạnh phúc',
+    text: 'Nhân ngày 20/10, chúc chị em luôn hạnh phúc, công việc thuận buồm xuôi gió, luôn được yêu thương trân trọng và nhận thật nhiều bất ngờ ấm áp từ mọi người!'
+  },
+  {
+    icon: '💎',
+    label: 'Bản lĩnh & Thành công',
+    text: 'Trân trọng sự nhiệt huyết, tỉ mỉ và tài năng xuất sắc của các chị em trong từng dòng code và sản phẩm. Chúc chị em luôn tự tin, tỏa sáng và gặt hái nhiều thành công!'
+  }
+];
+
+const DEPARTMENTS = [
+  'Engineering (Backend/Dev)',
+  'Frontend & Mobile Team',
+  'Quality Assurance (QA/QC)',
+  'Product & Design (UI/UX)',
+  'DevOps & System Infra',
+  'Data & AI Team',
+  'Tech Support & Operations',
+  'Toàn thể Anh Em Công Ty'
+];
+
 export default function SenderStudioPage() {
-  const { people } = useApp();
+  const { people, navigateWithFlowerTransition } = useApp();
   const [to, setTo] = useState('ALL');
   const [fromName, setFromName] = useState('');
+  const [dept, setDept] = useState(DEPARTMENTS[0]);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [color, setColor] = useState('#F43F5E');
   const [text, setText] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
 
   const showToast = (msg) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 3500);
+    setTimeout(() => setToastMsg(''), 4000);
+  };
+
+  const handleSelectTemplate = (templateText) => {
+    setText(templateText);
+    showToast('✨ Đã áp dụng mẫu lời chúc! Bạn có thể chỉnh sửa thêm.');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (honeypot) return; // Chặn bot spam
+
     if (!text.trim()) {
-      showToast('Vui lòng nhập nội dung lời chúc!');
+      showToast('⚠️ Vui lòng nhập nội dung lời chúc!');
       return;
     }
 
@@ -28,14 +71,16 @@ export default function SenderStudioPage() {
     const res = await submitWish({
       to,
       from_name: fromName.trim() || 'Một người anh em',
+      dept: dept || 'Engineering & Product Team',
       anonymous: isAnonymous,
       text: text.trim(),
-      color
+      color,
+      honeypot
     });
     setIsSubmitting(false);
 
     if (res.success) {
-      showToast('Gửi lời chúc thành công! Cảm ơn bạn rất nhiều! 🎉');
+      showToast('🎉 Gửi lời chúc thành công! Cảm ơn bạn rất nhiều! Lời chúc sẽ xuất hiện sau khi duyệt.');
       setText('');
       setFromName('');
     } else {
@@ -44,35 +89,89 @@ export default function SenderStudioPage() {
   };
 
   return (
-    <div className="page-screen" id="page-sender" style={{ background: 'linear-gradient(135deg, #1E1B26 0%, #2D1424 100%)', color: '#FFF' }}>
-      <div className="studio-container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid rgba(201,166,107,0.3)', paddingBottom: '16px' }}>
+    <div className="page-screen" id="page-sender" style={{ background: 'radial-gradient(ellipse at 50% 20%, #2D1424 0%, #150A12 100%)', color: '#FFF', minHeight: '100dvh', padding: '40px 16px' }}>
+      <div className="studio-container" style={{ maxWidth: '680px', margin: '0 auto', background: 'rgba(30, 15, 24, 0.85)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(201,166,107,0.3)', padding: '32px 28px', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', borderBottom: '1px solid rgba(201,166,107,0.25)', paddingBottom: '16px' }}>
           <div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: 'var(--champagne-gold)', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-              Pre-20/10 Portal
+            <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.75rem', color: '#C9A66B', letterSpacing: '0.25em', textTransform: 'uppercase', fontWeight: '600' }}>
+              ✦ GÓC TÂM TÌNH ANH EM IT ✦
             </span>
-            <h1 className="font-serif" style={{ fontSize: '1.8rem', color: '#FFF', marginTop: '4px' }}>
-              Góc Viết Lời Chúc Của Anh Em 👨‍💻
+            <h1 className="font-serif" style={{ fontSize: '1.85rem', color: '#FAF3EA', marginTop: '6px', fontWeight: '700' }}>
+              Trao Gửi Lời Chúc 20/10 💌
             </h1>
           </div>
-          <a href="#/" className="pill-btn" style={{ background: 'rgba(255,255,255,0.1)', color: '#FFF', borderColor: 'var(--champagne-gold)' }}>
-            <span>Xem thử trang Chị Em 🌸</span>
-          </a>
+          <button
+            type="button"
+            onClick={() => navigateWithFlowerTransition('/')}
+            className="pill-btn"
+            style={{ background: 'rgba(201,166,107,0.15)', color: '#FDE68A', borderColor: 'rgba(201,166,107,0.5)', padding: '8px 16px', fontSize: '0.85rem' }}
+          >
+            <span>Vào Trang Chúc Mừng 🌸</span>
+          </button>
         </div>
 
-        <p style={{ fontSize: '0.92rem', color: '#E2E8F0', lineHeight: '1.7', marginBottom: '28px' }}>
-          Chào anh em! Hãy gửi những lời chúc chân thành, trân trọng nhất gửi tới các chị em công ty. Lời chúc của bạn sẽ hóa thành quả bóng bay hoặc bức thư bí mật trao tay các chị vào đúng ngày 20/10!
+        <p style={{ fontSize: '0.94rem', color: '#E2E8F0', lineHeight: '1.7', marginBottom: '24px' }}>
+          Chào anh em! Hãy gửi những lời chúc chân thành, trân trọng năng lực và sự đồng hành của các chị em. Lời chúc của bạn sẽ hóa thành <strong>bóng bay bay lượn</strong> trên bầu trời công ty hoặc <strong>bức thư bí mật dát vàng</strong> gửi riêng vào ngày 20/10!
         </p>
 
+        {/* Mẫu lời chúc nhanh */}
+        <div style={{ marginBottom: '24px', background: 'rgba(255,255,255,0.04)', borderRadius: '14px', padding: '14px 16px', border: '1px solid rgba(201,166,107,0.15)' }}>
+          <div style={{ fontSize: '0.8rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px', fontWeight: '600' }}>
+            💡 Gợi ý nhanh (Bấm để điền mẫu lời chúc chuẩn mực):
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            {QUICK_TEMPLATES.map((tmpl, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSelectTemplate(tmpl.text)}
+                style={{
+                  background: 'rgba(201,166,107,0.12)',
+                  border: '1px solid rgba(201,166,107,0.3)',
+                  color: '#FAF3EA',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  fontSize: '0.82rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(201,166,107,0.25)'; e.currentTarget.style.borderColor = '#FDE68A'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(201,166,107,0.12)'; e.currentTarget.style.borderColor = 'rgba(201,166,107,0.3)'; }}
+              >
+                <span>{tmpl.icon}</span>
+                <span>{tmpl.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit}>
+          {/* Honeypot field (ẩn chống bot) */}
+          <input
+            type="text"
+            name="website_url"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            style={{ display: 'none' }}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+
+          {/* 1. Người nhận */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--champagne-gold)', textTransform: 'uppercase' }}>
+            <label style={{ display: 'block', fontSize: '0.82rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: '600' }}>
               1. Bạn muốn gửi tới:
             </label>
             <select
               value={to}
               onChange={(e) => setTo(e.target.value)}
               className="studio-select"
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: '#1A0C16', color: '#FFF', border: '1px solid rgba(201,166,107,0.4)', fontSize: '0.94rem' }}
             >
               <option value="ALL">🎈 Tất cả chị em (Bóng bay công khai trên bầu trời)</option>
               {people.map(p => (
@@ -83,68 +182,99 @@ export default function SenderStudioPage() {
             </select>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--champagne-gold)', textTransform: 'uppercase' }}>
-              2. Tên của bạn:
-            </label>
-            <input
-              type="text"
-              value={fromName}
-              onChange={(e) => setFromName(e.target.value)}
-              className="studio-input"
-              placeholder="Ví dụ: Hoàng Minh - Backend..."
-            />
+          {/* 2. Tên & Phòng ban */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.82rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: '600' }}>
+                2. Tên của bạn:
+              </label>
+              <input
+                type="text"
+                value={fromName}
+                onChange={(e) => setFromName(e.target.value)}
+                className="studio-input"
+                placeholder="Ví dụ: Hoàng Minh..."
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: '#1A0C16', color: '#FFF', border: '1px solid rgba(201,166,107,0.4)', fontSize: '0.94rem' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.82rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: '600' }}>
+                3. Phòng ban / Team:
+              </label>
+              <select
+                value={dept}
+                onChange={(e) => setDept(e.target.value)}
+                className="studio-select"
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: '#1A0C16', color: '#FFF', border: '1px solid rgba(201,166,107,0.4)', fontSize: '0.94rem' }}
+              >
+                {DEPARTMENTS.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Ẩn danh */}
+          <div style={{ marginBottom: '22px', display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '10px', border: '1px dashed rgba(201,166,107,0.3)' }}>
             <input
               type="checkbox"
               id="anonymousCheck"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              style={{ width: '20px', height: '20px', accentColor: 'var(--rose-500)' }}
+              style={{ width: '20px', height: '20px', accentColor: '#BE123C', cursor: 'pointer' }}
             />
-            <label htmlFor="anonymousCheck" style={{ fontSize: '0.9rem', color: 'var(--champagne-light)', cursor: 'pointer' }}>
-              Gửi ẩn danh (Người nhận chỉ thấy là 'Đồng nghiệp ẩn danh')
+            <label htmlFor="anonymousCheck" style={{ fontSize: '0.88rem', color: '#E2E8F0', cursor: 'pointer' }}>
+              <strong>Gửi ẩn danh với người nhận</strong> (Trên thẻ chỉ hiện <em>'Đồng nghiệp ẩn danh'</em>, nhưng admin vẫn biết danh tính của bạn)
             </label>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--champagne-gold)', textTransform: 'uppercase' }}>
-              3. Chọn màu bóng bay:
+          {/* Màu sắc bóng bay */}
+          <div style={{ marginBottom: '22px' }}>
+            <label style={{ display: 'block', fontSize: '0.82rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px', fontWeight: '600' }}>
+              4. Chọn sắc màu bóng bay:
             </label>
-            <div style={{ display: 'flex', gap: '12px', marginTop: '10px' }}>
-              {['#F43F5E', '#EC4899', '#C9A66B', '#8B5CF6', '#10B981', '#0EA5E9'].map(c => (
-                <label key={c} style={{ cursor: 'pointer' }}>
+            <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+              {[
+                { hex: '#F43F5E', name: 'Hồng Rose' },
+                { hex: '#EC4899', name: 'Hồng Phấn' },
+                { hex: '#C9A66B', name: 'Vàng Champagne' },
+                { hex: '#8B5CF6', name: 'Tím Lavender' },
+                { hex: '#10B981', name: 'Xanh Emerald' },
+                { hex: '#0EA5E9', name: 'Xanh Bầu Trời' }
+              ].map(item => (
+                <label key={item.hex} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }} title={item.name}>
                   <input
                     type="radio"
                     name="balloonColor"
-                    value={c}
-                    checked={color === c}
-                    onChange={() => setColor(c)}
+                    value={item.hex}
+                    checked={color === item.hex}
+                    onChange={() => setColor(item.hex)}
+                    style={{ cursor: 'pointer' }}
                   />
-                  <span style={{ display: 'inline-block', width: '24px', height: '24px', background: c, borderRadius: '50%', verticalAlign: 'middle', marginLeft: '4px' }}></span>
+                  <span style={{ display: 'inline-block', width: '26px', height: '26px', background: item.hex, borderRadius: '50%', boxShadow: color === item.hex ? '0 0 10px ' + item.hex : 'none', border: color === item.hex ? '2px solid #FFF' : '1px solid rgba(255,255,255,0.2)' }}></span>
                 </label>
               ))}
             </div>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--champagne-gold)', textTransform: 'uppercase' }}>
-                4. Lời chúc của bạn:
+          {/* Lời chúc */}
+          <div style={{ marginBottom: '26px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ fontSize: '0.82rem', color: '#C9A66B', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600' }}>
+                5. Nội dung lời chúc:
               </label>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: '#94A3B8' }}>
-                {text.length}/250
+              <span style={{ fontFamily: 'var(--font-mono, monospace)', fontSize: '0.78rem', color: text.length > 280 ? '#F43F5E' : '#94A3B8' }}>
+                {text.length}/300 ký tự
               </span>
             </div>
             <textarea
               rows={5}
               value={text}
-              maxLength={250}
+              maxLength={300}
               onChange={(e) => setText(e.target.value)}
               className="studio-textarea"
               placeholder="Viết những lời trân trọng, cảm ơn chân thành nhất gửi đến chị em..."
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', background: '#1A0C16', color: '#FAF3EA', border: '1px solid rgba(201,166,107,0.4)', fontSize: '0.95rem', lineHeight: '1.6', resize: 'vertical' }}
               required
             />
           </div>
@@ -153,14 +283,15 @@ export default function SenderStudioPage() {
             type="submit"
             disabled={isSubmitting}
             className="btn-rose"
-            style={{ width: '100%', fontSize: '1.05rem' }}
+            style={{ width: '100%', padding: '15px 24px', fontSize: '1.05rem', fontWeight: '700', borderRadius: '12px', letterSpacing: '0.04em', background: 'linear-gradient(135deg, #BE123C 0%, #8C2F4B 100%)', boxShadow: '0 8px 24px rgba(190, 18, 60, 0.45)', cursor: isSubmitting ? 'wait' : 'pointer' }}
           >
-            <span>{isSubmitting ? 'Đang gửi lời chúc... ⏳' : 'Gửi Lời Chúc Vào Hệ Thống 🚀'}</span>
+            <span>{isSubmitting ? 'Đang gửi lời chúc vào hệ thống... ⏳' : 'Gửi Lời Chúc Vào Hệ Thống 🚀'}</span>
           </button>
         </form>
 
-        {toastMsg && <div className="sweet-toast show">{toastMsg}</div>}
+        {toastMsg && <div className="sweet-toast show" style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', background: '#1E0F18', border: '1.5px solid #C9A66B', color: '#FDE68A', padding: '14px 28px', borderRadius: '30px', boxShadow: '0 10px 30px rgba(0,0,0,0.8)', zIndex: 9999 }}>{toastMsg}</div>}
       </div>
     </div>
   );
 }
+

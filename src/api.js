@@ -10,7 +10,7 @@ import cardWishesData from './data/cardWishes.json';
 
 // Khi deploy Google Apps Script, dán URL Web App vào đây (dạng https://script.google.com/macros/s/.../exec)
 // Nếu để rỗng (""), hệ thống sẽ tự động dùng 100% dữ liệu từ các file trong src/data/
-export const APPS_SCRIPT_URL = ""; 
+export const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuex0SUfkMbiD6zx0aIsoOyO9kMskPanbVtIbsCg1YQNckoPpwjJdR41_k5TtHMMs/exec"; 
 
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 phút
 
@@ -42,6 +42,24 @@ export function getAllCardWishes() {
 }
 
 /**
+ * Tự động chuẩn hóa link ảnh, đặc biệt là link Google Drive sang định dạng direct CDN
+ */
+export function normalizePhotoUrl(url) {
+  if (!url || typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  // Chuyển link Google Drive (view/sharing) sang link direct image stream
+  const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+  if (driveMatch && (trimmed.includes('drive.google.com') || trimmed.includes('docs.google.com'))) {
+    const fileId = driveMatch[1];
+    return `https://lh3.googleusercontent.com/d/${fileId}`;
+  }
+
+  return trimmed;
+}
+
+/**
  * 2. Lấy danh sách chị em (hỗ trợ cả offline data và online Google Sheet)
  */
 export async function fetchPeople() {
@@ -50,7 +68,10 @@ export async function fetchPeople() {
   if (cached) return cached;
 
   if (!APPS_SCRIPT_URL) {
-    return sistersData;
+    return sistersData.map(p => ({
+      ...p,
+      photo: normalizePhotoUrl(p.photo)
+    }));
   }
 
   try {
@@ -65,13 +86,23 @@ export async function fetchPeople() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-      setCache(cacheKey, data.data);
-      return data.data;
+      const sanitizedPeople = data.data.map(p => ({
+        ...p,
+        photo: normalizePhotoUrl(p.photo)
+      }));
+      setCache(cacheKey, sanitizedPeople);
+      return sanitizedPeople;
     }
-    return sistersData;
+    return sistersData.map(p => ({
+      ...p,
+      photo: normalizePhotoUrl(p.photo)
+    }));
   } catch (err) {
     console.warn("[API] fetchPeople dùng local data:", err.message);
-    return sistersData;
+    return sistersData.map(p => ({
+      ...p,
+      photo: normalizePhotoUrl(p.photo)
+    }));
   }
 }
 

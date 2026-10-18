@@ -82,7 +82,22 @@ export default function TopNav() {
         </span>
       </button>
 
-      {/* 4. Audio Controller */}
+      {/* 4. Nút Gửi Lời Chúc Dành Cho Anh Em */}
+      <button
+        onClick={() => navigateWithFlowerTransition('/sender')}
+        className="royal-nav-pill btn-sender-nav"
+        title="Dành cho Anh Em: Gửi lời chúc mới vào hệ thống"
+        style={{
+          background: 'linear-gradient(135deg, rgba(190,18,60,0.25) 0%, rgba(201,166,107,0.18) 100%)',
+          borderColor: 'rgba(201,166,107,0.45)',
+          color: '#FAF3EA'
+        }}
+      >
+        <span>✍️</span>
+        <span className="btn-label">Gửi lời chúc</span>
+      </button>
+
+      {/* 5. Audio Controller */}
       <AudioController />
     </nav>
   );
