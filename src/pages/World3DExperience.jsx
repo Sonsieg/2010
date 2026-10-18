@@ -42,6 +42,7 @@ import {
   taperedTube,
   makeHeartGeometry,
   VAN_PRESETS,
+  CARRIAGE_PRESETS,
   STATIONS,
   fireflyTexture,
   glowTexture,
@@ -56,7 +57,8 @@ import {
   makeLavenderHead,
   makeStem,
   makeBlade,
-  buildVegetationField
+  buildVegetationField,
+  buildRoyalCarriage
 } from '../components/world3d/index.js';
 
 export { STATIONS };
@@ -245,6 +247,9 @@ export default function World3DExperience() {
   // [P1] Navigation & Camera states
   const [activeStationIndex, setActiveStationIndex] = useState(0);
   const [activeVanCamPreset, setActiveVanCamPreset] = useState('chase');
+  const [selectedVehicle, setSelectedVehicle] = useState('van'); // 'van' | 'carriage'
+  const selectedVehicleRef = useRef('van');
+  const royalCarriageRef = useRef(null);
   const [isLookingAtSky, setIsLookingAtSky] = useState(false);
   const [isNavPadOpen, setIsNavPadOpen] = useState(false);
   const navMoveIntervalRef = useRef(null);
@@ -680,10 +685,12 @@ export default function World3DExperience() {
       transRef.current.dur = customDur || 1800;
       transRef.current.fromCam = cam.position.clone();
       transRef.current.fromTgt = ctrl.target.clone();
-      transRef.current.preset = VAN_PRESETS[activeVanCamPreset];
+      const isCarriage = selectedVehicleRef.current === 'carriage';
+      const presets = isCarriage ? CARRIAGE_PRESETS : VAN_PRESETS;
+      transRef.current.preset = presets[activeVanCamPreset] || (isCarriage ? CARRIAGE_PRESETS.tq : VAN_PRESETS.chase);
       transRef.current.isVanRelative = true;
       transRef.current.arcHeight = 0;
-      showToast('🚐 Đang bay bám theo Chuyến Xe Hoa 20/10!');
+      showToast(isCarriage ? '🐎 Đang bay bám theo Cỗ Xe Ngựa Hoàng Gia 20/10!' : '🚐 Đang bay bám theo Chuyến Xe Hoa 20/10!');
       return;
     }
 
@@ -743,8 +750,46 @@ export default function World3DExperience() {
     transRef.current.dur = 1200;
     transRef.current.fromCam = cam.position.clone();
     transRef.current.fromTgt = ctrl.target.clone();
-    transRef.current.preset = VAN_PRESETS[name];
+    const presets = selectedVehicleRef.current === 'carriage' ? CARRIAGE_PRESETS : VAN_PRESETS;
+    transRef.current.preset = presets[name] || CARRIAGE_PRESETS[name] || VAN_PRESETS[name] || VAN_PRESETS.chase;
     transRef.current.isVanRelative = true;
+  };
+
+  /* ================================================================== */
+  /*  [P1] SWITCH VEHICLE (XE HOA RETRO <-> CỖ XE BẠCH MÃ HOÀNG GIA)    */
+  /* ================================================================== */
+  const switchVehicle = (vehicleType) => {
+    if (selectedVehicleRef.current === vehicleType) return;
+    playSparkleSound();
+    fireConfetti({
+      particleCount: 55,
+      spread: 75,
+      origin: { y: 0.65 },
+      colors: ['#FDE68A', '#F43F5E', '#C084FC', '#FFF']
+    });
+    selectedVehicleRef.current = vehicleType;
+    setSelectedVehicle(vehicleType);
+    if (royalCarriageRef.current && royalCarriageRef.current.root) {
+      royalCarriageRef.current.root.visible = vehicleType === 'carriage';
+    }
+
+    const defaultPreset = vehicleType === 'carriage' ? 'tq' : 'chase';
+    setActiveVanCamPreset(defaultPreset);
+    if (transRef.current) {
+      transRef.current.active = true;
+      transRef.current.t0 = performance.now();
+      transRef.current.dur = 1100;
+      if (cameraRef.current) transRef.current.fromCam = cameraRef.current.position.clone();
+      if (controlsRef.current) transRef.current.fromTgt = controlsRef.current.target.clone();
+      transRef.current.preset = vehicleType === 'carriage' ? CARRIAGE_PRESETS.tq : VAN_PRESETS.chase;
+      transRef.current.isVanRelative = true;
+    }
+
+    if (vehicleType === 'carriage') {
+      showToast('🐎 Đã triệu hồi Cỗ Xe Bạch Mã Hoàng Gia Cổ Tích!');
+    } else {
+      showToast('🚐 Đã chuyển sang Chuyến Xe Hoa 20/10 Retro!');
+    }
   };
 
   /* ================================================================== */
@@ -1592,6 +1637,19 @@ export default function World3DExperience() {
     const fairyOrbs = [];
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xf0f0f5, metalness: 1, roughness: 0.15, envMap: envTex, envMapIntensity: 1.4 });
 
+    let royalCarriage = null;
+    const buildCarriageVehicle = () => {
+      try {
+        royalCarriage = buildRoyalCarriage({ scene, envTex });
+        royalCarriageRef.current = royalCarriage;
+        if (royalCarriage && royalCarriage.root) {
+          royalCarriage.root.visible = selectedVehicleRef.current === 'carriage';
+        }
+      } catch (err) {
+        console.warn('[Royal Carriage] Build error:', err);
+      }
+    };
+
     const buildTruck = () => {
       const creamMat = new THREE.MeshPhysicalMaterial({ color: 0xf7ecdc, roughness: 0.38, metalness: 0.05, clearcoat: 0.7, clearcoatRoughness: 0.2, envMap: envTex, envMapIntensity: 0.9 });
       const wineMat = new THREE.MeshPhysicalMaterial({ color: 0x9b2c4d, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.2, envMap: envTex, envMapIntensity: 0.9, side: THREE.DoubleSide });
@@ -2356,8 +2414,6 @@ export default function World3DExperience() {
     };
 
     let triggerCastleFireworks = () => {};
-    let launchRocket = (x, z, targetY) => {};
-    let explode = (pos, type) => {};
 
     /* ================================================================== */
     /*  [P3] STATION 0 — GIFT BOX                                          */
@@ -3910,29 +3966,17 @@ export default function World3DExperience() {
 
       st5Group.add(sealGroup);
 
-      /* ===== [P3] Trigger fireworks ===== */
-      triggerCastleFireworks = () => {
-        getAC();
-        const cx = st5Center.x, cz = st5Center.z;
-        const volley = (count) => {
-          for (let i = 0; i < count; i++) {
-            fwTimers.push(setTimeout(() => {
-              launchRocket(cx + (rand() - 0.5) * 32, cz - 6 + (rand() - 0.5) * 14, 38 + rand() * 12);
-            }, i * (120 + rand() * 180)));
-          }
-        };
-        for (let w = 0; w < 12; w++) {
-          fwTimers.push(setTimeout(() => volley(1 + Math.floor(rand() * 3)), w * 800));
-        }
-        fwTimers.push(setTimeout(() => volley(10), 11000));
-      };
+      // ⚠️ KHÔNG gán đè triggerCastleFireworks ở đây!
+      // PHẦN 4 đã override bằng bản Upgraded (3 giàn pháo độc lập, 12 chủng loại hoàng gia).
+      // Chỉ cần buildStation5() gán stationCameraPositions[5] là đủ.
 
       scene.add(st5Group);
 
       const onPartyClick = () => {
         const cAnim = worldAtmosphereRef.current.st5ChestAnim;
         if (cAnim && cAnim.opened) {
-          // Khi hòm quà đã mở rồi, bấm lại sẽ mở trực tiếp bảng thiệp Retina 2x
+          // Khi hòm quà đã mở rồi, bấm lại sẽ bắn thêm đợt pháo hoa rực rỡ và mở thiệp Retina 2x
+          triggerCastleFireworks();
           setActivePartyCardModal(true);
           return;
         }
@@ -4193,6 +4237,7 @@ export default function World3DExperience() {
     // Dựng dần các thành phần theo từng khung hình sau khi Trạm 0 và khung cảnh chính đã vẽ lên màn hình
     const stagedTasks = [
       { name: 'Xe Hoa 20/10', run: buildTruck },
+      { name: 'Cỗ Xe Bạch Mã Hoàng Gia', run: buildCarriageVehicle },
       { name: 'Hàng Rào Cổ Điển', run: buildVintageFence },
       { name: 'Đèn Đường Cổ Điển', run: buildStreetLamps },
       { name: 'Rừng Anh Đào', run: buildCherryTrees },
@@ -4587,7 +4632,10 @@ export default function World3DExperience() {
       triggerCastleFireworks_Upgraded = () => {
         getAC();
         const st5 = stationCameraPositions[5];
-        if (!st5) return;
+        if (!st5) {
+          console.warn('[Fireworks] Station 5 camera position not ready');
+          return;
+        }
         const stCam = st5.camPos;
         const stTgt = st5.targetPos;
         const fwd = stTgt.clone().sub(stCam);
@@ -5113,6 +5161,10 @@ export default function World3DExperience() {
       yaw = Math.atan2(T.x, T.z);
       vanRoot.position.copy(vanPos);
       vanRoot.rotation.y = yaw;
+      if (royalCarriage && royalCarriage.root) {
+        royalCarriage.root.position.copy(vanPos);
+        royalCarriage.root.rotation.y = yaw;
+      }
       vanStateRef.current.pos.copy(vanPos);
       vanStateRef.current.yaw = yaw;
     };
@@ -5180,21 +5232,32 @@ export default function World3DExperience() {
         }
       }
 
-      /* --- 1. Van --- */
+      /* --- 1. Van & Royal Carriage --- */
       vanU = (vanU + (SPEED * dt) / curveLen) % 1;
       const prevYaw = yaw;
       placeVan();
       const yr = dt > 0 ? normAngle(yaw - prevYaw) / dt : 0;
       yawRateS += (yr - yawRateS) * Math.min(1, dt * 4);
 
-      wheelAngle += (SPEED * dt) / 0.48;
-      spinGroups.forEach((s) => (s.rotation.x = wheelAngle));
-      const steer = Math.max(-0.4, Math.min(0.4, (yawRateS / SPEED) * 2.6));
-      steerPivots.forEach((p) => p && (p.rotation.y = steer));
+      const isCarriage = selectedVehicleRef.current === 'carriage';
+      vanRoot.visible = !isCarriage;
+      if (royalCarriage && royalCarriage.root) {
+        royalCarriage.root.visible = isCarriage;
+        if (isCarriage) {
+          royalCarriage.update(dt, elapsed, SPEED, yawRateS);
+        }
+      }
 
-      bodyGroup.position.y = Math.sin(elapsed * 9) * 0.007 + Math.sin(elapsed * 3.1) * 0.012;
-      bodyGroup.rotation.z = yawRateS * 0.35 + Math.sin(elapsed * 2.1) * 0.004;
-      bodyGroup.rotation.x = Math.sin(elapsed * 2.4) * 0.006;
+      if (!isCarriage) {
+        wheelAngle += (SPEED * dt) / 0.48;
+        spinGroups.forEach((s) => (s.rotation.x = wheelAngle));
+        const steer = Math.max(-0.4, Math.min(0.4, (yawRateS / SPEED) * 2.6));
+        steerPivots.forEach((p) => p && (p.rotation.y = steer));
+
+        bodyGroup.position.y = Math.sin(elapsed * 9) * 0.007 + Math.sin(elapsed * 3.1) * 0.012;
+        bodyGroup.rotation.z = yawRateS * 0.35 + Math.sin(elapsed * 2.1) * 0.004;
+        bodyGroup.rotation.x = Math.sin(elapsed * 2.4) * 0.006;
+      }
 
       // 1b. Dải đèn LED nhỏ quanh xe và hoa: nhấp nháy phát quang lung linh
       fairyOrbs.forEach((f) => {
@@ -5750,17 +5813,6 @@ export default function World3DExperience() {
                 </button>
               </div>
             </aside>
-
-            {/* Điều khiển góc nhìn xe hoa (chỉ nổi lên khi ở trạm 3) */}
-            {activeStationIndex === 3 && (
-              <div className="hud-van-angles-dock">
-                <span className="van-angle-title">🚐 Góc nhìn:</span>
-                <button className={`btn-van-angle ${activeVanCamPreset === 'chase' ? 'active' : ''}`} onClick={() => setVanCameraPreset('chase')}>Theo Xe</button>
-                <button className={`btn-van-angle ${activeVanCamPreset === 'close' ? 'active' : ''}`} onClick={() => setVanCameraPreset('close')}>Cận Cảnh</button>
-                <button className={`btn-van-angle ${activeVanCamPreset === 'side' ? 'active' : ''}`} onClick={() => setVanCameraPreset('side')}>Bên Hông</button>
-                <button className={`btn-van-angle ${activeVanCamPreset === 'top' ? 'active' : ''}`} onClick={() => setVanCameraPreset('top')}>Trên Cao</button>
-              </div>
-            )}
           </>
         )}
 
@@ -5864,49 +5916,101 @@ export default function World3DExperience() {
           )}
         </div>
 
-        {/* Thanh đáy: Hòm thư bưu điện & Nút trạm tiếp theo */}
-        <div className="hud-bottom-bar">
-          <button className="btn-hud-mailbox" onClick={() => { playLetterOpenSound(); setIsMailboxOpen(true); }}>
-            <span>🕊️ Hòm Thư Bưu Điện</span>
-            <span className="mailbox-badge">{messages.length} Món Quà</span>
-          </button>
-
-          {activeStationIndex === 5 && (
-            <button
-              onClick={() => setActivePartyCardModal(true)}
-              className="btn-rose"
-              style={{
-                background: 'linear-gradient(135deg, #D4AF37, #B48A27)',
-                color: '#1E0F18',
-                fontWeight: '800',
-                border: '1.5px solid #FFF',
-                boxShadow: '0 0 18px rgba(253, 230, 138, 0.6)'
-              }}
-            >
-              📜 Xem & Tải Thiệp 2X Retina
-            </button>
-          )}
-
-          <button
-            onClick={() => {
-              const nextIndex = typeof activeStationIndex === 'number'
-                ? (activeStationIndex + 1) % STATIONS.length
-                : 0;
-              flyToStation(nextIndex);
-            }}
-            className={`btn-rose ${shouldPulseNext ? 'pulse-guide-attention' : ''}`}
-            style={{ fontSize: '0.94rem', padding: '12px 24px' }}
-          >
-            {shouldPulseNext && (
-              <span className="pulse-guide-tag">✨ Tiếp tục!</span>
+        {/* THANH ĐÁY ĐIỀU HƯỚNG TRẠM VÀ HÒM THƯ (CĂN GIỮA MÀN HÌNH) */}
+        {!isHudHidden && (
+          <div className="hud-bottom-master-dock">
+            {/* 1. HUD ĐIỀU KHIỂN XE & GÓC NHÌN (CHỈ HIỆN KHI Ở TRẠM 3) */}
+            {activeStationIndex === 3 && (
+              <div className="hud-van-angles-dock">
+                <div className="hud-vehicle-selector">
+                  <button
+                    type="button"
+                    className={`btn-vehicle-select ${selectedVehicle === 'van' ? 'active' : ''}`}
+                    onClick={() => switchVehicle('van')}
+                    title="Chuyến Xe Hoa Retro 20/10"
+                  >
+                    <span>🚐</span>
+                    <span>Xe Hoa</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn-vehicle-select ${selectedVehicle === 'carriage' ? 'active' : ''}`}
+                    onClick={() => switchVehicle('carriage')}
+                    title="Cỗ Xe Bạch Mã Hoàng Gia Cổ Tích Dát Vàng"
+                  >
+                    <span>🐎</span>
+                    <span>Xe Ngựa</span>
+                  </button>
+                </div>
+                <div className="hud-van-angles-divider" />
+                <span className="van-angle-title">Góc nhìn:</span>
+                {selectedVehicle === 'carriage' ? (
+                  <>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'tq' ? 'active' : ''}`} onClick={() => setVanCameraPreset('tq')}>✨ Góc 3/4</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'side' ? 'active' : ''}`} onClick={() => setVanCameraPreset('side')}>🌼 Bên hông</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'carr' ? 'active' : ''}`} onClick={() => setVanCameraPreset('carr')}>👑 Cận xe</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'back' ? 'active' : ''}`} onClick={() => setVanCameraPreset('back')}>💐 Phía sau</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'close' ? 'active' : ''}`} onClick={() => setVanCameraPreset('close')}>🐎 Cận ngựa</button>
+                  </>
+                ) : (
+                  <>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'chase' ? 'active' : ''}`} onClick={() => setVanCameraPreset('chase')}>Theo Xe</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'close' ? 'active' : ''}`} onClick={() => setVanCameraPreset('close')}>Cận Cảnh</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'side' ? 'active' : ''}`} onClick={() => setVanCameraPreset('side')}>Bên Hông</button>
+                    <button className={`btn-van-angle ${activeVanCamPreset === 'top' ? 'active' : ''}`} onClick={() => setVanCameraPreset('top')}>Trên Cao</button>
+                  </>
+                )}
+              </div>
             )}
-            <span>
-              {typeof activeStationIndex === 'number' && STATIONS[(activeStationIndex + 1) % STATIONS.length]
-                ? `Trạm Tiếp Theo: ${STATIONS[(activeStationIndex + 1) % STATIONS.length].name} ➔`
-                : 'Khám Phá Các Trạm: Hộp Quà ➔'}
-            </span>
-          </button>
-        </div>
+
+            {/* 2. THANH HÒM THƯ BƯU ĐIỆN (CHỈ HIỆN KHI Ở CHẶNG THEO XE - TRẠM 3) */}
+            {activeStationIndex === 3 && (
+              <button className="btn-hud-mailbox" onClick={() => { playLetterOpenSound(); setIsMailboxOpen(true); }}>
+                <span>🕊️ Hòm Thư Bưu Điện</span>
+                <span className="mailbox-badge">{messages.length} Món Quà</span>
+              </button>
+            )}
+
+            {/* 3. NÚT CHUYỂN CHẶNG THEO KỊCH BẢN (LUÔN CĂN GIỮA DƯỚI CÙNG) */}
+            <div className="hud-bottom-action-row">
+              {activeStationIndex === 5 && (
+                <button
+                  onClick={() => setActivePartyCardModal(true)}
+                  className="btn-rose"
+                  style={{
+                    background: 'linear-gradient(135deg, #D4AF37, #B48A27)',
+                    color: '#1E0F18',
+                    fontWeight: '800',
+                    border: '1.5px solid #FFF',
+                    boxShadow: '0 0 18px rgba(253, 230, 138, 0.6)'
+                  }}
+                >
+                  📜 Xem & Tải Thiệp 2X Retina
+                </button>
+              )}
+
+              <button
+                onClick={() => {
+                  const nextIndex = typeof activeStationIndex === 'number'
+                    ? (activeStationIndex + 1) % STATIONS.length
+                    : 0;
+                  flyToStation(nextIndex);
+                }}
+                className={`btn-rose ${shouldPulseNext ? 'pulse-guide-attention' : ''}`}
+                style={{ fontSize: '0.94rem', padding: '12px 28px' }}
+              >
+                {shouldPulseNext && (
+                  <span className="pulse-guide-tag">✨ Tiếp tục!</span>
+                )}
+                <span>
+                  {typeof activeStationIndex === 'number' && STATIONS[(activeStationIndex + 1) % STATIONS.length]
+                    ? `Trạm Tiếp Theo: ${STATIONS[(activeStationIndex + 1) % STATIONS.length].name} ➔`
+                    : 'Khám Phá Các Trạm: Hộp Quà ➔'}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {isMailboxOpen && !readingMessage && (

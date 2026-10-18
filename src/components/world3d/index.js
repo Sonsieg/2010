@@ -5,3 +5,4 @@ export * from './worldConstants.js';
 export * from './worldMath.js';
 export * from './worldTextures.js';
 export * from './worldVegetation.js';
+export * from './worldCarriage.js';

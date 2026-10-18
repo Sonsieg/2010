@@ -10,6 +10,15 @@ export const VAN_PRESETS = {
   top: { rel: true, cam: [0, 16, -6], tgt: [0, 0, 1.5] }
 };
 
+// Camera presets cho cỗ xe bạch mã hoàng gia (tương thích góc quay chuẩn cinematic từ horse.html)
+export const CARRIAGE_PRESETS = {
+  tq: { rel: true, cam: [14, 4.6, 14], tgt: [0, 1.9, 4.2], label: '✨ Góc 3/4' },
+  side: { rel: true, cam: [17, 2.8, 4.2], tgt: [0, 1.9, 4.2], label: '🌼 Bên hông' },
+  carr: { rel: true, cam: [7.5, 3.2, -1.5], tgt: [0, 2.4, 0], label: '👑 Cận xe' },
+  back: { rel: true, cam: [1.5, 4, -11], tgt: [0, 2.2, 4.5], label: '💐 Phía sau' },
+  close: { rel: true, cam: [4.8, 2.4, 12.5], tgt: [0, 1.8, 8], label: '🐎 Cận ngựa' }
+};
+
 // 6 Master 3D Stations along the scenic flower road (Hành trình đóa hoa 20/10)
 export const STATIONS = [
   {
