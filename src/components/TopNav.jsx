@@ -29,9 +29,9 @@ export default function TopNav() {
 
   const handleToggleMode = () => {
     if (is3D) {
-      updateExperienceMode('2d');
+      updateExperienceMode('2d', '/letter');
     } else {
-      updateExperienceMode('3d');
+      updateExperienceMode('3d', '/3d');
     }
   };
 

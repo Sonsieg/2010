@@ -243,8 +243,7 @@ export default function GiftPage() {
                 className="btn-onboarding-choice primary-3d-highlight"
                 onClick={() => {
                   setShowWelcomeChoice(false);
-                  updateExperienceMode('3d');
-                  navigateWithFlowerTransition('/3d');
+                  updateExperienceMode('3d', '/3d');
                 }}
               >
                 <div className="choice-icon-wrap">✨</div>
@@ -264,8 +263,7 @@ export default function GiftPage() {
                 className="btn-onboarding-choice secondary-2d"
                 onClick={() => {
                   setShowWelcomeChoice(false);
-                  updateExperienceMode('2d');
-                  handleOpenGift();
+                  updateExperienceMode('2d', '/letter');
                 }}
               >
                 <div className="choice-icon-wrap">💌</div>

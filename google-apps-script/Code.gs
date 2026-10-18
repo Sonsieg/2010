@@ -4,13 +4,17 @@
  */
 
 // Thay SPREADSHEET_ID bằng ID Google Sheet thực tế của bạn
-const SPREADSHEET_ID = "YOUR_SPREADSHEET_ID_HERE";
+const SPREADSHEET_ID = "1Aaz88qBtrW4YYwo9CYiUWe-5oEbX_zfOYYX1azByWwo";
 
 function getSpreadsheet() {
-  if (SPREADSHEET_ID === "YOUR_SPREADSHEET_ID_HERE" || !SPREADSHEET_ID) {
-    return SpreadsheetApp.getActiveSpreadsheet();
+  if (SPREADSHEET_ID && SPREADSHEET_ID !== "YOUR_SPREADSHEET_ID_HERE") {
+    try {
+      return SpreadsheetApp.openById(SPREADSHEET_ID);
+    } catch (e) {
+      return SpreadsheetApp.getActiveSpreadsheet();
+    }
   }
-  return SpreadsheetApp.openById(SPREADSHEET_ID);
+  return SpreadsheetApp.getActiveSpreadsheet();
 }
 
 function normalizeDriveUrl(url) {
@@ -21,6 +25,13 @@ function normalizeDriveUrl(url) {
     return "https://lh3.googleusercontent.com/d/" + match[1];
   }
   return str;
+}
+
+function isTruthy(val) {
+  if (val === true) return true;
+  if (!val) return false;
+  const s = String(val).trim().toUpperCase();
+  return s === "TRUE" || s === "1" || s === "YES";
 }
 
 function doGet(e) {
@@ -38,15 +49,18 @@ function doGet(e) {
 
       const rows = data.slice(1);
       const people = rows
-        .filter(r => r[0]) // Phải có id
-        .map(r => ({
-          id: String(r[0]).trim().toLowerCase(),
-          name: String(r[1]).trim(),
-          dept: String(r[2] || "").trim(),
-          role: String(r[3] || "").trim(),
-          photo: r[6] ? normalizeDriveUrl(r[4]) : "", // Chỉ trả URL ảnh khi has_consent = TRUE
-          has_consent: Boolean(r[6])
-        }));
+        .filter(r => r[0] && String(r[0]).trim()) // Phải có id
+        .map(r => {
+          const hasConsent = isTruthy(r[6]);
+          return {
+            id: String(r[0]).trim().toLowerCase(),
+            name: String(r[1]).trim(),
+            dept: String(r[2] || "").trim(),
+            role: String(r[3] || "").trim(),
+            photo: hasConsent ? normalizeDriveUrl(r[4]) : "", // Chỉ trả URL ảnh khi has_consent = TRUE
+            has_consent: hasConsent
+          };
+        });
 
       return createJsonResponse({ success: true, data: people });
     }
@@ -62,42 +76,43 @@ function doGet(e) {
       const rows = data.slice(1);
       const publicWishes = rows
         .filter(r => String(r[3]).trim().toUpperCase() === "ALL" && String(r[5]).trim().toLowerCase() === "approved")
-        .map((r, idx) => ({
-          id: idx + 1,
-          from_name: r[2] ? "Đồng nghiệp ẩn danh" : String(r[1]).trim(),
-          dept: r[7] ? String(r[7]).trim() : "Engineering & Product Team",
-          text: String(r[4]).trim(),
-          color: r[6] ? String(r[6]).trim() : "#C9A66B",
-          timestamp: r[0]
-        }));
+        .map((r, idx) => {
+          const isAnon = isTruthy(r[2]);
+          const senderName = isAnon ? "Đồng nghiệp ẩn danh" : String(r[1]).trim();
+          return {
+            id: idx + 1,
+            from_name: senderName,
+            name: senderName,
+            dept: r[7] ? String(r[7]).trim() : "Engineering & Product Team",
+            text: String(r[4]).trim(),
+            color: r[6] ? String(r[6]).trim() : "#C9A66B",
+            timestamp: r[0]
+          };
+        });
 
       return createJsonResponse({ success: true, data: publicWishes });
     }
 
-    // 3. Lấy lời chúc riêng tư (Yêu cầu id + pin khớp chính xác)
+    // 3. Lấy lời chúc riêng tư theo ID người nhận (Không bắt buộc mã PIN)
     if (action === "private") {
       const id = String(e.parameter.id || "").trim().toLowerCase();
-      const pin = String(e.parameter.pin || "").trim();
 
-      if (!id || !pin) {
-        return createJsonResponse({ success: false, message: "Thiếu thông tin xác thực" });
+      if (!id) {
+        return createJsonResponse({ success: false, message: "Thiếu ID người nhận" });
       }
 
       const pSheet = ss.getSheetByName("people");
-      if (!pSheet) return createJsonResponse({ success: false, message: "Sheet 'people' not found" });
-      
-      const pData = pSheet.getDataRange().getValues().slice(1);
-      const matchedPerson = pData.find(r => 
-        String(r[0]).trim().toLowerCase() === id && 
-        String(r[5]).trim() === pin
-      );
-
-      if (!matchedPerson) {
-        return createJsonResponse({ success: false, message: "Mã PIN không chính xác" });
+      let recipientName = "Chị";
+      if (pSheet) {
+        const pData = pSheet.getDataRange().getValues().slice(1);
+        const matchedPerson = pData.find(r => String(r[0]).trim().toLowerCase() === id);
+        if (matchedPerson && matchedPerson[1]) {
+          recipientName = String(matchedPerson[1]).trim();
+        }
       }
 
       const wSheet = ss.getSheetByName("wishes");
-      if (!wSheet) return createJsonResponse({ success: true, data: [] });
+      if (!wSheet) return createJsonResponse({ success: true, recipient_name: recipientName, data: [] });
 
       const wData = wSheet.getDataRange().getValues().slice(1);
       const privateWishes = wData
@@ -105,17 +120,24 @@ function doGet(e) {
           String(r[3]).trim().toLowerCase() === id && 
           String(r[5]).trim().toLowerCase() === "approved"
         )
-        .map((r, idx) => ({
-          id: idx + 1,
-          from_name: r[2] ? "Một người bạn ẩn danh" : String(r[1]).trim(),
-          dept: r[7] ? String(r[7]).trim() : "Đồng nghiệp thân thiết",
-          text: String(r[4]).trim(),
-          timestamp: r[0]
-        }));
+        .map((r, idx) => {
+          const isAnon = isTruthy(r[2]);
+          const senderName = isAnon ? "Một người bạn ẩn danh" : String(r[1]).trim();
+          return {
+            id: idx + 1,
+            from_name: senderName,
+            name: senderName,
+            dept: r[7] ? String(r[7]).trim() : "Đồng nghiệp thân thiết",
+            text: String(r[4]).trim(),
+            type: "winged_letter",
+            badge: "🕊️ Cánh Thư Tri Ân",
+            timestamp: r[0]
+          };
+        });
 
       return createJsonResponse({
         success: true,
-        recipient_name: String(matchedPerson[1]),
+        recipient_name: recipientName,
         data: privateWishes
       });
     }
@@ -142,8 +164,9 @@ function doPost(e) {
 
     const from_name = String(payload.from_name || "Ẩn danh").trim();
     const dept = String(payload.dept || "Engineering & Product Team").trim();
-    const is_anonymous = Boolean(payload.anonymous);
-    const to = String(payload.to || "ALL").trim().toLowerCase();
+    const is_anonymous = isTruthy(payload.anonymous);
+    const rawTo = String(payload.to || "ALL").trim();
+    const to = rawTo.toUpperCase() === "ALL" ? "ALL" : rawTo.toLowerCase();
     const text = String(payload.text || "").trim().substring(0, 300);
 
     if (!text) {

@@ -12,7 +12,7 @@ import cardWishesData from './data/cardWishes.json';
 // Nếu để rỗng (""), hệ thống sẽ tự động dùng 100% dữ liệu từ các file trong src/data/
 export const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuex0SUfkMbiD6zx0aIsoOyO9kMskPanbVtIbsCg1YQNckoPpwjJdR41_k5TtHMMs/exec"; 
 
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 phút
+const CACHE_TTL_MS = 45 * 1000; // 45 giây (tự động đồng bộ nhanh khi admin duyệt sheet)
 
 /**
  * 1. Lấy 1 lời chúc thiệp ngẫu nhiên trong 50 lời chúc chọn lọc
@@ -197,7 +197,30 @@ export async function fetchPrivateWishes(id) {
     const res = await fetch(`${APPS_SCRIPT_URL}?action=private&id=${encodeURIComponent(cleanId)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data;
+    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+      return data;
+    }
+    // Nếu chưa có lời chúc riêng gửi đích danh trong sheet, tự động sinh thư chúc ấm áp
+    return {
+      success: true,
+      recipient_name: (data && data.recipient_name) || displayName,
+      data: [
+        {
+          id: 1,
+          type: "winged_letter",
+          badge: "🕊️ Cánh Thư Tri Ân",
+          from_name: "Anh em trong team FE",
+          text: `Cảm ơn ${displayName} đã luôn đồng hành, hỗ trợ và mang lại nguồn năng lượng tích cực cho toàn thể anh em. Chúc bạn một ngày 20/10 ngập tràn niềm vui, hoa tươi và những điều ngọt ngào nhất!`
+        },
+        {
+          id: 2,
+          type: "heart",
+          badge: "💖 Trái Tim Đồng Đội",
+          from_name: "Em Intern siêu đẹp trai",
+          text: `Chúc ${displayName} ngày 20/10 luôn rạng rỡ, công việc hanh thông, vạn sự như ý và mãi là đóa hoa xinh đẹp của công ty!`
+        }
+      ]
+    };
   } catch (err) {
     console.error("[API] fetchPrivateWishes error:", err);
     return {
@@ -206,6 +229,8 @@ export async function fetchPrivateWishes(id) {
       data: [
         {
           id: 1,
+          type: "winged_letter",
+          badge: "🕊️ Cánh Thư Tri Ân",
           from_name: "Đồng nghiệp thân thiết",
           text: `Chúc ${displayName} một ngày 20/10 ngập tràn niềm vui, công việc thuận buồm xuôi gió và luôn tươi cười hạnh phúc!`
         }
@@ -234,7 +259,13 @@ export async function submitWish(payload) {
       },
       body: JSON.stringify(payload)
     });
-    return await res.json();
+    const result = await res.json();
+    if (result && result.success) {
+      try {
+        localStorage.removeItem("tribute_public_wishes_cache");
+      } catch (e) {}
+    }
+    return result;
   } catch (err) {
     console.error("[API] submitWish error:", err);
     return { success: false, message: "Gửi lời chúc thất bại, vui lòng kiểm tra kết nối mạng." };
@@ -246,7 +277,11 @@ function getCache(key) {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return null;
-    const { timestamp, data } = JSON.parse(raw);
+    const { timestamp, data, url } = JSON.parse(raw);
+    if (url !== APPS_SCRIPT_URL) {
+      localStorage.removeItem(key);
+      return null;
+    }
     if (Date.now() - timestamp < CACHE_TTL_MS) {
       return data;
     }
@@ -261,6 +296,7 @@ function setCache(key, data) {
   try {
     localStorage.setItem(key, JSON.stringify({
       timestamp: Date.now(),
+      url: APPS_SCRIPT_URL,
       data
     }));
   } catch (e) {

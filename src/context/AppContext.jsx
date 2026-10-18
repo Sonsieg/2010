@@ -32,16 +32,18 @@ export function AppProvider({ children, navigate }) {
     return '2d';
   });
 
-  const updateExperienceMode = (mode) => {
+  const updateExperienceMode = (mode, targetPath) => {
     setExperienceMode(mode);
     try {
       localStorage.setItem('tribute_mode', mode);
     } catch (e) {}
 
-    if (mode === '3d') {
+    if (targetPath) {
+      navigateWithFlowerTransition(targetPath);
+    } else if (mode === '3d') {
       navigateWithFlowerTransition('/3d');
     } else {
-      navigateWithFlowerTransition('/');
+      navigateWithFlowerTransition('/letter');
     }
   };
 
