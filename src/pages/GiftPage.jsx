@@ -11,6 +11,16 @@ export default function GiftPage() {
     updateExperienceMode 
   } = useApp();
   const [isLidOpened, setIsLidOpened] = useState(false);
+  const [showWelcomeChoice, setShowWelcomeChoice] = useState(false);
+
+  // Khi chọn tên chị em, hiện modal chào mừng trang trọng định hướng 3D vs 2D
+  const lastSelectedIdRef = React.useRef(selectedSister?.id);
+  React.useEffect(() => {
+    if (selectedSister && selectedSister.id !== lastSelectedIdRef.current) {
+      lastSelectedIdRef.current = selectedSister.id;
+      setShowWelcomeChoice(true);
+    }
+  }, [selectedSister]);
 
   const handleOpenGift = () => {
     if (isLidOpened) return;
@@ -192,6 +202,72 @@ export default function GiftPage() {
           </button>
         </div>
       </div>
+
+      {/* [P1] MODAL CHÀO MỪNG ĐỊNH HƯỚNG 3D VS 2D KHI VỪA CHỌN TÊN */}
+      {showWelcomeChoice && selectedSister && (
+        <div className="modal-overlay open" onClick={() => setShowWelcomeChoice(false)}>
+          <div className="onboarding-welcome-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="onboarding-modal-wax-seal">20.10</div>
+            <div className="onboarding-badge">🌸 CHÀO MỪNG ĐÓA HOA RẠNG RỠ</div>
+            <h2 className="onboarding-title">
+              Chào Mừng Chị <strong>{selectedSister.name}</strong>! 💖
+            </h2>
+            <p className="onboarding-desc">
+              Toàn thể anh em TechCorp đã chuẩn bị không gian tri ân riêng dành tặng chị. Chị muốn bắt đầu khám phá qua trải nghiệm nào?
+            </p>
+
+            <div className="onboarding-choices">
+              <button
+                type="button"
+                className="btn-onboarding-choice primary-3d-highlight"
+                onClick={() => {
+                  setShowWelcomeChoice(false);
+                  updateExperienceMode('3d');
+                  navigateWithFlowerTransition('/3d');
+                }}
+              >
+                <div className="choice-icon-wrap">✨</div>
+                <div className="choice-text-wrap">
+                  <div className="choice-title">
+                    Vương Quốc 3D Điện Ảnh <span className="recommended-tag">Khuyên Dùng</span>
+                  </div>
+                  <div className="choice-sub">
+                    Dạo bước hoàng hôn 3D • Xe hoa cổ điển • Bầu trời pháo hoa & bóng bay
+                  </div>
+                </div>
+                <span className="choice-arrow">➔</span>
+              </button>
+
+              <button
+                type="button"
+                className="btn-onboarding-choice secondary-2d"
+                onClick={() => {
+                  setShowWelcomeChoice(false);
+                  updateExperienceMode('2d');
+                  handleOpenGift();
+                }}
+              >
+                <div className="choice-icon-wrap">💌</div>
+                <div className="choice-text-wrap">
+                  <div className="choice-title">Tạp Chí 2D Cổ Tích</div>
+                  <div className="choice-sub">
+                    Thiệp bifold mở rộng • Con dấu sáp đỏ • Suối hoa nhẹ nhàng
+                  </div>
+                </div>
+                <span className="choice-arrow">➔</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="onboarding-close-text"
+              onClick={() => setShowWelcomeChoice(false)}
+            >
+              Tôi muốn ở lại trang này tự khám phá
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

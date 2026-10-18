@@ -10,11 +10,13 @@ export const VAN_PRESETS = {
   top: { rel: true, cam: [0, 16, -6], tgt: [0, 0, 1.5] }
 };
 
-// 6 Master 3D Stations along the scenic flower road
+// 6 Master 3D Stations along the scenic flower road (Hành trình đóa hoa 20/10)
 export const STATIONS = [
   {
     id: 'gift',
     u: 0.02,
+    chapter: 'Chương 1',
+    chapterTitle: 'Món Quà Bất Ngờ Chớm Nở',
     name: 'Hộp Quà Hoàng Gia',
     subtitle: 'Chạm Hộp Quà Mở Bung Nắp, Thả Bướm & Bong Bóng 20.10',
     icon: '🎁'
@@ -22,6 +24,8 @@ export const STATIONS = [
   {
     id: 'letter',
     u: 0.18,
+    chapter: 'Chương 2',
+    chapterTitle: 'Lời Tâm Tình Gửi Trao',
     name: 'Đại Điện Thư Ngỏ',
     subtitle: 'Tấm Thiệp Bifold Khổng Lồ Dát Vàng & Chân Dung Tri Ân',
     icon: '💌'
@@ -29,6 +33,8 @@ export const STATIONS = [
   {
     id: 'balloons',
     u: 0.35,
+    chapter: 'Chương 3',
+    chapterTitle: 'Ngàn Ước Nguyện Bay Xa',
     name: 'Thung Lũng Bóng Bay',
     subtitle: 'Chạm Nổ Bóng Nhận Ngay Những Lời Chúc May Mắn Ngọt Ngào',
     icon: '🎈'
@@ -36,6 +42,8 @@ export const STATIONS = [
   {
     id: 'courier',
     u: 0.52,
+    chapter: 'Chương 4',
+    chapterTitle: 'Chuyến Xe Mang Niềm Vui Đi Khắp Thế Giới',
     name: 'Đại Lộ Xe Hoa 20/10',
     subtitle: 'Chuyến Xe Hoa Cổ Điển Rực Rỡ & Hòm Thư Bưu Kiện Riêng',
     icon: '🚐'
@@ -43,6 +51,8 @@ export const STATIONS = [
   {
     id: 'video',
     u: 0.70,
+    chapter: 'Chương 5',
+    chapterTitle: 'Thước Phim Thanh Xuân Rực Rỡ',
     name: 'Rạp Chiếu Điện Ảnh',
     subtitle: 'Khán Đài Hoàng Hôn & Thước Phim Tri Ân Phái Đẹp',
     icon: '🎬'
@@ -50,6 +60,8 @@ export const STATIONS = [
   {
     id: 'party',
     u: 0.88,
+    chapter: 'Chương 6',
+    chapterTitle: 'Đêm Đại Tiệc Vinh Danh Phái Đẹp',
     name: 'Lâu Đài Tiệc Mừng',
     subtitle: 'Cung Điện Tiệc Hoàng Gia & Tải Thiệp Kỷ Niệm 2x Retina',
     icon: '💐'

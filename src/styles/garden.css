@@ -1129,6 +1129,16 @@
   font-weight: 700;
 }
 
+.hud-dock-tool-btn.active-tour {
+  background: linear-gradient(135deg, rgba(225, 29, 72, 0.92), rgba(190, 18, 60, 0.95));
+  border-color: #FDE68A;
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.5);
+}
+.hud-dock-tool-btn.active-tour .tool-label {
+  color: #FFF;
+  font-weight: 700;
+}
+
 .hud-dock-tool-btn.btn-2d-mode {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(244, 63, 94, 0.4);
@@ -2524,3 +2534,400 @@
   from { width: 100%; }
   to { width: 0%; }
 }
+
+/* ==========================================================
+   12. CINEMATIC VEIL CURTAIN & AUTO-TOUR POLISH
+   ========================================================== */
+
+/* Màn nhung điện ảnh che toàn màn hình khi đang nạp thế giới 3D */
+.cinematic-veil-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: radial-gradient(circle at center, #2d0e20 0%, #160711 70%, #0d040a 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
+  pointer-events: all;
+  user-select: none;
+}
+
+.cinematic-veil-overlay.veil-fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.cinematic-veil-spinner-wrap {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cinematic-veil-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px dashed rgba(253, 230, 138, 0.35);
+  border-top-color: #FDE68A;
+  border-right-color: #F43F5E;
+  animation: spinVeilRing 2.4s linear infinite;
+}
+
+@keyframes spinVeilRing {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.cinematic-veil-icon {
+  font-size: 2.6rem;
+  animation: pulseVeilRose 1.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 16px rgba(244, 63, 94, 0.6));
+}
+
+@keyframes pulseVeilRose {
+  0% { transform: scale(0.92); opacity: 0.85; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+.cinematic-veil-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #FFFDF9;
+  text-align: center;
+  margin: 0;
+  max-width: 88vw;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(253, 230, 138, 0.3);
+}
+
+.cinematic-veil-title strong {
+  color: #FDE68A;
+}
+
+.cinematic-veil-sub {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  color: rgba(250, 243, 234, 0.7);
+  letter-spacing: 0.05em;
+  margin: 0;
+  text-align: center;
+}
+
+/* Auto-tour indicator pill */
+.autotour-active-banner {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10001;
+  background: rgba(30, 15, 24, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid #FDE68A;
+  border-radius: 9999px;
+  padding: 8px 22px;
+  color: #FAF3EA;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(253, 230, 138, 0.35);
+  animation: modalSlideIn 0.3s ease;
+}
+
+.autotour-active-banner .btn-autotour-stop {
+  background: #E11D48;
+  color: #FFF;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.autotour-active-banner .btn-autotour-stop:hover {
+  background: #BE123C;
+  transform: scale(1.05);
+}
+
+/* ==========================================================
+   13. ONBOARDING WELCOME MODAL (3D VS 2D CHOICE)
+   ========================================================== */
+.onboarding-welcome-modal {
+  position: relative;
+  background: radial-gradient(circle at top, #2D1424 0%, #190915 80%, #12050F 100%);
+  border: 1.5px solid #FDE68A;
+  border-radius: 28px;
+  padding: 38px 32px 28px;
+  max-width: 540px;
+  width: 92vw;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(253, 230, 138, 0.25);
+  animation: modalSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  color: #FAF3EA;
+  z-index: 10005;
+}
+
+.onboarding-modal-wax-seal {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #F43F5E 0%, #BE123C 60%, #881337 100%);
+  border: 2px solid #FDE68A;
+  box-shadow: 0 6px 18px rgba(190, 18, 60, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #FFF;
+  letter-spacing: 0.05em;
+}
+
+.onboarding-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 9999px;
+  background: rgba(253, 230, 138, 0.15);
+  border: 1px solid rgba(253, 230, 138, 0.4);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #FDE68A;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.onboarding-title {
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #FFF;
+  margin: 0 0 10px;
+}
+.onboarding-title strong {
+  color: #FDE68A;
+  text-shadow: 0 0 12px rgba(253, 230, 138, 0.4);
+}
+
+.onboarding-desc {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: rgba(250, 243, 234, 0.8);
+  line-height: 1.55;
+  margin: 0 0 24px;
+}
+
+.onboarding-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.btn-onboarding-choice {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+.btn-onboarding-choice.primary-3d-highlight {
+  background: linear-gradient(135deg, rgba(190, 18, 60, 0.95), rgba(120, 15, 45, 0.95));
+  border-color: #FDE68A;
+  box-shadow: 0 8px 24px rgba(190, 18, 60, 0.4), 0 0 16px rgba(253, 230, 138, 0.3);
+}
+.btn-onboarding-choice.primary-3d-highlight:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(190, 18, 60, 0.55), 0 0 24px rgba(253, 230, 138, 0.5);
+  border-color: #FFF;
+}
+
+.btn-onboarding-choice.secondary-2d {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+.btn-onboarding-choice.secondary-2d:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--rose-400);
+  transform: translateY(-2px);
+}
+
+.choice-icon-wrap {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.choice-text-wrap {
+  flex: 1;
+}
+
+.choice-title {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.recommended-tag {
+  background: #FDE68A;
+  color: #881337;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+}
+
+.choice-sub {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  color: rgba(250, 243, 234, 0.7);
+  margin-top: 3px;
+}
+
+.choice-arrow {
+  font-size: 1.25rem;
+  color: #FDE68A;
+  transition: transform 0.2s ease;
+}
+.btn-onboarding-choice:hover .choice-arrow {
+  transform: translateX(4px);
+}
+
+.onboarding-close-text {
+  background: none;
+  border: none;
+  color: rgba(250, 243, 234, 0.55);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 6px 12px;
+  transition: color 0.2s ease;
+}
+.onboarding-close-text:hover {
+  color: #FAF3EA;
+  text-decoration: underline;
+}
+
+/* ==========================================================
+   14. ACHIEVEMENT TRACKER & MODAL WAX SEALS
+   ========================================================== */
+.hud-achievement-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(26, 11, 22, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(253, 230, 138, 0.5);
+  border-radius: 9999px;
+  padding: 5px 14px;
+  color: #FAF3EA;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 10px rgba(253, 230, 138, 0.2);
+  transition: all 0.25s ease;
+}
+.hud-achievement-pill:hover {
+  border-color: #FDE68A;
+  transform: scale(1.04);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 16px rgba(253, 230, 138, 0.35);
+}
+.hud-achievement-pill.unlocked {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95));
+  border-color: #FFFBEB;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.6);
+  animation: modalSlideIn 0.3s ease;
+}
+
+/* Con dấu sáp vàng 20.10 ở góc modal 3D */
+.modal-wax-seal-badge {
+  position: absolute;
+  top: 14px;
+  right: 56px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #F59E0B 0%, #D97706 60%, #B45309 100%);
+  border: 1.5px solid #FDE68A;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #FFF;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Mobile Apple HIG Touch Targets & Safe Area */
+@media (max-width: 768px) {
+  .hud-top-minimal-pill {
+    padding-top: max(8px, env(safe-area-inset-top));
+    max-width: 92vw;
+  }
+  .hud-dock-station-btn,
+  .hud-dock-tool-btn,
+  .btn-rose,
+  .btn-hud-reopen-floating {
+    min-height: 44px;
+  }
+  .hud-aside-dock {
+    width: 58px;
+    padding: 8px 4px;
+    left: 8px;
+    transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  }
+  .hud-aside-dock:not(:hover):not(.touch-open) .station-label,
+  .hud-aside-dock:not(:hover):not(.touch-open) .tool-label,
+  .hud-aside-dock:not(:hover):not(.touch-open) .hud-dock-brand-text {
+    display: none;
+  }
+  .hud-aside-dock:hover,
+  .hud-aside-dock.touch-open {
+    width: 156px;
+    padding: 10px 8px;
+  }
+  .hud-aside-dock:hover .station-label,
+  .hud-aside-dock:hover .tool-label,
+  .hud-aside-dock.touch-open .station-label,
+  .hud-aside-dock.touch-open .tool-label {
+    display: block;
+  }
+}
+
+.garden-3d-viewport {
+  touch-action: none;
+}
+
+

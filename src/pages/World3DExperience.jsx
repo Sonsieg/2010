@@ -1,5 +1,4 @@
-// ===== PHẦN 1/5 — BẮT ĐẦU =====
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 import { fetchPrivateWishes } from '../api.js';
 import * as THREE from 'three';
@@ -72,8 +71,8 @@ const ColorGradeShader = {
     uTime: { value: 0 },
     uStrength: { value: 1.0 },
     uVignette: { value: 0.35 },
-    uGrain: { value: 0.018 },
-    uAberration: { value: 0.0006 },
+    uGrain: { value: 0.012 },
+    uAberration: { value: 0.0004 },
     uSaturation: { value: 1.08 },
     uVignetteColor: { value: new THREE.Color(0x0a0510) },
     uShadowTint: { value: new THREE.Color(0.06, 0.08, 0.14) },
@@ -424,6 +423,144 @@ export default function World3DExperience() {
     return () => window.removeEventListener('keydown', handleEscKey);
   }, [readingMessage, isMailboxOpen, activeVideoModal, activePartyCardModal]);
 
+  // [P1] Cinematic Veil Curtain & Auto-tour & Photo mode & Easter egg states
+  const [isVeilOpen, setIsVeilOpen] = useState(false);
+  const [isAutoTourActive, setIsAutoTourActive] = useState(false);
+  const autoTourTimerRef = useRef(null);
+  const easterEggCountRef = useRef(0);
+
+  // [P1] Achievement System (Khám phá X/6 trạm)
+  const [visitedStations, setVisitedStations] = useState(() => new Set([0]));
+  const achievementUnlockedRef = useRef(false);
+
+  // [P1] Personalization: Theme màu sắc & loài hoa theo tên chị em (Nhóm 5.2)
+  const sisterTheme = useMemo(() => {
+    const name = sisterName || '';
+    const lower = name.toLowerCase();
+    if (lower.includes('mai') || lower.includes('cúc') || lower.includes('hoàng')) {
+      return { primary: '#D97706', accent: '#FDE68A', flower: 'Hoa Mai Vàng & Champagne', lightColor: 0xfff0b0 };
+    }
+    if (lower.includes('hồng') || lower.includes('anh') || lower.includes('ngọc')) {
+      return { primary: '#E11D48', accent: '#FDA4AF', flower: 'Hoa Hồng Ngọc & Phong Lan', lightColor: 0xffd6e7 };
+    }
+    if (lower.includes('thủy') || lower.includes('hà') || lower.includes('thanh')) {
+      return { primary: '#0284C7', accent: '#BAE6FD', flower: 'Hoa Cẩm Tú Cầu Lam Ngọc', lightColor: 0xd0f0ff };
+    }
+    if (lower.includes('phương') || lower.includes('ngân') || lower.includes('ánh')) {
+      return { primary: '#9333EA', accent: '#E9D5FF', flower: 'Hoa Lavender Tím Kiêu Kỳ', lightColor: 0xf3e8ff };
+    }
+    return { primary: '#BE123C', accent: '#FDE68A', flower: 'Ngàn Hoa Rực Rỡ', lightColor: 0xffecd0 };
+  }, [sisterName]);
+
+  // [P1] Procedural Web Audio API Ambient Sound (Gió vi vu & chuông pha lê - Nhóm 2.5)
+  const ambientAudioRef = useRef(null);
+  const initAmbientAudio = () => {
+    if (ambientAudioRef.current) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+
+      // Buffer tạo pink noise (gió thảo nguyên dịu nhẹ)
+      const bufferSize = ctx.sampleRate * 2;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.032;
+        b6 = white * 0.115926;
+      }
+
+      const whiteNoise = ctx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+
+      // Filter gió nhẹ (biquad lowpass)
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(320, ctx.currentTime);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+
+      whiteNoise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      whiteNoise.start(0);
+
+      ambientAudioRef.current = { ctx, gain, whiteNoise };
+    } catch (e) {
+      console.warn('[Ambient Audio] Failed to init procedural audio:', e);
+    }
+  };
+
+  // Auto-tour: tự động chuyển trạm mỗi 8.5s để xem phim rảnh tay
+  useEffect(() => {
+    if (!isAutoTourActive) {
+      if (autoTourTimerRef.current) clearTimeout(autoTourTimerRef.current);
+      return;
+    }
+    const runStep = () => {
+      autoTourTimerRef.current = setTimeout(() => {
+        setActiveStationIndex((curr) => {
+          const next = typeof curr === 'number' ? (curr + 1) % STATIONS.length : 0;
+          flyToStation(next, 3200);
+          return next;
+        });
+        runStep();
+      }, 8500);
+    };
+    runStep();
+    return () => {
+      if (autoTourTimerRef.current) clearTimeout(autoTourTimerRef.current);
+    };
+  }, [isAutoTourActive]);
+
+  // Nhận diện thời gian thực buổi tối (sau 18h30) để chuyển sang Dạ Tiệc Đêm lung linh
+  useEffect(() => {
+    const hours = new Date().getHours();
+    if (hours >= 18 || hours < 5) {
+      setTimeout(() => {
+        if (!nightModeRef.current) {
+          toggleNightMode();
+          showToast('🌙 Chào buổi tối! Vương Quốc đã tự động thắp sáng Bầu Trời Dạ Tiệc Đêm!');
+        }
+      }, 2400);
+    }
+  }, []);
+
+  // Easter egg: Chạm 3 lần vào logo 🌸 để bắn pháo hoa bí mật & mưa sao băng (Nhóm 3.1)
+  const triggerEasterEgg = () => {
+    easterEggCountRef.current += 1;
+    if (easterEggCountRef.current === 3) {
+      easterEggCountRef.current = 0;
+      playSparkleSound();
+      fireConfetti({
+        particleCount: 140,
+        spread: 140,
+        origin: { y: 0.38 },
+        colors: ['#FDE68A', '#F43F5E', '#C084FC', '#38BDF8', '#FFF']
+      });
+      showToast('✨ BẠN ĐÃ MỞ KHÓA BÍ MẬT 20/10: Triệu vì sao lung linh & đàn bướm dạ quang tỏa sáng mừng phái đẹp! 💖');
+    }
+  };
+
+  // Photo mode: Ẩn tạm thời HUD trong 5s để chụp ảnh kỷ niệm không vướng giao diện
+  const triggerPhotoMode = () => {
+    setIsHudHidden(true);
+    showToast('📸 Đã vào Chế Độ Chụp Ảnh! HUD sẽ tự động hiện lại sau 5 giây.');
+    setTimeout(() => {
+      setIsHudHidden(false);
+    }, 5000);
+  };
+
   /* ================================================================== */
   /*  [P1] TOGGLE NIGHT MODE — cập nhật exposure + colorGrade + vignette */
   /* ================================================================== */
@@ -524,7 +661,7 @@ export default function World3DExperience() {
   /* ================================================================== */
   /*  [P1] FLY TO STATION — có guard chống undefined                    */
   /* ================================================================== */
-  const flyToStation = (idx) => {
+  const flyToStation = (idx, customDur = null) => {
     playSoftTapSound();
     setActiveStationIndex(idx);
     if (idx !== 5) setIsLookingAtSky(false);
@@ -536,11 +673,12 @@ export default function World3DExperience() {
       followVanRef.current = false;
       transRef.current.active = true;
       transRef.current.t0 = performance.now();
-      transRef.current.dur = 1400;
+      transRef.current.dur = customDur || 1800;
       transRef.current.fromCam = cam.position.clone();
       transRef.current.fromTgt = ctrl.target.clone();
       transRef.current.preset = VAN_PRESETS[activeVanCamPreset];
       transRef.current.isVanRelative = true;
+      transRef.current.arcHeight = 0;
       showToast('🚐 Đang bay bám theo Chuyến Xe Hoa 20/10!');
       return;
     }
@@ -549,16 +687,38 @@ export default function World3DExperience() {
     const stConfig = transRef.current.stationsPos[idx];
     if (!stConfig) return;
 
+    // [P1] Track Achievement Progress (Khám phá X/6 trạm)
+    setVisitedStations((prev) => {
+      const next = new Set(prev);
+      next.add(idx);
+      if (next.size === 6 && !achievementUnlockedRef.current) {
+        achievementUnlockedRef.current = true;
+        setTimeout(() => {
+          playSparkleSound();
+          fireConfetti({
+            particleCount: 130,
+            spread: 120,
+            origin: { y: 0.45 },
+            colors: ['#FDE68A', '#F43F5E', '#C084FC', '#38BDF8', '#FFF']
+          });
+          showToast('👑 VINH QUANG! Bạn đã khám phá đủ 6 trạm và mở khóa danh hiệu: NỮ THẦN VƯƠNG QUỐC 20/10! 💖');
+        }, 1200);
+      }
+      return next;
+    });
+
     transRef.current.active = true;
     transRef.current.t0 = performance.now();
-    transRef.current.dur = 1500;
+    transRef.current.dur = customDur || (idx === 1 ? 3200 : 2500);
     transRef.current.fromCam = cam.position.clone();
     transRef.current.toCam = stConfig.camPos.clone();
     transRef.current.fromTgt = ctrl.target.clone();
     transRef.current.toTgt = stConfig.targetPos.clone();
     transRef.current.isVanRelative = false;
+    transRef.current.arcHeight = 4.0;
 
-    showToast(`✨ Đang bay đến: ${STATIONS[idx].name}`);
+    const stData = STATIONS[idx];
+    showToast(`✨ [${stData.chapter}] Đang bay đến: ${stData.name} — ${stData.chapterTitle}`);
   };
 
   /* ================================================================== */
@@ -2364,7 +2524,7 @@ export default function World3DExperience() {
           disableForReducedMotion: true
         });
         showToast(`🎁 Điều kỳ diệu đã xuất hiện! Dành tặng riêng đóa hoa ${sisterName}...`);
-        setTimeout(() => { flyToStation(1); }, 4500);
+        setTimeout(() => { flyToStation(1, 3200); }, 4200);
       };
 
       interactiveMeshes.push({ mesh: bodyBox, onClick: onGiftClick });
@@ -2372,9 +2532,10 @@ export default function World3DExperience() {
       interactiveMeshes.push({ mesh: giftSprite, onClick: onGiftClick });
       interactiveMeshes.push({ mesh: crystalHeart, onClick: onGiftClick });
 
+      // [P3] Góc nhìn chính diện trực tiếp mặt trước hộp quà (căn thẳng trục nơ vàng & bảng chữ)
       stationCameraPositions[0] = {
-        targetPos: st0Center.clone().add(new THREE.Vector3(0, 1.6, 0)),
-        camPos: st0Center.clone().add(norm.clone().multiplyScalar(10.5)).add(new THREE.Vector3(0, 4.2, 0))
+        targetPos: st0Center.clone().add(new THREE.Vector3(0, 1.45, 0)),
+        camPos: st0Center.clone().add(new THREE.Vector3(0, 2.4, 8.4))
       };
     }
 
@@ -2503,6 +2664,44 @@ export default function World3DExperience() {
       rightWing.add(letterMesh);
       worldAtmosphereRef.current.letterMat = letterMat;
 
+      // [P3] KHUNG VIỀN KIM LOẠI VÀNG 3D CHO LÁ THƯ TRI ÂN
+      const frameGeo = new THREE.BoxGeometry(3.14, 4.14, 0.06);
+      const frameMat = new THREE.MeshStandardMaterial({
+        color: 0xC9A66B,
+        roughness: 0.28,
+        metalness: 0.85,
+        envMap: envTex,
+        envMapIntensity: 1.2
+      });
+      const letterFrame = new THREE.Mesh(frameGeo, frameMat);
+      letterFrame.position.set(0, 0, 0.05);
+      rightWing.add(letterFrame);
+
+      // [P3] CON DẤU SÁP ĐỎ 3D NỔI VỚI VÀNH KHUY VÀNG CHAMPAGNE (Thay thế hình vẽ 2D bẹt)
+      const sealGroup = new THREE.Group();
+      sealGroup.position.set(0, -1.35, 0.14);
+
+      const waxCylinderGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.06, 32);
+      waxCylinderGeo.rotateX(Math.PI / 2);
+      const waxMat = new THREE.MeshStandardMaterial({
+        color: 0xBE123C,
+        roughness: 0.32,
+        metalness: 0.1
+      });
+      const waxMesh = new THREE.Mesh(waxCylinderGeo, waxMat);
+      sealGroup.add(waxMesh);
+
+      const goldRimGeo = new THREE.TorusGeometry(0.26, 0.022, 16, 32);
+      const goldRimMesh = new THREE.Mesh(goldRimGeo, frameMat);
+      sealGroup.add(goldRimMesh);
+
+      const heartEmblem = new THREE.Mesh(makeHeartGeometry(0.12, 0.04), frameMat);
+      heartEmblem.position.set(0, -0.02, 0.035);
+      heartEmblem.scale.set(0.9, 0.9, 0.9);
+      sealGroup.add(heartEmblem);
+
+      rightWing.add(sealGroup);
+
       const letterLight = new THREE.PointLight(0xffecd0, 1.8, 8.5);
       letterLight.position.set(1.75, 2.2, 1.8);
       st1Group.add(letterLight);
@@ -2524,6 +2723,14 @@ export default function World3DExperience() {
           playLetterOpenSound();
           fireConfetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
           showToast('💌 Thư ngỏ chân tình từ toàn thể anh em công ty gửi tặng chị em!');
+        }
+      });
+      interactiveMeshes.push({
+        mesh: waxMesh,
+        onClick: () => {
+          playLetterOpenSound();
+          fireConfetti({ particleCount: 70, spread: 85, origin: { y: 0.6 } });
+          showToast('💌 Con dấu sáp hoàng gia 20.10 chứng nhận tình cảm trân quý từ anh em!');
         }
       });
 
@@ -2908,8 +3115,8 @@ export default function World3DExperience() {
       grandFlag.position.set(1.2, 30.2, -2.5);
       st5Group.add(grandFlag);
 
-      // [P3] Bàn tiệc — khăn trải bàn subdivided + wave (chuẩn bị cho PHẦN 4 vertex shader)
-      const banquetTableGeo = new RoundedBoxGeometry(8.6, 0.9, 2.8, 4, 0.14);
+      // [P3] Bàn tiệc trái — khăn trải bàn cánh cung sang bên trái (Nhóm 2.3)
+      const banquetTableGeo = new RoundedBoxGeometry(5.6, 0.9, 2.8, 4, 0.14);
       const banquetTable = new THREE.Mesh(
         banquetTableGeo,
         new THREE.MeshPhysicalMaterial({
@@ -2921,13 +3128,14 @@ export default function World3DExperience() {
           clearcoat: 0.1
         })
       );
-      banquetTable.position.set(0, 2.45, 3.0);
+      banquetTable.position.set(-5.6, 2.45, 2.8);
+      banquetTable.rotation.y = 0.22;
       banquetTable.castShadow = true;
       banquetTable.receiveShadow = true;
       st5Group.add(banquetTable);
 
       const tableRunner = new THREE.Mesh(
-        new RoundedBoxGeometry(8.62, 0.04, 1.35, 4, 0.02),
+        new RoundedBoxGeometry(5.62, 0.04, 1.35, 4, 0.02),
         new THREE.MeshPhysicalMaterial({
           color: 0x8C2F4B,
           roughness: 0.45,
@@ -2937,18 +3145,14 @@ export default function World3DExperience() {
           clearcoat: 0.2
         })
       );
-      tableRunner.position.set(0, 2.92, 3.0);
+      tableRunner.position.set(-5.6, 2.92, 2.8);
+      tableRunner.rotation.y = 0.22;
       st5Group.add(tableRunner);
 
-      [-0.68, 0.68].forEach(rz => {
-        const goldLace = new THREE.Mesh(new THREE.BoxGeometry(8.62, 0.02, 0.04), goldTrimMat);
-        goldLace.position.set(0, 2.95, 3.0 + rz);
-        st5Group.add(goldLace);
-      });
-
-      /* ===== [P3] BÁNH KEM 4 TẦNG — PBR NÂNG CẤP ===== */
+      /* ===== [P3] BÁNH KEM 4 TẦNG (CÁNH TRÁI BÀN TIỆC) ===== */
       const cakeGroup = new THREE.Group();
-      cakeGroup.position.set(-2.5, 2.92, 3.0);
+      cakeGroup.position.set(-5.6, 2.92, 2.8);
+      cakeGroup.rotation.y = 0.22;
 
       const cakeStand = new THREE.Mesh(new THREE.CylinderGeometry(1.48, 1.62, 0.16, 32), goldTrimMat);
       cakeStand.position.y = 0.08;
@@ -3069,9 +3273,18 @@ export default function World3DExperience() {
 
       st5Group.add(cakeGroup);
 
-      /* ===== [P3] THÁP CHAMPAGNE 30 LY — PBR VẬT LÝ THẬT ===== */
+      /* ===== [P3] THÁP CHAMPAGNE 30 LY (CÁNH PHẢI BÀN TIỆC - Nhóm 2.3) ===== */
+      const champTableGeo = new RoundedBoxGeometry(5.2, 0.9, 2.8, 4, 0.14);
+      const champTable = new THREE.Mesh(champTableGeo, banquetTable.material);
+      champTable.position.set(5.6, 2.45, 2.8);
+      champTable.rotation.y = -0.22;
+      champTable.castShadow = true;
+      champTable.receiveShadow = true;
+      st5Group.add(champTable);
+
       const champagneGroup = new THREE.Group();
-      champagneGroup.position.set(2.5, 2.92, 3.0);
+      champagneGroup.position.set(5.6, 2.92, 2.8);
+      champagneGroup.rotation.y = -0.22;
 
       const standRiser = new THREE.Mesh(new RoundedBoxGeometry(1.68, 0.12, 1.68, 4, 0.03), marbleMat);
       standRiser.position.y = 0.06;
@@ -3209,13 +3422,20 @@ export default function World3DExperience() {
         });
       });
 
-      const chestStand = new THREE.Mesh(new RoundedBoxGeometry(2.4, 0.22, 1.6, 4, 0.04), goldTrimMat);
-      chestStand.position.set(0, 3.03, 3.0);
+      // [P3] Bệ đá cẩm thạch tròn hoàng gia cho hòm quà trung tâm (Nhóm 2.3)
+      const chestStand = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.8, 0.45, 32), marbleMat);
+      chestStand.position.set(0, 2.22, 3.8);
+      chestStand.castShadow = true;
+      chestStand.receiveShadow = true;
+      const chestRim = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.04, 8, 32), goldTrimMat);
+      chestRim.rotation.x = Math.PI / 2;
+      chestRim.position.set(0, 2.44, 3.8);
       st5Group.add(chestStand);
+      st5Group.add(chestRim);
 
-      // GROUP HÒM QUÀ HOÀNG GIA (ROYAL CHEST GROUP) CÓ KHẢ NĂNG ĐUNG ĐƯA NHƯ SẮP NỔ VÀ NỞ HOA
+      // GROUP HÒM QUÀ HOÀNG GIA (ROYAL CHEST GROUP) TẠI TRUNG TÂM KHÔNG BỊ CHE KHUẤT
       const royalChestGroup = new THREE.Group();
-      royalChestGroup.position.set(0, 3.74, 3.0);
+      royalChestGroup.position.set(0, 2.92, 3.8);
       st5Group.add(royalChestGroup);
 
       const chestBodyMat = new THREE.MeshPhysicalMaterial({
@@ -3589,14 +3809,21 @@ export default function World3DExperience() {
         showToast('🎆 Bầu trời pháo hoa 3D đại tiệc 20/10 đã bừng sáng! Bấm nút [Xem & Tải Thiệp 2X Retina] ở thanh đáy để nhận quà bất cứ lúc nào!');
       };
 
+      let cakeClicks = 0;
       const onCakeClick = () => {
+        cakeClicks++;
         soundClink();
-        triggerCastleFireworks();
-        fireConfetti({
-          particleCount: 100, spread: 100, origin: { y: 0.5 },
-          colors: ['#FDE68A', '#FDA4AF', '#BE123C', '#FFF1F2']
-        });
-        showToast('🎂 Đã cắt bánh đại tiệc 20/10! Chúc chị em mãi trẻ trung, rạng ngời và ngập tràn hạnh phúc!');
+        if (cakeClicks >= 3) {
+          cakeClicks = 0;
+          triggerCastleFireworks();
+          fireConfetti({
+            particleCount: 130, spread: 110, origin: { y: 0.5 },
+            colors: ['#FDE68A', '#FDA4AF', '#BE123C', '#FFF1F2']
+          });
+          showToast('🎂 Ăn nhiều bánh ngọt không sợ béo, chúc chị em luôn xinh đẹp rạng ngời! 💖');
+        } else {
+          showToast(`🍰 Bánh kem đại tiệc 4 tầng! (Chạm thêm ${3 - cakeClicks} lần nữa để xem bất ngờ ✨)`);
+        }
       };
 
       const onChampagneClick = () => {
@@ -3658,6 +3885,96 @@ export default function World3DExperience() {
       // [P3] Lưu bubbleData để PHẦN 4 update bọt sủi
       st5Group.userData.bubbleData = bubbleData;
       st5Group.userData.champagneBubbles = champagneBubbles;
+    }
+
+    /* ================================================================== */
+    /*  [P3] HIDDEN SECRET STATION: VỌNG LÂU NGẮM SAO (Nhóm 3.2)         */
+    /* ================================================================== */
+    {
+      const ptSecret = curve.getPointAt(0.84);
+      const TSecret = curve.getTangentAt(0.84);
+      const normSecret = new THREE.Vector3(TSecret.z, 0, -TSecret.x).normalize();
+      const secretCenter = ptSecret.clone().add(normSecret.clone().multiplyScalar(13.5));
+      const secretGroup = new THREE.Group();
+      secretGroup.position.set(secretCenter.x, heightAt(secretCenter.x, secretCenter.z), secretCenter.z);
+
+      const secretMarbleMat = new THREE.MeshStandardMaterial({ color: 0xFFFDF9, roughness: 0.4 });
+      const secretGoldMat = new THREE.MeshStandardMaterial({ color: 0xD4AF37, metalness: 0.9, roughness: 0.2 });
+
+      // Bệ đài đá cẩm thạch hình bát giác
+      const pagodaBase = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.6, 0.6, 8), secretMarbleMat);
+      pagodaBase.position.y = 0.3;
+      pagodaBase.castShadow = true;
+      pagodaBase.receiveShadow = true;
+      secretGroup.add(pagodaBase);
+
+      // 6 cột trụ vàng champagne
+      const pagodaLanterns = [];
+      for (let p = 0; p < 6; p++) {
+        const ang = (p / 6) * Math.PI * 2;
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 4.2, 12), secretGoldMat);
+        col.position.set(Math.cos(ang) * 3.4, 2.4, Math.sin(ang) * 3.4);
+        col.castShadow = true;
+        secretGroup.add(col);
+
+        // Đèn lồng treo phát sáng
+        const lantern = new THREE.Mesh(
+          new THREE.SphereGeometry(0.24, 12, 12),
+          new THREE.MeshStandardMaterial({
+            color: 0xFFFBEB,
+            emissive: 0xFDE68A,
+            emissiveIntensity: 2.2,
+            roughness: 0.2
+          })
+        );
+        lantern.position.set(Math.cos(ang) * 3.4, 4.2, Math.sin(ang) * 3.4);
+        secretGroup.add(lantern);
+        pagodaLanterns.push(lantern);
+      }
+
+      // Mái vòm cong cung đình
+      const pagodaRoof = new THREE.Mesh(new THREE.ConeGeometry(4.4, 2.4, 8), new THREE.MeshStandardMaterial({ color: 0x8C2F4B, roughness: 0.35, metalness: 0.4 }));
+      pagodaRoof.position.y = 5.6;
+      pagodaRoof.castShadow = true;
+      secretGroup.add(pagodaRoof);
+
+      // Đỉnh sao vàng
+      const starSpire = new THREE.Mesh(new THREE.OctahedronGeometry(0.4), secretGoldMat);
+      starSpire.position.y = 7.0;
+      secretGroup.add(starSpire);
+
+      // Đèn PointLight lung linh
+      const secretLight = new THREE.PointLight(0xFDE68A, 2.8, 18);
+      secretLight.position.set(0, 3.8, 0);
+      secretGroup.add(secretLight);
+
+      // Biển tên thần bí
+      const secretSignTex = signTexture('🌟 VỌNG LÂU NGẮM SAO BÍ MẬT 🌟');
+      const secretSign = new THREE.Sprite(new THREE.SpriteMaterial({ map: secretSignTex, transparent: true }));
+      secretSign.position.set(0, 4.8, 0);
+      secretSign.scale.set(4.2, 1.05, 1);
+      secretGroup.add(secretSign);
+
+      scene.add(secretGroup);
+
+      const onSecretClick = () => {
+        playSparkleSound();
+        pagodaLanterns.forEach(l => {
+          l.material.emissiveIntensity = 5.5;
+          setTimeout(() => { l.material.emissiveIntensity = 2.2; }, 3200);
+        });
+        fireConfetti({
+          particleCount: 90,
+          spread: 110,
+          origin: { y: 0.48 },
+          colors: ['#FDE68A', '#38BDF8', '#C084FC', '#FFF']
+        });
+        showToast('🌟 BÍ MẬT: Bạn đã khám phá Vọng Lâu Ngắm Sao! Nơi hội tụ vạn vì tinh tú may mắn cho phái đẹp! ✨');
+      };
+
+      interactiveMeshes.push({ mesh: pagodaBase, onClick: onSecretClick });
+      interactiveMeshes.push({ mesh: pagodaRoof, onClick: onSecretClick });
+      interactiveMeshes.push({ mesh: secretSign, onClick: onSecretClick });
     }
 
     /* ---------- [P3] Camera transitions dictionary ---------- */
@@ -4466,8 +4783,8 @@ export default function World3DExperience() {
     const colorGrade = new ShaderPass(ColorGradeShader);
     colorGrade.uniforms.uStrength.value = 1.0;
     colorGrade.uniforms.uVignette.value = 0.35;
-    colorGrade.uniforms.uGrain.value = 0.018;
-    colorGrade.uniforms.uAberration.value = 0.0006;
+    colorGrade.uniforms.uGrain.value = 0.012;
+    colorGrade.uniforms.uAberration.value = 0.0004;
     colorGrade.uniforms.uSaturation.value = 1.08;
     colorGrade.uniforms.uTime.value = 0;
     composer.addPass(colorGrade);
@@ -4490,6 +4807,7 @@ export default function World3DExperience() {
     let lastTapTime = 0;
 
     const onPointerDown = (e) => {
+      initAmbientAudio();
       if (e.target.closest('button, .hud-aside-dock, .hud-bottom-bar, .modal-overlay, .fairy-mailbox-overlay, .hud-top-minimal-pill, .hud-van-angles-dock, .hud-nav-pad-cluster, .btn-camera-sky-toggle, .hud-center-guide-pill')) return;
       isPointerDown = true;
       downPos = { x: e.clientX, y: e.clientY };
@@ -4578,6 +4896,9 @@ export default function World3DExperience() {
       console.warn('[First Frame Render] Warning:', e);
     }
     setIsSceneReady(true);
+    setTimeout(() => {
+      setIsVeilOpen(true);
+    }, 450);
 
     let spawnAcc = 0;
     const camTmpA = new THREE.Vector3();
@@ -4817,6 +5138,9 @@ export default function World3DExperience() {
           controls.target.lerpVectors(tr.fromTgt, camDestB, ease);
         } else {
           camera.position.lerpVectors(tr.fromCam, tr.toCam, ease);
+          if (tr.arcHeight) {
+            camera.position.y += Math.sin(k * Math.PI) * tr.arcHeight;
+          }
           controls.target.lerpVectors(tr.fromTgt, tr.toTgt, ease);
         }
 
@@ -4974,6 +5298,13 @@ export default function World3DExperience() {
       if (container && renderer.domElement) {
         try { container.removeChild(renderer.domElement); } catch (e) {}
       }
+      if (ambientAudioRef.current) {
+        try {
+          ambientAudioRef.current.whiteNoise.stop();
+          ambientAudioRef.current.ctx.close();
+        } catch (e) {}
+        ambientAudioRef.current = null;
+      }
     };
   }, []);
 
@@ -4983,6 +5314,35 @@ export default function World3DExperience() {
   return (
     <div className="page-garden-3d" id="world-3d-sanctuary">
       <div ref={containerRef} className="garden-3d-viewport" />
+
+      {/* [P1] BỨC MÀN CINEMATIC VEIL LOADER — Che đậy lúc chuyển cảnh từ / sang /#/3d, không bị đơ/đen template */}
+      <div className={`cinematic-veil-overlay ${isVeilOpen ? 'veil-fade-out' : ''}`} aria-hidden={isVeilOpen}>
+        <div className="cinematic-veil-spinner-wrap">
+          <div className="cinematic-veil-ring" />
+          <div className="cinematic-veil-icon">🌸</div>
+        </div>
+        <h2 className="cinematic-veil-title">
+          Vương Quốc Hoa 3D • 20/10<br />
+          Dành Riêng Cho <strong>{sisterName || 'Chị Em'}</strong> ✨
+        </h2>
+        <p className="cinematic-veil-sub">
+          Đang chuẩn bị không gian ngập tràn hoa và ánh sáng kỳ diệu...
+        </p>
+      </div>
+
+      {/* [P1] BANNER CHẾ ĐỘ AUTO-TOUR ĐANG CHẠY */}
+      {isAutoTourActive && (
+        <div className="autotour-active-banner">
+          <span>🎬 Đang chiếu Chuyến Du Ngoạn Tự Động 3D (Hands-free Tour)</span>
+          <button
+            className="btn-autotour-stop"
+            onClick={() => setIsAutoTourActive(false)}
+            title="Dừng chế độ tự động và quay lại khám phá tự do"
+          >
+            ⏹️ Dừng Tour
+          </button>
+        </div>
+      )}
 
       <div className="garden-game-hud">
         {!isSceneReady && (
@@ -5010,15 +5370,43 @@ export default function World3DExperience() {
           <>
             {/* Thanh tiêu đề tối giản và gọn gàng trên cùng */}
             <div className="hud-top-minimal-pill">
-              <span className="pill-badge">🌸 20.10 WORLD 3D</span>
-              <span className="pill-text">
-                Vương Quốc Tri Ân • Dành Riêng Cho <strong>{sisterName}</strong> ✨
+              <span className="pill-badge" style={{ background: sisterTheme.primary }}>
+                🌸 20.10 WORLD 3D
               </span>
+              <span className="pill-text">
+                Vương Quốc Tri Ân • {sisterTheme.flower} • Dành Riêng Cho <strong>{sisterName}</strong> ✨
+                {typeof activeStationIndex === 'number' && STATIONS[activeStationIndex] && (
+                  <span style={{ color: '#FDE68A', marginLeft: '6px' }}>
+                    [{STATIONS[activeStationIndex].chapter}: {STATIONS[activeStationIndex].chapterTitle}]
+                  </span>
+                )}
+              </span>
+
+              {/* [P1] Achievement Tracker Badge (Khám phá X/6 trạm) */}
+              <div
+                className={`hud-achievement-pill ${visitedStations.size === 6 ? 'unlocked' : ''}`}
+                onClick={() => {
+                  if (visitedStations.size === 6) {
+                    showToast('👑 Bạn đã là NỮ THẦN VƯƠNG QUỐC 20/10! Toàn bộ 6 trạm đã được thắp sáng rực rỡ.');
+                  } else {
+                    showToast(`🏆 Tiến trình: Bạn đã khám phá ${visitedStations.size}/6 trạm. Tiếp tục du ngoạn để mở khóa danh hiệu Hoàng Gia!`);
+                  }
+                }}
+                title="Huy hiệu tiến trình khám phá các trạm"
+              >
+                <span>{visitedStations.size === 6 ? '👑' : '🏆'}</span>
+                <span>{visitedStations.size === 6 ? 'Nữ Thần 20/10' : `${visitedStations.size}/6 Trạm`}</span>
+              </div>
             </div>
 
             {/* THANH ASIDE DỌC THỜI THƯỢNG (HIỂN THỊ LABEL TRONG SUỐT CHO TẤT CẢ, ACTIVE NỔI BẬT ĐẬM HƠN) */}
             <aside className="hud-aside-dock">
-              <div className="hud-dock-brand" title={`20.10 World 3D • Dành tặng ${sisterName}`}>
+              <div
+                className="hud-dock-brand"
+                onClick={triggerEasterEgg}
+                style={{ cursor: 'pointer' }}
+                title={`20.10 World 3D • Dành tặng ${sisterName} (Chạm 3 lần để mở quà bí mật 🌸)`}
+              >
                 <span className="hud-dock-logo">🌸</span>
                 <span className="hud-dock-brand-text">20.10 WORLD</span>
               </div>
@@ -5033,7 +5421,8 @@ export default function World3DExperience() {
                       key={st.id}
                       className={`hud-dock-station-btn ${isActive ? 'active' : ''}`}
                       onClick={() => flyToStation(idx)}
-                      title={`${st.name} — ${st.subtitle}`}
+                      aria-current={isActive ? 'step' : undefined}
+                      title={`${st.chapter}: ${st.name} — ${st.subtitle}`}
                     >
                       <span className="station-icon">{st.icon}</span>
                       <span className="station-label">{st.name}</span>
@@ -5053,6 +5442,31 @@ export default function World3DExperience() {
                 >
                   <span className="tool-icon">{isNightMode ? '🌙' : '🌅'}</span>
                   <span className="tool-label">{isNightMode ? 'Dạ Tiệc Đêm' : 'Hoàng Hôn'}</span>
+                </button>
+
+                <button
+                  className={`hud-dock-tool-btn ${isAutoTourActive ? 'active-tour' : ''}`}
+                  onClick={() => {
+                    setIsAutoTourActive(!isAutoTourActive);
+                    showToast(
+                      !isAutoTourActive
+                        ? '🎬 Bắt đầu Chuyến Du Ngoạn Tự Động (Hands-free Tour)! Thư thái chiêm ngưỡng từng trạm.'
+                        : '⏹️ Đã dừng tour tự động.'
+                    );
+                  }}
+                  title="Tự động dẫn bạn du ngoạn qua tất cả các trạm rảnh tay"
+                >
+                  <span className="tool-icon">{isAutoTourActive ? '⏹️' : '🎬'}</span>
+                  <span className="tool-label">{isAutoTourActive ? 'Dừng Tour' : 'Auto Tour'}</span>
+                </button>
+
+                <button
+                  className="hud-dock-tool-btn"
+                  onClick={triggerPhotoMode}
+                  title="Chụp ảnh: Ẩn tạm thời toàn bộ giao diện trong 5 giây"
+                >
+                  <span className="tool-icon">📸</span>
+                  <span className="tool-label">Chụp Ảnh</span>
                 </button>
 
                 <button
@@ -5263,6 +5677,7 @@ export default function World3DExperience() {
       {isMailboxOpen && !readingMessage && (
         <div className="parcel-chest-overlay" onClick={() => setIsMailboxOpen(false)}>
           <div className="parcel-chest-box" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-wax-seal-badge">20.10</div>
             <div className="parcel-chest-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <span style={{ fontSize: '2.4rem' }}>🚚</span>
@@ -5390,7 +5805,8 @@ export default function World3DExperience() {
 
       {activeVideoModal && (
         <div className="modal-overlay open" onClick={() => setActiveVideoModal(false)}>
-          <div className="cinema-stage-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '860px', width: '100%', padding: '28px' }}>
+          <div className="cinema-stage-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '860px', width: '100%', padding: '28px', position: 'relative' }}>
+            <div className="modal-wax-seal-badge">20.10</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: 'var(--rose-900)', margin: 0 }}>
                 🎬 Phim Tri Ân 20/10 • Phái Đẹp TechCorp
@@ -5416,7 +5832,8 @@ export default function World3DExperience() {
 
       {activePartyCardModal && (
         <div className="modal-overlay open" onClick={() => setActivePartyCardModal(false)}>
-          <div className="party-honor-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', width: '100%', padding: '36px 32px' }}>
+          <div className="party-honor-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px', width: '100%', padding: '36px 32px', position: 'relative' }}>
+            <div className="modal-wax-seal-badge">20.10</div>
             <div
               ref={printableCardRef}
               style={{
@@ -5513,6 +5930,22 @@ export default function World3DExperience() {
                 }}
               >
                 <span>{isDownloadingCard ? '⏳ Đang xuất thiệp 2x...' : '📥 Tải Thiệp Kỷ Niệm 2x Retina'}</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  const shareText = `🌸 Chúc mừng ngày Phụ Nữ Việt Nam 20/10! Thân gửi chị ${sisterName || 'Đồng Nghiệp'} tấm thiệp tri ân đặc biệt từ TechCorp ❤️ Xem ngay tại: ${window.location.origin}/#/3d`;
+                  navigator.clipboard.writeText(shareText);
+                  showToast('📋 Đã sao chép thiệp mừng & link! Bạn có thể dán ngay vào Zalo/Teams để chia sẻ.');
+                }}
+                className="btn-rose"
+                style={{
+                  padding: '12px 22px',
+                  background: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
+                  boxShadow: '0 8px 24px rgba(2, 132, 199, 0.35)'
+                }}
+              >
+                <span>🔗 Sao Chép Thiệp & Link (Zalo/Teams)</span>
               </button>
 
               <button
