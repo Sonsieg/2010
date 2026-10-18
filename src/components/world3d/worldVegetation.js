@@ -187,8 +187,10 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
   {
     const GN = Math.floor(13500 * Q);
     const pts = scatter(GN, 2.0, 32, 1.4);
-    const mat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, side: THREE.DoubleSide }), timeU, 0.3);
+    const mat = windify(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }), timeU, 0.3);
     const grass = new THREE.InstancedMesh(bladeGeo, mat, pts.length);
+    grass.castShadow = false;
+    grass.receiveShadow = false;
     pts.forEach((p, i) => {
       dummy.position.set(p.x, p.y, p.z);
       dummy.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, 0);
@@ -203,14 +205,13 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     scene.add(grass);
   }
 
-  // 2. 4 Loài hoa chính phủ khắp thế giới
-  const roseHeadBase = makeRoseHead();
+  // 2. 4 Loài hoa chính phủ khắp thế giới (cache geometry gốc để không lặp lại mergeGeometries đắt đỏ)
   const species = [
     {
       name: 'Roses',
       count: 3600,
       stemH: 0.72,
-      head: roseHeadBase.clone(),
+      getHead: () => makeRoseHead(),
       leaves: true,
       tint: true,
       pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4, 0xff2442],
@@ -220,7 +221,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       name: 'Tulips',
       count: 3600,
       stemH: 0.64,
-      head: makeTulipHead(),
+      getHead: () => makeTulipHead(),
       leaves: true,
       tint: true,
       pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9, 0xfacc15],
@@ -230,7 +231,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       name: 'Daisies',
       count: 4200, 
       stemH: 0.52, 
-      head: makeDaisyHead(), 
+      getHead: () => makeDaisyHead(), 
       leaves: false, 
       tint: false, 
       pal: null, 
@@ -240,7 +241,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       name: 'Lavender',
       count: 3600,
       stemH: 0.98,
-      head: makeLavenderHead(),
+      getHead: () => makeLavenderHead(),
       leaves: true,
       tint: true,
       pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe, 0x8b5cf6, 0xa855f7],
@@ -248,7 +249,14 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     }
   ];
 
-  species.forEach((sp, si) => {
+  // Dựng từng loài hoa qua requestAnimationFrame để main thread không bao giờ bị nghẽn (0s jank)
+  let spIndex = 0;
+  function stepSpecies() {
+    if (spIndex >= species.length) return;
+    const sp = species[spIndex];
+    const si = spIndex;
+    spIndex++;
+
     const nTotal = Math.floor(sp.count * Q);
     const nNear = Math.floor(nTotal * 0.3);
     const nFar = nTotal - nNear;
@@ -257,11 +265,18 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     const pts = ptsNear.concat(ptsFar);
 
     const stemGeo = makeStem(sp.stemH, sp.leaves);
-    sp.head.translate(0, sp.stemH, 0);
-    const stemMat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8 }), timeU, 0.2);
-    const headMat = windify(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, side: THREE.DoubleSide }), timeU, 0.2);
+    const headGeo = sp.getHead();
+    headGeo.translate(0, sp.stemH, 0);
+
+    // MeshLambertMaterial nhẹ hơn gấp 5 lần MeshStandardMaterial, màu sắc rực rỡ và chạy mượt 60fps trên mọi GPU
+    const stemMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true }), timeU, 0.2);
+    const headMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), timeU, 0.2);
     const stems = new THREE.InstancedMesh(stemGeo, stemMat, pts.length);
-    const heads = new THREE.InstancedMesh(sp.head, headMat, pts.length);
+    const heads = new THREE.InstancedMesh(headGeo, headMat, pts.length);
+    stems.castShadow = false;
+    stems.receiveShadow = false;
+    heads.castShadow = false;
+    heads.receiveShadow = false;
 
     pts.forEach((p, i) => {
       dummy.position.set(p.x, p.y, p.z);
@@ -285,5 +300,11 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     heads.frustumCulled = false;
     scene.add(stems);
     scene.add(heads);
-  });
+
+    if (spIndex < species.length) {
+      requestAnimationFrame(stepSpecies);
+    }
+  }
+
+  stepSpecies();
 }

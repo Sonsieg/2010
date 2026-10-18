@@ -2311,5 +2311,216 @@
   box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
 }
 
+/* ==========================================================
+   11. UI POLISH & MICRO-INTERACTIONS (Vanilla CSS Premium)
+   ========================================================== */
 
+/* 11.1. Button Press Feedback */
+.btn-rose:active,
+.btn-golden-rose:active,
+.hud-dock-station-btn:active,
+.hud-dock-tool-btn:active,
+.btn-hud-mailbox:active,
+.hud-van-angle-btn:active,
+.nav-pad-btn:active,
+.btn-camera-sky-toggle:active,
+.btn-hud-reopen-floating:active,
+.royal-btn-close:active,
+.hud-van-guide-banner:active,
+.fairy-tab-btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.08s ease-out !important;
+}
 
+/* 11.2. Focus Visible Rings for Accessibility */
+.btn-rose:focus-visible,
+.btn-golden-rose:focus-visible,
+.hud-dock-station-btn:focus-visible,
+.hud-dock-tool-btn:focus-visible,
+.btn-hud-mailbox:focus-visible,
+.hud-van-angle-btn:focus-visible,
+.nav-pad-btn:focus-visible,
+.btn-camera-sky-toggle:focus-visible,
+.btn-hud-reopen-floating:focus-visible,
+.royal-btn-close:focus-visible,
+.fairy-tab-btn:focus-visible {
+  outline: 2px solid #FDE68A !important;
+  outline-offset: 3px !important;
+}
+
+/* 11.3. Modal Entrance & Card Hover Lift */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.parcel-chest-box {
+  animation: modalSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.parcel-chest-box .winged-card {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.2s ease;
+}
+
+.parcel-chest-box .winged-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(140, 47, 75, 0.25);
+  border-color: var(--rose-400);
+}
+
+.cinema-stage-box {
+  background: radial-gradient(circle at center, #260c1c 0%, #13060e 100%) !important;
+  border: 2px solid var(--champagne-gold) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(201, 166, 107, 0.3) !important;
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.party-honor-card {
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 11.4. HUD Loading Skeleton & Shimmer */
+@keyframes hudShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.hud-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: hudShimmer 1.6s infinite ease-in-out;
+}
+
+.hud-loading-skeleton {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.hud-skeleton-pill {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 22px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  color: #FAF3EA;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.hud-skeleton-aside {
+  position: absolute;
+  top: 70px;
+  left: 16px;
+  width: 140px;
+  height: 280px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hud-skeleton-bottom {
+  align-self: center;
+  width: 320px;
+  max-width: 80vw;
+  height: 48px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+}
+
+/* 11.5. HUD Toast with Progress Bar & Pause on Hover */
+.hud-toast-container {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10002;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 90vw;
+}
+
+.hud-toast {
+  pointer-events: auto;
+  position: relative;
+  background: rgba(30, 15, 24, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(201, 166, 107, 0.65);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 24px rgba(201, 166, 107, 0.3);
+  border-radius: 9999px;
+  padding: 10px 24px 12px;
+  color: #FAF3EA;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+  animation: toastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.hud-toast:hover {
+  border-color: #FDE68A;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 28px rgba(253, 230, 138, 0.4);
+}
+
+.hud-toast-text {
+  line-height: 1.4;
+  color: #FFFDF9;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.hud-toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #F43F5E, #FDE68A);
+  width: 100%;
+  animation: toastProgressBar 3.5s linear forwards;
+}
+
+@keyframes toastProgressBar {
+  from { width: 100%; }
+  to { width: 0%; }
+}
