@@ -895,8 +895,8 @@ export default function World3DExperience() {
 
     const lowPower = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
     const isWeakDevice = lowPower || (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4);
-    // Cân bằng Q = 0.35 (desktop) / 0.18 (mobile) giúp giảm hơn 11.000 instance thừa mà vườn hoa vẫn ngút ngàn
-    const Q = isWeakDevice ? 0.18 : 0.35;
+    // Level up tối đa: Q = 1.0 (desktop - 100% mật độ hoa ngút ngàn) / 0.45 (mobile mượt mà)
+    const Q = isWeakDevice ? 0.45 : 1.0;
     const rand = rngFactory(20102026);
     const timeU = { value: 0 };
 

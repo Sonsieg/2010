@@ -185,7 +185,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
   const grassMat = windify(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }), timeU, 0.3);
 
   // 1. Dựng thảm cỏ nền chia làm 2 lát cắt (Slice 1: Cỏ gần đường; Slice 2: Cỏ thảo nguyên)
-  const totalGrass = Math.floor(13500 * Q);
+  const totalGrass = Math.floor(16500 * Q);
   const grassBatch1 = Math.floor(totalGrass * 0.45);
   const grassBatch2 = totalGrass - grassBatch1;
 
@@ -197,8 +197,8 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     pts.forEach((p, i) => {
       dummy.position.set(p.x, p.y, p.z);
       dummy.rotation.set((rand() - 0.5) * 0.25, rand() * Math.PI * 2, 0);
-      const h = 0.65 + rand() * 0.9;
-      dummy.scale.set(0.85 + rand() * 0.5, h, 1);
+      const h = 0.72 + rand() * 0.95;
+      dummy.scale.set(0.95 + rand() * 0.55, h, 1);
       dummy.updateMatrix();
       grass.setMatrixAt(i, dummy.matrix);
       tint.setRGB(0.75 + rand() * 0.4, 0.85 + rand() * 0.3, 0.65 + rand() * 0.25);
@@ -219,7 +219,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       leaves: true,
       tint: true,
       pal: [0xe11d48, 0xfb7185, 0xfda4af, 0xfff1f2, 0xbe123c, 0xf9a8d4, 0xff2442],
-      sc: [1.3, 2.1]
+      sc: [1.45, 2.35]
     },
     {
       name: 'Hoa Tulip',
@@ -229,7 +229,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       leaves: true,
       tint: true,
       pal: [0xf43f5e, 0xfbbf24, 0xfde68a, 0xf97316, 0xfb7185, 0xe879f9, 0xfacc15],
-      sc: [1.4, 2.2]
+      sc: [1.55, 2.45]
     },
     { 
       name: 'Cúc Họa Mi',
@@ -239,7 +239,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       leaves: false, 
       tint: false, 
       pal: null, 
-      sc: [1.2, 2.0] 
+      sc: [1.35, 2.2] 
     },
     {
       name: 'Hoa Oải Hương',
@@ -249,7 +249,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       leaves: true,
       tint: true,
       pal: [0xffffff, 0xf5d0fe, 0xc7d2fe, 0xddd6fe, 0x8b5cf6, 0xa855f7],
-      sc: [1.3, 2.2]
+      sc: [1.45, 2.4]
     }
   ];
 
@@ -270,9 +270,9 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     }
 
     const nTotal = Math.floor(sp.count * Q);
-    const nNear = Math.floor(nTotal * 0.35);
+    const nNear = Math.floor(nTotal * 0.58);
     const nFar = nTotal - nNear;
-    const ptsNear = scatter(nNear, 2.0, 26, 1.2);
+    const ptsNear = scatter(nNear, 1.6, 22, 1.25);
     const ptsFar = scatterLandscape(nFar, 2.4, 115);
     const pts = ptsNear.concat(ptsFar);
 
