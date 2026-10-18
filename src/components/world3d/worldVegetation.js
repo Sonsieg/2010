@@ -178,17 +178,20 @@ export function makeBlade() {
 /**
  * Dựng toàn bộ thảm hoa 23.000 đóa và cánh đồng cỏ nhẹ
  */
-export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, rand, Q }) {
+export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, rand, Q, onProgress }) {
   const bladeGeo = makeBlade();
   const dummy = new THREE.Object3D();
   const tint = new THREE.Color();
+  const grassMat = windify(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }), timeU, 0.3);
 
-  // 1. Cỏ nhẹ làm nền
-  {
-    const GN = Math.floor(13500 * Q);
-    const pts = scatter(GN, 2.0, 32, 1.4);
-    const mat = windify(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }), timeU, 0.3);
-    const grass = new THREE.InstancedMesh(bladeGeo, mat, pts.length);
+  // 1. Dựng thảm cỏ nền chia làm 2 lát cắt (Slice 1: Cỏ gần đường; Slice 2: Cỏ thảo nguyên)
+  const totalGrass = Math.floor(13500 * Q);
+  const grassBatch1 = Math.floor(totalGrass * 0.45);
+  const grassBatch2 = totalGrass - grassBatch1;
+
+  function buildGrassSlice(count, latMin, latMax, pw, nextStep) {
+    const pts = scatter(count, latMin, latMax, pw);
+    const grass = new THREE.InstancedMesh(bladeGeo, grassMat, pts.length);
     grass.castShadow = false;
     grass.receiveShadow = false;
     pts.forEach((p, i) => {
@@ -203,12 +206,13 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     });
     grass.frustumCulled = false;
     scene.add(grass);
+    if (nextStep) requestAnimationFrame(nextStep);
   }
 
   // 2. 4 Loài hoa chính phủ khắp thế giới (cache geometry gốc để không lặp lại mergeGeometries đắt đỏ)
   const species = [
     {
-      name: 'Roses',
+      name: 'Hoa Hồng',
       count: 3600,
       stemH: 0.72,
       getHead: () => makeRoseHead(),
@@ -218,7 +222,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       sc: [1.3, 2.1]
     },
     {
-      name: 'Tulips',
+      name: 'Hoa Tulip',
       count: 3600,
       stemH: 0.64,
       getHead: () => makeTulipHead(),
@@ -228,7 +232,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       sc: [1.4, 2.2]
     },
     { 
-      name: 'Daisies',
+      name: 'Cúc Họa Mi',
       count: 4200, 
       stemH: 0.52, 
       getHead: () => makeDaisyHead(), 
@@ -238,7 +242,7 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
       sc: [1.2, 2.0] 
     },
     {
-      name: 'Lavender',
+      name: 'Hoa Oải Hương',
       count: 3600,
       stemH: 0.98,
       getHead: () => makeLavenderHead(),
@@ -249,16 +253,20 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     }
   ];
 
-  // Dựng từng loài hoa qua requestAnimationFrame để main thread không bao giờ bị nghẽn (0s jank)
   let spIndex = 0;
   function stepSpecies() {
-    if (spIndex >= species.length) return;
+    if (spIndex >= species.length) {
+      if (typeof onProgress === 'function') onProgress('Hoàn tất thảm hoa 3D!');
+      return;
+    }
     const sp = species[spIndex];
     const si = spIndex;
     spIndex++;
 
+    if (typeof onProgress === 'function') onProgress(`Đang trải ${sp.name}...`);
+
     const nTotal = Math.floor(sp.count * Q);
-    const nNear = Math.floor(nTotal * 0.3);
+    const nNear = Math.floor(nTotal * 0.35);
     const nFar = nTotal - nNear;
     const ptsNear = scatter(nNear, 2.0, 26, 1.2);
     const ptsFar = scatterLandscape(nFar, 2.4, 115);
@@ -306,5 +314,10 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
     }
   }
 
-  stepSpecies();
+  // Khởi động chuỗi micro-tasks: Cỏ đợt 1 -> Cỏ đợt 2 -> 4 loài hoa
+  buildGrassSlice(grassBatch1, 2.0, 18, 1.3, () => {
+    buildGrassSlice(grassBatch2, 16.0, 36, 1.4, () => {
+      requestAnimationFrame(stepSpecies);
+    });
+  });
 }

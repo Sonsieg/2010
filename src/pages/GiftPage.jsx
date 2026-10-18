@@ -13,6 +13,14 @@ export default function GiftPage() {
   const [isLidOpened, setIsLidOpened] = useState(false);
   const [showWelcomeChoice, setShowWelcomeChoice] = useState(false);
 
+  // Pre-load 3D chunk ngầm khi người dùng ở trang chủ để khi bấm 3D là mở tức thì 0s delay
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      import('./World3DExperience.jsx').catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Khi chọn tên chị em, hiện modal chào mừng trang trọng định hướng 3D vs 2D
   const lastSelectedIdRef = React.useRef(selectedSister?.id);
   React.useEffect(() => {
