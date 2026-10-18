@@ -97,183 +97,357 @@ export function getSignatureStyleForName(name = '') {
  * Tạo canvas 2D thẻ chữ ký nghệ thuật chất lượng cao (dùng cho Three.js Texture hoặc xuất ảnh)
  * Tone màu nước pastel ấm, có vệt cọ nghệ thuật nâng đỡ tên, hoa lá tràn viền, chống lóa sáng tuyệt đối.
  */
+/**
+ * Tạo canvas 2D thẻ chữ ký nghệ thuật "Hồng Nhung & Vòng Hoa Vàng Hoàng Gia"
+ * Dùng làm Texture sắc nét cho Three.js (Trạm 2 và Trạm 5) và xuất ảnh.
+ * Đồng bộ 100% với giao diện Thiệp Hồng Nhung: vòng tròn vàng, giàn hoa đào botanical hai bên, chữ Pinyon Script.
+ */
 export function createSignatureCardCanvas(name = 'Lan Anh', customQuote = '', width = 800, height = 1060) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
-  const style = getSignatureStyleForName(name);
 
-  // 1. Nền màu nước pastel dịu nhẹ (chống lóa sáng trong 3D)
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-  bgGrad.addColorStop(0, style.theme.bgStart);
-  bgGrad.addColorStop(0.45, style.theme.bgEnd);
-  bgGrad.addColorStop(1, style.theme.bgStart);
+  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Lan Anh';
+  const wish = customQuote || 'Chúc chị luôn vui vẻ, may mắn và hạnh phúc!';
+
+  // 1. Nền radial gradient ấm áp phong cách Thiệp Hồng Nhung
+  const bgGrad = ctx.createRadialGradient(
+    width * 0.5, height * 0.45, 40,
+    width * 0.5, height * 0.45, width * 0.75
+  );
+  bgGrad.addColorStop(0, '#fdeae4');
+  bgGrad.addColorStop(0.6, '#fde6df');
+  bgGrad.addColorStop(1, '#fbd9d2');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // Vệt màu nước tròn loang nhẹ ở 2 góc
-  const cornerGrad1 = ctx.createRadialGradient(80, 80, 10, 80, 80, 260);
-  cornerGrad1.addColorStop(0, style.theme.splash);
-  cornerGrad1.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = cornerGrad1;
-  ctx.fillRect(0, 0, 360, 360);
-
-  const cornerGrad2 = ctx.createRadialGradient(width - 80, height - 80, 10, width - 80, height - 80, 260);
-  cornerGrad2.addColorStop(0, style.theme.splash);
-  cornerGrad2.addColorStop(1, 'rgba(255, 255, 255, 0)');
-  ctx.fillStyle = cornerGrad2;
-  ctx.fillRect(width - 360, height - 360, 360, 360);
-
-  // 2. Viền đôi mỹ thuật mạ vàng / hồng pastel
-  ctx.strokeStyle = style.theme.border;
-  ctx.lineWidth = 4;
-  ctx.strokeRect(26, 26, width - 52, height - 52);
-
-  ctx.strokeStyle = 'rgba(201, 166, 107, 0.55)';
-  ctx.lineWidth = 1.8;
-  ctx.strokeRect(38, 38, width - 76, height - 76);
-
-  // 4 Hoa văn Baroque ở góc ❧ ☙
-  ctx.fillStyle = style.theme.accent;
-  ctx.font = '24px serif';
-  ctx.fillText('❧', 48, 68);
-  ctx.fillText('☙', width - 72, 68);
-  ctx.fillText('❧', 48, height - 48);
-  ctx.fillText('☙', width - 72, height - 48);
-
-  // 3. Header: WITH LOVE • 20.10
-  ctx.textAlign = 'center';
-  ctx.fillStyle = style.theme.text;
-  ctx.font = '700 16px "Be Vietnam Pro", sans-serif';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('WITH LOVE • 20.10', width / 2, 108);
-  ctx.letterSpacing = '0px';
-
-  // 4. Biểu tượng đồ họa / Giàn hoa Botanical
-  if (style.theme.emblem === 'crown') {
-    ctx.font = '46px serif';
-    ctx.fillText('👑', width / 2, 185);
-    ctx.fillStyle = style.theme.accent;
-    ctx.font = '18px serif';
-    ctx.fillText('✦  ✧  ✦', width / 2, 220);
-  } else if (style.theme.emblem === 'stars') {
-    ctx.font = '36px serif';
-    ctx.fillStyle = style.theme.accent;
-    ctx.fillText('✨  ✦  👑  ✦  ✨', width / 2, 190);
-  } else {
-    // Giàn cành hoa uốn lượn phong cách Botanical (Style 1 & 4)
-    ctx.save();
-    ctx.strokeStyle = style.theme.accent;
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    ctx.moveTo(width / 2 - 130, 195);
-    ctx.bezierCurveTo(width / 2 - 60, 170, width / 2 + 60, 220, width / 2 + 130, 192);
-    ctx.stroke();
-
-    // Những đóa hoa hồng / hoa đào tươi thắm
-    [-100, -50, 0, 50, 100].forEach((ox, i) => {
-      ctx.fillStyle = i % 2 === 0 ? '#BE123C' : '#F43F5E';
-      ctx.beginPath();
-      ctx.arc(width / 2 + ox, 192 + (i % 2 === 0 ? -6 : 6), 6.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Lá xanh mướt
-      ctx.fillStyle = '#15803D';
-      ctx.beginPath();
-      ctx.ellipse(width / 2 + ox + 8, 192 + (i % 2 === 0 ? -2 : 10), 7, 3, Math.PI / 4, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.restore();
-  }
-
-  // 5. [VỆT MÀU NƯỚC NGHỆ THUẬT NÂNG ĐỠ CHỮ KÝ] (Style 7 & 9 trong mẫu)
+  // 2. Khung viền đôi hoàng gia
   ctx.save();
-  ctx.translate(width / 2, 360);
-  ctx.rotate(-0.02);
+  ctx.strokeStyle = '#ee8f86';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(width * 0.022, height * 0.022, width * 0.956, height * 0.956);
 
-  // Lớp vệt cọ màu nước loang tự nhiên
-  const brushGrad = ctx.createLinearGradient(-width * 0.42, 0, width * 0.42, 0);
-  brushGrad.addColorStop(0, 'rgba(251, 113, 133, 0.0)');
-  brushGrad.addColorStop(0.12, 'rgba(251, 113, 133, 0.35)');
-  brushGrad.addColorStop(0.35, 'rgba(244, 63, 94, 0.45)');
-  brushGrad.addColorStop(0.65, 'rgba(251, 113, 133, 0.48)');
-  brushGrad.addColorStop(0.88, 'rgba(244, 63, 94, 0.32)');
-  brushGrad.addColorStop(1, 'rgba(251, 113, 133, 0.0)');
-  ctx.fillStyle = brushGrad;
+  ctx.strokeStyle = 'rgba(238, 143, 134, 0.55)';
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(width * 0.034, height * 0.034, width * 0.932, height * 0.932);
 
-  // Vẽ hình cọ quét màu nước mềm mại có texture lượn sóng
-  ctx.beginPath();
-  ctx.ellipse(0, 0, width * 0.44, 72, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Lớp cọ thứ hai điểm xuyết tạo chiều sâu nghệ thuật
-  ctx.fillStyle = 'rgba(254, 205, 211, 0.6)';
-  ctx.beginPath();
-  ctx.ellipse(-15, 8, width * 0.38, 52, 0.02, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Điểm xuyết vài chấm mực nước hồng rơi lãng mạn
-  [[-180, -32], [210, 28], [-140, 36], [170, -30]].forEach(([dx, dy]) => {
-    ctx.fillStyle = 'rgba(244, 63, 94, 0.35)';
+  // 4 Hoa văn góc uốn cong
+  const cornerR = width * 0.05;
+  const drawCornerArc = (x, y, startA, endA) => {
+    ctx.strokeStyle = 'rgba(238, 143, 134, 0.75)';
+    ctx.lineWidth = 2.2;
     ctx.beginPath();
-    ctx.arc(dx, dy, 4.5, 0, Math.PI * 2);
-    ctx.fill();
-  });
+    ctx.arc(x, y, cornerR, startA, endA);
+    ctx.stroke();
+  };
+  drawCornerArc(width * 0.036 + cornerR, height * 0.036 + cornerR, Math.PI, Math.PI * 1.5);
+  drawCornerArc(width * 0.964 - cornerR, height * 0.036 + cornerR, Math.PI * 1.5, 0);
+  drawCornerArc(width * 0.036 + cornerR, height * 0.964 - cornerR, Math.PI * 0.5, Math.PI);
+  drawCornerArc(width * 0.964 - cornerR, height * 0.964 - cornerR, 0, Math.PI * 0.5);
   ctx.restore();
 
-  // 6. Tên chữ ký nghệ thuật (Calligraphy lớn, cực kỳ nổi bật trên vệt cọ)
-  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Lan Anh';
-  ctx.fillStyle = '#881337';
-  ctx.font = 'italic 700 96px "Great Vibes", "Alex Brush", cursive';
-  ctx.shadowColor = 'rgba(136, 19, 55, 0.3)';
-  ctx.shadowBlur = 12;
-  ctx.fillText(`${displayName} ♡`, width / 2, 388);
-  ctx.shadowBlur = 0; // reset shadow
+  // 3. Vài cánh hoa hồng mềm mại rơi lãng mạn
+  const drawFallenPetal = (x, y, scale, rot) => {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((rot * Math.PI) / 180);
+    ctx.scale(scale, scale);
+    const grad = ctx.createLinearGradient(-15, -25, 15, 25);
+    grad.addColorStop(0, '#fbcbd6');
+    grad.addColorStop(1, '#f4a9bb');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0, -25);
+    ctx.bezierCurveTo(20, -10, 20, 15, 0, 25);
+    ctx.bezierCurveTo(-20, 15, -20, -10, 0, -25);
+    ctx.fill();
+    ctx.restore();
+  };
 
-  // Nét gạch ký tên uốn lượn nghệ thuật dưới chân
-  ctx.strokeStyle = style.theme.border;
-  ctx.lineWidth = 2.8;
+  drawFallenPetal(width * 0.11, height * 0.14, 0.9, 35);
+  drawFallenPetal(width * 0.08, height * 0.22, 0.6, 60);
+  drawFallenPetal(width * 0.91, height * 0.09, 0.8, -40);
+  drawFallenPetal(width * 0.10, height * 0.86, 1.0, 25);
+  drawFallenPetal(width * 0.93, height * 0.72, 0.85, -55);
+  drawFallenPetal(width * 0.86, height * 0.92, 1.1, 30);
+  drawFallenPetal(width * 0.20, height * 0.93, 0.7, -30);
+
+  // 4. Vòng tròn vàng kim (Golden Metallic Ring)
+  const ringCX = width / 2;
+  const ringCY = height * 0.44;
+  const ringRadius = width * 0.32;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(201, 161, 90, 0.35)';
+  ctx.shadowBlur = 16;
+  const ringGrad = ctx.createLinearGradient(
+    ringCX - ringRadius, ringCY - ringRadius,
+    ringCX + ringRadius, ringCY + ringRadius
+  );
+  ringGrad.addColorStop(0, '#b8893f');
+  ringGrad.addColorStop(0.28, '#f5deb3');
+  ringGrad.addColorStop(0.5, '#e8cf8f');
+  ringGrad.addColorStop(0.72, '#b8893f');
+  ringGrad.addColorStop(1, '#e8cf8f');
+
+  ctx.strokeStyle = ringGrad;
+  ctx.lineWidth = 4;
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 200, 432);
-  ctx.quadraticCurveTo(width / 2, 465, width / 2 + 200, 426);
+  ctx.arc(ringCX, ringCY, ringRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  // 7. Lời chúc ngọt ngào (Typography lớn 25px, màu than đậm dễ đọc)
-  const wish = customQuote || style.quote;
-  ctx.fillStyle = '#1E293B';
-  ctx.font = '500 25px "Be Vietnam Pro", sans-serif';
+  // Viền mỏng phụ lấp lánh bên trong vòng tròn
+  ctx.strokeStyle = 'rgba(232, 207, 143, 0.5)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(ringCX, ringCY, ringRadius - 6, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 5. Cành hoa đào / hoa hồng Botanical ôm tròn hai bên vòng tròn
+  const drawBlossom = (bx, by, size, angle) => {
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(angle);
+    ctx.scale(size, size);
+
+    // 5 Cánh hoa hồng đào loang màu
+    for (let i = 0; i < 5; i++) {
+      ctx.save();
+      ctx.rotate((i * 72 * Math.PI) / 180);
+      const pGrad = ctx.createLinearGradient(0, 0, 0, -32);
+      pGrad.addColorStop(0, '#e8527f');
+      pGrad.addColorStop(0.35, '#f4a0b8');
+      pGrad.addColorStop(0.75, '#fbd3de');
+      pGrad.addColorStop(1, '#fef0f3');
+      ctx.fillStyle = pGrad;
+      ctx.strokeStyle = 'rgba(228, 109, 147, 0.5)';
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-18, -6, -22, -28, 0, -32);
+      ctx.bezierCurveTo(22, -28, 18, -6, 0, 0);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Tâm hoa & nhụy
+    ctx.fillStyle = 'rgba(224, 83, 127, 0.85)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Các tia nhụy hoa
+    for (let r = 0; r < 8; r++) {
+      const a = (r * 45 * Math.PI) / 180;
+      ctx.strokeStyle = '#c2416f';
+      ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(a) * 12, Math.sin(a) * 12);
+      ctx.stroke();
+
+      ctx.fillStyle = '#d4467c';
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * 13, Math.sin(a) * 13, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = '#a8305c';
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  };
+
+  const drawLeaf = (lx, ly, len, wid, angle) => {
+    ctx.save();
+    ctx.translate(lx, ly);
+    ctx.rotate(angle);
+    const lGrad = ctx.createLinearGradient(0, 0, len, 0);
+    lGrad.addColorStop(0, '#9aa070');
+    lGrad.addColorStop(1, '#cfd0a3');
+    ctx.fillStyle = lGrad;
+    ctx.strokeStyle = 'rgba(138, 145, 96, 0.6)';
+    ctx.lineWidth = 1;
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(len * 0.4, -wid, len, 0);
+    ctx.quadraticCurveTo(len * 0.4, wid, 0, 0);
+    ctx.fill();
+    ctx.stroke();
+
+    // Gân lá
+    ctx.strokeStyle = 'rgba(125, 133, 86, 0.7)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(2, 0);
+    ctx.lineTo(len - 2, 0);
+    ctx.stroke();
+    ctx.restore();
+  };
+
+  const drawBud = (bx, by, size, angle) => {
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(angle);
+    ctx.scale(size, size);
+    ctx.fillStyle = '#ee7a9c';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(-6, -6, -6, -18, 0, -22);
+    ctx.bezierCurveTo(6, -18, 6, -6, 0, 0);
+    ctx.fill();
+
+    // Đài hoa xanh
+    ctx.fillStyle = '#9ea46f';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-4, -8);
+    ctx.lineTo(0, -6);
+    ctx.lineTo(4, -8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  };
+
+  // Hàm vẽ 1 nhánh hoa ôm vòng tròn (bên trái)
+  const drawBotanicalBranch = (isRight = false) => {
+    ctx.save();
+    if (isRight) {
+      ctx.translate(width, 0);
+      ctx.scale(-1, 1);
+    }
+
+    // Nhánh cây uốn lượn ôm cung tròn
+    ctx.strokeStyle = '#8a6a55';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(ringCX - ringRadius * 0.68, ringCY + ringRadius * 0.88);
+    ctx.bezierCurveTo(
+      ringCX - ringRadius * 1.08, ringCY + ringRadius * 0.6,
+      ringCX - ringRadius * 1.14, ringCY - ringRadius * 0.2,
+      ringCX - ringRadius * 0.72, ringCY - ringRadius * 0.82
+    );
+    ctx.stroke();
+
+    // Lớp vệt sáng trên thân cành
+    ctx.strokeStyle = 'rgba(185, 152, 125, 0.65)';
+    ctx.lineWidth = 2.2;
+    ctx.beginPath();
+    ctx.moveTo(ringCX - ringRadius * 0.68, ringCY + ringRadius * 0.88);
+    ctx.bezierCurveTo(
+      ringCX - ringRadius * 1.08, ringCY + ringRadius * 0.6,
+      ringCX - ringRadius * 1.14, ringCY - ringRadius * 0.2,
+      ringCX - ringRadius * 0.72, ringCY - ringRadius * 0.82
+    );
+    ctx.stroke();
+
+    // Các nhánh phụ nhỏ
+    ctx.strokeStyle = '#8a6a55';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(ringCX - ringRadius * 1.06, ringCY + ringRadius * 0.2);
+    ctx.quadraticCurveTo(ringCX - ringRadius * 1.22, ringCY + ringRadius * 0.15, ringCX - ringRadius * 1.3, ringCY + ringRadius * 0.28);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(ringCX - ringRadius * 0.98, ringCY - ringRadius * 0.45);
+    ctx.quadraticCurveTo(ringCX - ringRadius * 1.18, ringCY - ringRadius * 0.52, ringCX - ringRadius * 1.24, ringCY - ringRadius * 0.42);
+    ctx.stroke();
+
+    // Các cụm lá xanh
+    drawLeaf(ringCX - ringRadius * 0.82, ringCY + ringRadius * 0.8, 38, 14, (120 * Math.PI) / 180);
+    drawLeaf(ringCX - ringRadius * 1.08, ringCY + ringRadius * 0.42, 34, 12, (190 * Math.PI) / 180);
+    drawLeaf(ringCX - ringRadius * 1.12, ringCY - ringRadius * 0.1, 32, 11, (160 * Math.PI) / 180);
+    drawLeaf(ringCX - ringRadius * 0.92, ringCY - ringRadius * 0.62, 30, 11, (240 * Math.PI) / 180);
+
+    // Búp hoa non
+    drawBud(ringCX - ringRadius * 1.3, ringCY + ringRadius * 0.28, 1.2, (-45 * Math.PI) / 180);
+    drawBud(ringCX - ringRadius * 1.24, ringCY - ringRadius * 0.42, 1.1, (30 * Math.PI) / 180);
+    drawBud(ringCX - ringRadius * 0.66, ringCY - ringRadius * 0.88, 1.3, (75 * Math.PI) / 180);
+
+    // 4 Đóa hoa đào nở rộ dọc theo cành
+    drawBlossom(ringCX - ringRadius * 1.02, ringCY + ringRadius * 0.58, 0.95, (12 * Math.PI) / 180);
+    drawBlossom(ringCX - ringRadius * 1.14, ringCY + ringRadius * 0.05, 1.1, (-15 * Math.PI) / 180);
+    drawBlossom(ringCX - ringRadius * 1.04, ringCY - ringRadius * 0.38, 0.85, (25 * Math.PI) / 180);
+    drawBlossom(ringCX - ringRadius * 0.72, ringCY - ringRadius * 0.8, 0.75, (40 * Math.PI) / 180);
+
+    ctx.restore();
+  };
+
+  // Vẽ 2 nhánh hoa ôm lấy 2 bên của vòng tròn
+  drawBotanicalBranch(false); // Trái
+  drawBotanicalBranch(true);  // Phải đối xứng
+
+  // 6. Nội dung đặt trang nhã ngay tâm vòng tròn
+  ctx.textAlign = 'center';
+
+  // Eyebrow: WITH LOVE · 20.10
+  ctx.fillStyle = '#b83a68';
+  ctx.font = '500 18px "Be Vietnam Pro", sans-serif';
+  ctx.letterSpacing = '6px';
+  ctx.fillText('WITH LOVE · 20.10', ringCX, ringCY - 105);
+  ctx.letterSpacing = '0px';
+
+  // Tên thư pháp (Pinyon Script / Great Vibes lộng lẫy với gradient)
+  const nameGrad = ctx.createLinearGradient(0, ringCY - 70, 0, ringCY + 15);
+  nameGrad.addColorStop(0, '#f0548a');
+  nameGrad.addColorStop(1, '#d93d78');
+  ctx.fillStyle = nameGrad;
+  ctx.font = '400 86px "Pinyon Script", "Great Vibes", "Alex Brush", cursive';
+  ctx.shadowColor = 'rgba(232, 70, 124, 0.25)';
+  ctx.shadowBlur = 10;
+  ctx.fillText(`${displayName}`, ringCX - 8, ringCY - 8);
+  ctx.shadowBlur = 0;
+
+  // Trái tim nhỏ xinh cuối tên
+  ctx.fillStyle = '#e8467c';
+  ctx.font = '32px sans-serif';
+  const nameWidth = ctx.measureText(displayName).width;
+  ctx.fillText('♡', ringCX + nameWidth * 0.48 + 12, ringCY - 30);
+
+  // Nét uốn lượn nghệ thuật dưới chân tên (Swash)
+  ctx.strokeStyle = '#e8467c';
+  ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  ctx.moveTo(ringCX - 150, ringCY + 18);
+  ctx.quadraticCurveTo(ringCX + 10, ringCY + 46, ringCX + 150, ringCY + 12);
+  ctx.stroke();
+
+  // Lời chúc dịu dàng, trang nhã
+  ctx.fillStyle = '#b83a68';
+  ctx.font = '300 24px "Be Vietnam Pro", sans-serif';
 
   const words = wish.split(' ');
   let line = '';
-  let curY = 540;
-  const maxWidth = width - 170;
-  const lineHeight = 44;
+  let curY = ringCY + 75;
+  const maxWidth = ringRadius * 1.55;
+  const lineHeight = 36;
 
   for (let n = 0; n < words.length; n++) {
     const testLine = line + words[n] + ' ';
     const metrics = ctx.measureText(testLine);
     if (metrics.width > maxWidth && n > 0) {
-      ctx.fillText(line, width / 2, curY);
+      ctx.fillText(line, ringCX, curY);
       line = words[n] + ' ';
       curY += lineHeight;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line, width / 2, curY);
+  ctx.fillText(line, ringCX, curY);
 
-  // 8. Trái tim nghệ thuật đỏ thắm ở đáy thẻ
-  ctx.font = '42px serif';
-  ctx.fillStyle = '#BE123C';
-  ctx.fillText('♥', width / 2, height - 150);
-
-  // 9. Dòng chữ vinh danh chân thành
-  ctx.fillStyle = style.theme.accent;
-  ctx.font = '700 16px "Be Vietnam Pro", sans-serif';
-  ctx.letterSpacing = '2.5px';
-  ctx.fillText('✦ TECH & PRODUCT TRIBUTE 20.10 ✦', width / 2, height - 105);
-  ctx.letterSpacing = '0px';
+  // Trái tim biểu tượng chân tình ở tâm dưới vòng tròn
+  ctx.fillStyle = '#e8467c';
+  ctx.font = '28px serif';
+  ctx.fillText('♥', ringCX, curY + 45);
 
   return canvas;
 }
+

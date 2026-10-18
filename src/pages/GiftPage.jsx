@@ -13,6 +13,8 @@ export default function GiftPage() {
   const [isLidOpened, setIsLidOpened] = useState(false);
   const [showWelcomeChoice, setShowWelcomeChoice] = useState(false);
 
+  const [requireNameNotice, setRequireNameNotice] = useState(false);
+
   // Pre-load 3D chunk ngầm khi người dùng ở trang chủ để khi bấm 3D là mở tức thì 0s delay
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -21,30 +23,50 @@ export default function GiftPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Khi chọn tên chị em, hiện modal chào mừng trang trọng định hướng 3D vs 2D
+  // Khi chọn tên chị em: xóa thông báo nhắc nhở, nhưng KHÔNG tự nhảy modal 2D/3D
+  // Hộp quà bên dưới sẽ tự phát quang hào quang (aura) để dẫn dắt chị em chạm mở!
   const lastSelectedIdRef = React.useRef(selectedSister?.id);
   React.useEffect(() => {
     if (selectedSister && selectedSister.id !== lastSelectedIdRef.current) {
       lastSelectedIdRef.current = selectedSister.id;
-      setShowWelcomeChoice(true);
+      setRequireNameNotice(false);
+      // KHÔNG tự động mở modal lựa chọn ở đây nữa
     }
   }, [selectedSister]);
 
   const handleOpenGift = () => {
-    if (isLidOpened) return;
+    // BUỘC PHẢI CHỌN TÊN CHỊ EM MỚI ĐƯỢC MỞ
+    if (!selectedSister) {
+      setRequireNameNotice(true);
+      const selBox = document.querySelector('.identity-selector-box');
+      if (selBox) {
+        selBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        selBox.classList.add('identity-shake-highlight');
+        setTimeout(() => selBox.classList.remove('identity-shake-highlight'), 1000);
+      }
+      return;
+    }
+
+    // Nếu đã mở nắp rồi thì mở lại modal chọn trải nghiệm
+    if (isLidOpened) {
+      setShowWelcomeChoice(true);
+      return;
+    }
+
     setIsLidOpened(true);
 
-    // Bắn pháo hoa cánh hoa tung bay ngọt ngào
+    // Bắn pháo hoa cánh hoa tung bay ngọt ngào khi nắp bật mở
     confetti({
-      particleCount: 110,
-      spread: 95,
+      particleCount: 120,
+      spread: 100,
       origin: { y: 0.58 },
       colors: ['#F43F5E', '#FDA4AF', '#FCD34D', '#FFF1F2', '#FECDD3', '#FB7185']
     });
 
+    // Sau khi nắp hộp mở ra 550ms, hiện modal chào mừng trang trọng hỏi chọn 3D hay 2D
     setTimeout(() => {
-      navigateWithFlowerTransition('/letter');
-    }, 700);
+      setShowWelcomeChoice(true);
+    }, 550);
   };
 
   return (
@@ -72,43 +94,30 @@ export default function GiftPage() {
         {/* BỘ CHỌN TÊN CHỊ EM (ĐẶT NGAY ĐẦU TRANG, TRỰC QUAN & RÕ RÀNG) */}
         <IdentitySelector onOpenGift={handleOpenGift} />
 
-        {/* Switcher chế độ trải nghiệm 2D vs 3D */}
-        <div className="mode-banner-card">
-          <div className="mode-banner-label">
-            <span>🎭 Chế Độ Trải Nghiệm Demo:</span>
+        {/* Lời nhắc bắt buộc chọn tên nếu bấm mở quà trước khi chọn */}
+        {requireNameNotice && !selectedSister && (
+          <div className="gift-require-name-alert">
+            <span className="alert-icon">🌸</span>
+            <span className="alert-text">
+              Chị ơi, hãy chọn tên của mình ở danh sách phía trên để mở món quà bí mật này nhé!
+            </span>
           </div>
-          <div className="mode-banner-grid">
-            <button
-              type="button"
-              onClick={() => updateExperienceMode('2d')}
-              className={`mode-card-pill ${experienceMode === '2d' ? 'active' : ''}`}
-            >
-              <span style={{ fontSize: '1.6rem' }}>🌸</span>
-              <div>
-                <strong>Bản 2D Cổ Tích</strong>
-                <small>Thiệp bifold mở rộng • Xe thư vintage • Suối hoa pastel</small>
-              </div>
-            </button>
+        )}
 
-            <button
-              type="button"
-              onClick={() => updateExperienceMode('3d')}
-              className={`mode-card-pill ${experienceMode === '3d' ? 'active' : ''}`}
-            >
-              <span style={{ fontSize: '1.6rem' }}>✨</span>
-              <div>
-                <strong>Bản 3D Điện Ảnh</strong>
-                <small>Three.js hoàng hôn • Xe van 3D • Camera bám đuổi</small>
-              </div>
-            </button>
+        {/* Hào quang gợi ý chạm mở sau khi đã chọn tên chị em */}
+        {selectedSister && !isLidOpened && (
+          <div className="gift-aura-callout-badge" onClick={handleOpenGift}>
+            <span className="badge-sparkle">✨</span>
+            <span>Món quà dành riêng cho Chị {selectedSister.name} đã sẵn sàng! Chạm để mở</span>
+            <span className="badge-sparkle">✨</span>
           </div>
-        </div>
+        )}
 
-        {/* HỘP QUÀ HỒNG PHẤN 3D NƠ VÀNG CHAMPAGNE */}
+        {/* HỘP QUÀ HỒNG PHẤN 3D NƠ VÀNG CHAMPAGNE (CÓ HÀO QUANG AURA PHÁT QUANG) */}
         <div
-          className={`sweet-gift-wrapper ${isLidOpened ? 'box-is-open' : 'gift-wobble-anim'}`}
+          className={`sweet-gift-wrapper ${isLidOpened ? 'box-is-open' : 'gift-wobble-anim'} ${selectedSister && !isLidOpened ? 'gift-aura-glowing' : ''}`}
           onClick={handleOpenGift}
-          title="Chạm để mở hộp quà!"
+          title={selectedSister ? `Chạm để mở món quà của Chị ${selectedSister.name}!` : "Vui lòng chọn tên chị em ở trên trước"}
         >
           <svg className="sweet-gift-svg" viewBox="0 0 240 240" fill="none">
             <defs>
@@ -205,8 +214,12 @@ export default function GiftPage() {
 
         {/* Nút Mở Hộp Quà */}
         <div style={{ marginBottom: '28px' }}>
-          <button onClick={handleOpenGift} className="btn-rose" style={{ fontSize: '1.08rem' }}>
-            <span>Mở Hộp Quà Ngay 🌸</span>
+          <button
+            onClick={handleOpenGift}
+            className={`btn-rose ${selectedSister && !isLidOpened ? 'btn-pulse-glow' : ''}`}
+            style={{ fontSize: '1.08rem' }}
+          >
+            <span>{selectedSister ? `Mở Hộp Quà Chị ${selectedSister.name} 🌸` : 'Mở Hộp Quà Ngay 🌸'}</span>
           </button>
         </div>
       </div>

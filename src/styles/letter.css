@@ -378,173 +378,192 @@
    THẺ CHỮ KÝ NGHỆ THUẬT (FALLBACK KHI CHỊ EM CHƯA CÓ ẢNH THẬT)
    Theo đúng quy chuẩn thiết kế infographic Mẫu Chữ Ký Nghệ Thuật
    ========================================================= */
+:root {
+  --sig-card-bg: #fde6df;
+  --sig-card-bg2: #fbd9d2;
+  --sig-card-rose: #e8467c;
+  --sig-card-rose-deep: #b83a68;
+  --sig-card-petal: #f8bfcb;
+  --sig-card-gold: #c9a15a;
+  --sig-card-frame: #ee8f86;
+}
+
 .signature-art-card {
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: 18px;
-  border: 2px solid #E6C9D1;
-  box-sizing: border-box;
-  position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 
-    0 15px 35px rgba(225, 29, 72, 0.12),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 45%, #fdeae4 0%, var(--sig-card-bg) 60%, var(--sig-card-bg2) 100%);
+  container-type: inline-size;
+  box-shadow: 0 12px 36px rgba(184, 58, 104, 0.18);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .signature-art-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 40px rgba(225, 29, 72, 0.18);
+  box-shadow: 0 20px 44px rgba(184, 58, 104, 0.24);
 }
 
-.card-corner {
+/* Khung viền đôi hoàng gia */
+.signature-art-card::before,
+.signature-art-card::after {
+  content: "";
   position: absolute;
-  font-size: 1.1rem;
-  opacity: 0.75;
-  user-select: none;
   pointer-events: none;
-  line-height: 1;
-}
-.corner-tl { top: 7px; left: 8px; }
-.corner-tr { top: 7px; right: 8px; }
-.corner-bl { bottom: 7px; left: 8px; }
-.corner-br { bottom: 7px; right: 8px; }
-
-.signature-inner-border {
-  border: 1px dashed rgba(201, 166, 107, 0.55);
   border-radius: 14px;
-  margin: 8px;
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-  padding: 12px 10px;
-  box-sizing: border-box;
-  text-align: center;
+}
+.signature-art-card::before {
+  inset: 2.2%;
+  border: 1.5px solid var(--sig-card-frame);
+}
+.signature-art-card::after {
+  inset: 3.4%;
+  border: 1px solid rgba(238, 143, 134, 0.55);
 }
 
-.signature-top-eyebrow {
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
-.signature-emblem-wrapper {
-  margin: 2px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.emblem-crown {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 2px 6px rgba(217, 119, 6, 0.3));
-}
-.emblem-sakura {
-  font-size: 1.8rem;
-  animation: sakuraSway 3s ease-in-out infinite alternate;
-}
-.emblem-stars {
-  font-size: 1.25rem;
-  color: #D97706;
-}
-.emblem-flower-svg {
-  width: 140px;
-  height: 28px;
-  filter: drop-shadow(0 2px 4px rgba(190, 18, 60, 0.15));
-}
-
-.signature-signature-block {
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 6px 0;
-}
-
-.signature-watercolor-backdrop {
+/* Hoa văn uốn 4 góc */
+.card-corner-arc {
   position: absolute;
-  width: 90%;
-  height: 64px;
-  border-radius: 40px;
-  filter: blur(8px);
-  z-index: 1;
+  width: 5%;
+  aspect-ratio: 1;
+  border: 1.5px solid var(--sig-card-frame);
+  border-radius: 0 100% 0 100%;
+  opacity: 0.75;
   pointer-events: none;
-  opacity: 0.95;
-  transform: rotate(-1deg);
-}
-
-.signature-name-calligraphy {
-  position: relative;
   z-index: 2;
-  font-size: clamp(2.6rem, 5.2vw, 3.8rem);
-  line-height: 1.1;
-  font-style: italic;
-  font-weight: 700;
-  padding: 0 10px;
-  text-shadow: 0 2px 10px rgba(136, 19, 55, 0.22);
-  letter-spacing: 0.02em;
 }
+.card-corner-arc.c1 { left: 3.6%; top: 3.6%; transform: rotate(180deg); }
+.card-corner-arc.c2 { right: 3.6%; top: 3.6%; transform: rotate(270deg); }
+.card-corner-arc.c3 { left: 3.6%; bottom: 3.6%; transform: rotate(90deg); }
+.card-corner-arc.c4 { right: 3.6%; bottom: 3.6%; }
 
-.signature-heart-loop {
-  font-size: 0.72em;
-  font-style: normal;
-  display: inline-block;
-  margin-left: 4px;
-  color: #BE123C;
-  transform: translateY(-2px);
-}
-
-.signature-underline-svg {
-  position: relative;
+/* Cánh hoa rơi tự nhiên */
+.card-floating-petal {
+  position: absolute;
+  width: 4.5cqw;
+  aspect-ratio: 1 / 1.6;
+  background: linear-gradient(135deg, #fbcbd6, #f4a9bb);
+  border-radius: 80% 20% 80% 20%;
+  opacity: 0.85;
+  pointer-events: none;
   z-index: 2;
-  width: 160px;
-  height: 14px;
-  margin: -4px auto 2px;
-  opacity: 0.9;
+}
+.card-floating-petal.p1 { left: 11%; top: 13%; transform: rotate(35deg); }
+.card-floating-petal.p2 { left: 8%; top: 22%; width: 2.4cqw; transform: rotate(60deg); }
+.card-floating-petal.p3 { right: 9%; top: 9%; transform: rotate(-40deg); }
+.card-floating-petal.p4 { left: 10%; bottom: 14%; width: 5cqw; transform: rotate(25deg); }
+.card-floating-petal.p5 { right: 7%; bottom: 28%; transform: rotate(-55deg); }
+.card-floating-petal.p6 { right: 14%; bottom: 8%; width: 5.5cqw; transform: rotate(30deg); }
+.card-floating-petal.p7 { left: 20%; bottom: 7%; width: 3cqw; transform: rotate(-30deg); }
+
+/* Vòng tròn vàng kim (Golden Metallic Ring) ôm trọn tên */
+.card-golden-ring {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 72%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: conic-gradient(from 200deg, #b8893f, #e8cf8f, #b8893f, #e8cf8f, #b8893f) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 0 20px rgba(201, 161, 90, 0.22);
 }
 
-.signature-blessing-text {
-  font-family: var(--font-sans);
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #1E293B;
+/* Cành hoa đào / hoa hồng SVG bao quanh vòng tròn */
+.card-floral-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Nội dung trung tâm vòng tròn */
+.card-center-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 5;
+  padding: 0 14%;
+  box-sizing: border-box;
+}
+
+.card-top-eyebrow {
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-weight: 500;
-  max-width: 92%;
-  margin: 4px 0;
-}
-
-.signature-bottom-heart {
-  font-size: 1.4rem;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3));
-  animation: heartGentlePulse 2.4s ease-in-out infinite;
-}
-
-.signature-tribute-tag {
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-size: clamp(0.68rem, 2.2cqw, 0.95rem);
+  letter-spacing: 0.42em;
+  color: var(--sig-card-rose-deep);
+  margin-bottom: clamp(6px, 2.8cqw, 18px);
+  margin-top: clamp(-14px, -1.5cqw, 0);
   text-transform: uppercase;
-  margin-top: 2px;
+}
+
+.card-calligraphy-name {
+  background: linear-gradient(180deg, #f0548a, #d93d78);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-family: 'Pinyon Script', 'Great Vibes', 'Alex Brush', cursive;
+  font-size: clamp(2.5rem, 13.5cqw, 5.2rem);
+  font-weight: 400;
+  line-height: 1;
+  position: relative;
+  margin: 0;
+  filter: drop-shadow(0 2px 8px rgba(232, 70, 124, 0.18));
+}
+
+.card-name-heart {
+  position: absolute;
+  right: -0.45em;
+  top: -0.1em;
+  font-family: sans-serif;
+  font-size: 0.45em;
+  line-height: 1;
+  color: var(--sig-card-rose);
+}
+
+/* Nét uốn lượn dưới tên */
+.card-underline-swash {
+  width: clamp(130px, 46cqw, 240px);
+  height: clamp(10px, 4cqw, 22px);
+  margin-top: -2px;
+  border-bottom: 2.2px solid var(--sig-card-rose);
+  border-radius: 0 0 60% 40% / 0 0 100% 100%;
   opacity: 0.85;
 }
 
-@keyframes sakuraSway {
-  0% { transform: rotate(-5deg); }
-  100% { transform: rotate(5deg); }
+.card-wish-quote {
+  margin: clamp(10px, 3.2cqw, 20px) 0 0;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 300;
+  font-size: clamp(0.82rem, 3.2cqw, 1.05rem);
+  line-height: 1.6;
+  color: var(--sig-card-rose-deep);
+  max-width: 92%;
+}
+
+.card-heart-symbol {
+  margin-top: clamp(6px, 2.5cqw, 16px);
+  color: var(--sig-card-rose);
+  font-size: clamp(1.1rem, 3.8cqw, 1.6rem);
+  animation: heartGentlePulse 2.4s ease-in-out infinite;
 }
 
 @keyframes heartGentlePulse {
   0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.15); opacity: 1; }
+  50% { transform: scale(1.16); opacity: 1; }
 }

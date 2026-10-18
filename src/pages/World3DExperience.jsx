@@ -2572,7 +2572,7 @@ export default function World3DExperience() {
       // [P3] Góc nhìn chính diện trực tiếp mặt trước hộp quà (căn thẳng trục nơ vàng & bảng chữ)
       stationCameraPositions[0] = {
         targetPos: st0Center.clone().add(new THREE.Vector3(0, 1.45, 0)),
-        camPos: st0Center.clone().add(new THREE.Vector3(0, 2.4, 8.4))
+        camPos: st0Center.clone().add(new THREE.Vector3(0, 3.6, 12.6))
       };
     }
 
@@ -2874,7 +2874,7 @@ export default function World3DExperience() {
 
       stationCameraPositions[1] = {
         targetPos: st1Center.clone().add(new THREE.Vector3(0, 2.2, 0)),
-        camPos: st1Center.clone().add(norm.clone().multiplyScalar(14)).add(new THREE.Vector3(0, 3.8, 0))
+        camPos: st1Center.clone().add(norm.clone().multiplyScalar(10.8)).add(new THREE.Vector3(0, 3.8, 0))
       };
     };
 
@@ -5636,6 +5636,18 @@ export default function World3DExperience() {
               </div>
             </div>
 
+            {/* Thẻ hướng dẫn điều khiển chuột & cuộn đặt ngay dưới thanh Vương Quốc Tri Ân */}
+            <div className="hud-center-guide-pill" aria-hidden="true">
+              <span className="guide-icon">🖱️</span>
+              <span>Giữ &amp; kéo chuột xoay 360°</span>
+              <span className="guide-sep">•</span>
+              <span className="guide-icon">🔍</span>
+              <span>Cuộn chuột thu / phóng</span>
+              <span className="guide-sep">•</span>
+              <span className="guide-icon">✨</span>
+              <span>Chạm trạm &amp; hòm quà</span>
+            </div>
+
             {/* THANH ASIDE DỌC THỜI THƯỢNG (HIỂN THỊ LABEL TRONG SUỐT CHO TẤT CẢ, ACTIVE NỔI BẬT ĐẬM HƠN) */}
             <aside className="hud-aside-dock">
               <div
@@ -5851,20 +5863,6 @@ export default function World3DExperience() {
             </div>
           )}
         </div>
-
-        {/* Thẻ hướng dẫn điều khiển chuột & cuộn trong suốt ở giữa (không chiếm diện tích) */}
-        {!isHudHidden && (
-          <div className="hud-center-guide-pill" aria-hidden="true">
-            <span className="guide-icon">🖱️</span>
-            <span>Kéo chuột xoay 360°</span>
-            <span className="guide-sep">•</span>
-            <span className="guide-icon">🔍</span>
-            <span>Cuộn chuột thu / phóng</span>
-            <span className="guide-sep">•</span>
-            <span className="guide-icon">✨</span>
-            <span>Chạm trạm & hòm quà</span>
-          </div>
-        )}
 
         {/* Thanh đáy: Hòm thư bưu điện & Nút trạm tiếp theo */}
         <div className="hud-bottom-bar">
