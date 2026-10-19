@@ -41,7 +41,7 @@ export default function LetterPage() {
             <div className="page-inner-content">
               {/* Dải danh xưng kiêu sa trên đầu trang */}
               <div className="muse-crown-ribbon">
-                👑 NÀNG THƠ TECHCORP
+                👑 NÀNG THƠ 
               </div>
 
               {/* KHUNG ẢNH CHÂN DUNG BỌC GIÀN HOA BOTANICAL UỐN LƯỢN */}

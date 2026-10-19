@@ -104,7 +104,7 @@ export default function VideoPage() {
               />
             </div>
             <p style={{ textAlign: 'center', margin: '14px 0 6px', fontSize: '0.9rem', color: 'var(--champagne-gold)', fontStyle: 'italic' }}>
-              ✨ Video tri ân ngày Phụ nữ Việt Nam 20/10 dành tặng phái đẹp TechCorp
+              ✨ Video tri ân ngày Phụ nữ Việt Nam 20/10 dành tặng phái đẹp 
             </p>
           </div>
         ) : (

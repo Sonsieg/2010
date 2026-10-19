@@ -1867,7 +1867,7 @@ export default function World3DExperience() {
 
       lG.fillStyle = '#8C2F4B';
       lG.font = 'italic bold 32px "Playfair Display", Georgia, serif';
-      lG.fillText('Thân Gửi Phái Đẹp TechCorp,', 45, 95);
+      lG.fillText('Thân Gửi Phái Đẹp ,', 45, 95);
 
       lG.fillStyle = '#2D1B28';
       lG.font = '500 22px "Be Vietnam Pro", sans-serif';
@@ -2054,7 +2054,7 @@ export default function World3DExperience() {
       scG.fillStyle = '#FDA4AF';
       scG.font = 'bold 22px monospace';
       scG.textAlign = 'center';
-      scG.fillText('🎬 TECHCORP CINEMA • 20/10 SPECIAL', 320, 80);
+      scG.fillText('🎬  CINEMA • 20/10 SPECIAL', 320, 80);
 
       scG.fillStyle = '#FFF';
       scG.font = 'italic bold 36px "Playfair Display", Georgia, serif';
@@ -2579,7 +2579,7 @@ export default function World3DExperience() {
       cG.fillText(`Đóa Hoa Rực Rỡ • ${sisterName}`, 256, 52);
       cG.fillStyle = '#6B4226';
       cG.font = '600 16px "Be Vietnam Pro", sans-serif';
-      cG.fillText('TECHCORP GALA TRIBUTE 20.10', 256, 88);
+      cG.fillText(' GALA TRIBUTE 20.10', 256, 88);
 
       const captionTex = new THREE.CanvasTexture(captionCanvas);
       captionTex.colorSpace = THREE.SRGBColorSpace;
@@ -2712,7 +2712,7 @@ export default function World3DExperience() {
           origin: { y: 0.52 },
           colors: ['#F59E0B', '#FDE68A', '#FFFFFF', '#BE123C']
         });
-        showToast('🥂 Nâng ly Champagne hảo hạng chúc mừng phái đẹp TechCorp ngày 20/10!');
+        showToast('🥂 Nâng ly Champagne hảo hạng chúc mừng phái đẹp  ngày 20/10!');
       };
 
       const onEaselClick = () => {
@@ -3558,7 +3558,7 @@ export default function World3DExperience() {
           <div className="cinema-stage-box" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '860px', width: '100%', padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: 'var(--rose-900)', margin: 0 }}>
-                🎬 Phim Tri Ân 20/10 • Phái Đẹp TechCorp
+                🎬 Phim Tri Ân 20/10 • Phái Đẹp 
               </h3>
               <button onClick={() => setActiveVideoModal(false)} className="royal-btn-close" style={{ position: 'static' }}>
                 ✕
@@ -3604,7 +3604,7 @@ export default function World3DExperience() {
                     margin: '6px 0'
                   }}
                 >
-                  TechCorp Celebration • 20.10 Invitation
+                   Celebration • 20.10 Invitation
                 </span>
 
                 <h2
@@ -3633,7 +3633,7 @@ export default function World3DExperience() {
                     Thân gửi <strong>{sisterName}</strong>,
                   </p>
                   <p style={{ margin: 0, fontSize: '0.94rem', color: '#475569', lineHeight: '1.7' }}>
-                    📍 <strong>Địa điểm nhận quà:</strong> Khu Vực Pantry Tầng 8 - Trụ sở TechCorp<br />
+                    📍 <strong>Địa điểm nhận quà:</strong> Khu Vực Pantry Tầng 8 - Trụ sở <br />
                     ⏰ <strong>Thời gian:</strong> 15:30 Ngày 20/10/2026<br />
                     🎁 <strong>Phần quà:</strong> Hoa tươi, set quà chăm sóc đặc quyền & tiệc trà trà bánh hoàng gia!
                   </p>
@@ -3643,7 +3643,7 @@ export default function World3DExperience() {
                   <div style={{ textAlign: 'left' }}>
                     <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Trao tặng từ:</span>
                     <strong style={{ display: 'block', fontFamily: 'var(--font-serif)', color: 'var(--rose-900)', fontSize: '0.98rem' }}>
-                      Toàn Thể Anh Em TechCorp ❤️
+                      Toàn Thể Anh Em  ❤️
                     </strong>
                   </div>
                   <div

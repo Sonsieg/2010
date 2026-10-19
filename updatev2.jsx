@@ -3017,7 +3017,7 @@ export default function World3DExperience() {
       scG.strokeStyle = '#C9A66B'; scG.lineWidth = 6; scG.strokeRect(12, 12, 616, 336);
       scG.fillStyle = '#FDA4AF'; scG.font = 'bold 22px monospace';
       scG.textAlign = 'center';
-      scG.fillText('🎬 TECHCORP CINEMA • 20/10 SPECIAL', 320, 80);
+      scG.fillText('🎬  CINEMA • 20/10 SPECIAL', 320, 80);
       scG.fillStyle = '#FFF'; scG.font = 'italic bold 36px "Playfair Display", Georgia, serif';
       scG.fillText('Thước phim tình củm', 320, 160);
       scG.fillStyle = '#FDE68A'; scG.font = '600 24px "Be Vietnam Pro", sans-serif';
@@ -3798,7 +3798,7 @@ export default function World3DExperience() {
       cG.fillText(`Đóa Hoa Rực Rỡ • ${sisterName}`, 256, 52);
       cG.fillStyle = '#6B4226';
       cG.font = '600 16px "Be Vietnam Pro", sans-serif';
-      cG.fillText('TECHCORP GALA TRIBUTE 20.10', 256, 88);
+      cG.fillText(' GALA TRIBUTE 20.10', 256, 88);
       const captionTex = new THREE.CanvasTexture(captionCanvas);
       captionTex.colorSpace = THREE.SRGBColorSpace;
       const capMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.65, 0.42), new THREE.MeshBasicMaterial({ map: captionTex }));
@@ -4000,7 +4000,7 @@ export default function World3DExperience() {
           particleCount: 110, spread: 110, origin: { y: 0.52 },
           colors: ['#F59E0B', '#FDE68A', '#FFFFFF', '#BE123C']
         });
-        showToast('🥂 Nâng ly Champagne hảo hạng chúc mừng phái đẹp TechCorp ngày 20/10!');
+        showToast('🥂 Nâng ly Champagne hảo hạng chúc mừng phái đẹp  ngày 20/10!');
       };
 
       const onEaselClick = () => {
@@ -6034,7 +6034,7 @@ export default function World3DExperience() {
             <div className="modal-wax-seal-badge">20.10</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', color: 'var(--rose-900)', margin: 0 }}>
-                🎬 Phim Tri Ân 20/10 • Phái Đẹp TechCorp
+                🎬 Phim Tri Ân 20/10 • Phái Đẹp 
               </h3>
               <button onClick={() => setActiveVideoModal(false)} className="royal-btn-close" style={{ position: 'static' }}>
                 ✕
@@ -6084,7 +6084,7 @@ export default function World3DExperience() {
                     margin: '6px 0'
                   }}
                 >
-                  TechCorp Celebration • 20.10 Invitation
+                   Celebration • 20.10 Invitation
                 </span>
 
                 <h2
@@ -6125,7 +6125,7 @@ export default function World3DExperience() {
                   <div style={{ textAlign: 'left' }}>
                     <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Trao tặng từ:</span>
                     <strong style={{ display: 'block', fontFamily: 'var(--font-serif)', color: 'var(--rose-900)', fontSize: '0.98rem' }}>
-                      Toàn Thể Anh Em TechCorp ❤️
+                      Toàn Thể Anh Em  ❤️
                     </strong>
                   </div>
                   <div
@@ -6161,7 +6161,7 @@ export default function World3DExperience() {
 
               <button
                 onClick={() => {
-                  const shareText = `🌸 Chúc mừng ngày Phụ Nữ Việt Nam 20/10! Thân gửi chị ${sisterName || 'Đồng Nghiệp'} tấm thiệp tri ân đặc biệt từ TechCorp ❤️ Xem ngay tại: ${window.location.origin}/#/3d`;
+                  const shareText = `🌸 Chúc mừng ngày Phụ Nữ Việt Nam 20/10! Thân gửi chị ${sisterName || 'Đồng Nghiệp'} tấm thiệp tri ân đặc biệt từ  ❤️ Xem ngay tại: ${window.location.origin}/#/3d`;
                   navigator.clipboard.writeText(shareText);
                   showToast('📋 Đã sao chép thiệp mừng & link! Bạn có thể dán ngay vào Zalo/Teams để chia sẻ.');
                 }}
