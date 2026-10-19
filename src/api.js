@@ -272,9 +272,14 @@ export async function submitWish(payload) {
   }
 }
 
-// Helpers
 function getCache(key) {
   try {
+    // Nếu có tham số ?refresh=1 trên URL, xóa cache để luôn kéo data mới nhất từ Sheet
+    if (typeof window !== 'undefined' && window.location.search.includes('refresh=1')) {
+      try { localStorage.removeItem(key); } catch (e) {}
+      return null;
+    }
+
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const { timestamp, data, url } = JSON.parse(raw);
@@ -282,7 +287,12 @@ function getCache(key) {
       localStorage.removeItem(key);
       return null;
     }
-    if (Date.now() - timestamp < CACHE_TTL_MS) {
+
+    // Ở môi trường local dev (localhost / 127.0.0.1), giảm cache TTL xuống 5 giây để test thay đổi từ Sheet gần như tức thì
+    const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const effectiveTTL = isLocalhost ? 5000 : CACHE_TTL_MS;
+
+    if (Date.now() - timestamp < effectiveTTL) {
       return data;
     }
     localStorage.removeItem(key);

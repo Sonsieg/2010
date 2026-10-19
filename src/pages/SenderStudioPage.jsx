@@ -25,7 +25,7 @@ const QUICK_TEMPLATES = [
   }
 ];
 
-const DEPARTMENTS = [
+const DEFAULT_DEPARTMENTS = [
   'Engineering (Backend/Dev)',
   'Frontend & Mobile Team',
   'Quality Assurance (QA/QC)',
@@ -40,7 +40,18 @@ export default function SenderStudioPage() {
   const { people, navigateWithFlowerTransition } = useApp();
   const [to, setTo] = useState('ALL');
   const [fromName, setFromName] = useState('');
-  const [dept, setDept] = useState(DEPARTMENTS[0]);
+  
+  // Tự động gom các phòng ban từ tab 'people' của Google Sheet + phòng ban mặc định
+  const departmentOptions = React.useMemo(() => {
+    const fromSheet = (people || [])
+      .map(p => (p.dept || '').trim())
+      .filter(Boolean);
+    return Array.from(new Set([...fromSheet, ...DEFAULT_DEPARTMENTS]));
+  }, [people]);
+
+  const [dept, setDept] = useState(DEFAULT_DEPARTMENTS[0]);
+  const [isCustomDept, setIsCustomDept] = useState(false);
+  const [customDept, setCustomDept] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [color, setColor] = useState('#F43F5E');
   const [text, setText] = useState('');
@@ -67,11 +78,13 @@ export default function SenderStudioPage() {
       return;
     }
 
+    const finalDept = isCustomDept ? (customDept.trim() || 'Anh Em Công Ty') : dept;
+
     setIsSubmitting(true);
     const res = await submitWish({
       to,
       from_name: fromName.trim() || 'Một người anh em',
-      dept: dept || 'Engineering & Product Team',
+      dept: finalDept || 'Engineering & Product Team',
       anonymous: isAnonymous,
       text: text.trim(),
       color,
@@ -202,15 +215,34 @@ export default function SenderStudioPage() {
                 3. Phòng ban / Team:
               </label>
               <select
-                value={dept}
-                onChange={(e) => setDept(e.target.value)}
+                value={isCustomDept ? 'CUSTOM' : dept}
+                onChange={(e) => {
+                  if (e.target.value === 'CUSTOM') {
+                    setIsCustomDept(true);
+                  } else {
+                    setIsCustomDept(false);
+                    setDept(e.target.value);
+                  }
+                }}
                 className="studio-select"
                 style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: '#1A0C16', color: '#FFF', border: '1px solid rgba(201,166,107,0.4)', fontSize: '0.94rem' }}
               >
-                {DEPARTMENTS.map(d => (
+                {departmentOptions.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
+                <option value="CUSTOM">✍️ Khác (Tự gõ phòng ban của bạn)...</option>
               </select>
+
+              {isCustomDept && (
+                <input
+                  type="text"
+                  value={customDept}
+                  onChange={(e) => setCustomDept(e.target.value)}
+                  placeholder="Gõ tên phòng ban của bạn (VD: Ban Giám Đốc, Media Team...)"
+                  style={{ width: '100%', marginTop: '8px', padding: '10px 14px', borderRadius: '8px', background: '#25121F', color: '#FDE68A', border: '1px solid #C9A66B', fontSize: '0.9rem' }}
+                  autoFocus
+                />
+              )}
             </div>
           </div>
 
