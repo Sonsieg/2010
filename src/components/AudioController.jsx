@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { playSoftTapSound } from '../utils/soundEffects.js';
 
@@ -19,42 +20,37 @@ export default function AudioController() {
     Math.max(0, PLAYLIST.findIndex((track) => track.id === 'video2'))
   ));
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+  const [isMusicPromptOpen, setIsMusicPromptOpen] = useState(true);
   const audioRef = useRef(null);
   const dropdownRef = useRef(null);
+  const enableMusicButtonRef = useRef(null);
 
   const currentTrack = PLAYLIST[currentTrackIndex];
 
-  // Khởi tạo và mở khóa âm thanh trên tương tác đầu tiên của người dùng
+  // Chuẩn bị âm thanh. Việc phát nhạc chỉ diễn ra sau lựa chọn rõ ràng của người dùng
+  // để tương thích với chính sách autoplay của Safari, Chrome và trình duyệt di động.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     audio.volume = 0;
-
-    const tryStartAudio = () => {
-      audio.play().then(() => {
-        setIsPlayingMusic(true);
-        fadeVolume(0.48);
-      }).catch(() => {});
-    };
-
-    // Thử autoplay ngay khi mở trang; nếu bị browser chặn, fallback ở tương tác đầu tiên.
-    tryStartAudio();
-
-    const handleFirstTouch = () => {
-      tryStartAudio();
-      window.removeEventListener('click', handleFirstTouch);
-      window.removeEventListener('touchstart', handleFirstTouch);
-    };
-
-    window.addEventListener('click', handleFirstTouch, { once: true });
-    window.addEventListener('touchstart', handleFirstTouch, { once: true });
-
-    return () => {
-      window.removeEventListener('click', handleFirstTouch);
-      window.removeEventListener('touchstart', handleFirstTouch);
-    };
   }, []);
+
+  // Đưa focus vào lựa chọn chính và cho phép đóng hộp hỏi bằng phím Escape.
+  useEffect(() => {
+    if (!isMusicPromptOpen) return undefined;
+
+    const focusTimer = window.setTimeout(() => enableMusicButtonRef.current?.focus(), 80);
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsMusicPromptOpen(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMusicPromptOpen]);
 
   // Đổi bài: load và phát bài mới nếu đang ở trạng thái phát
   useEffect(() => {
@@ -111,6 +107,21 @@ export default function AudioController() {
         fadeVolume(0.48);
       }).catch(() => {});
     }
+  };
+
+  const enableMusicFromPrompt = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.play().then(() => {
+      setIsPlayingMusic(true);
+      setIsMusicPromptOpen(false);
+      fadeVolume(0.48);
+    }).catch(() => {
+      // Vẫn đóng hộp hỏi nếu thiết bị từ chối; nút nhạc luôn còn ở góc màn hình.
+      setIsMusicPromptOpen(false);
+      setIsPlayingMusic(false);
+    });
   };
 
   const togglePlaylist = (e) => {
@@ -217,6 +228,45 @@ export default function AudioController() {
             <span>💡 Nhạc nền cố định cho trải nghiệm 20/10</span>
           </div>
         </div>
+      )}
+
+      {isMusicPromptOpen && createPortal(
+        <div className="music-consent-backdrop" role="presentation">
+          <section
+            className="music-consent-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="music-consent-title"
+            aria-describedby="music-consent-description"
+          >
+            <span className="music-consent-note" aria-hidden="true">♪</span>
+            <p className="music-consent-eyebrow">Một chút giai điệu</p>
+            <h2 id="music-consent-title">Bạn có muốn bật nhạc không?</h2>
+            <p id="music-consent-description">
+              Bản nhạc nền sẽ giúp món quà 20/10 trọn vẹn và nhiều cảm xúc hơn.
+            </p>
+            <div className="music-consent-actions">
+              <button
+                ref={enableMusicButtonRef}
+                type="button"
+                className="music-consent-primary"
+                onClick={enableMusicFromPrompt}
+              >
+                <span aria-hidden="true">♫</span>
+                Bật nhạc &amp; bắt đầu
+              </button>
+              <button
+                type="button"
+                className="music-consent-secondary"
+                onClick={() => setIsMusicPromptOpen(false)}
+              >
+                Để sau
+              </button>
+            </div>
+            <p className="music-consent-hint">Bạn vẫn có thể bật hoặc tắt nhạc ở góc trên màn hình.</p>
+          </section>
+        </div>,
+        document.body
       )}
     </div>
   );

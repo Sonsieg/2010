@@ -156,6 +156,159 @@
   gap: 6px;
 }
 
+/* Hộp chào mở khóa nhạc bằng thao tác chủ động của người dùng. */
+.music-consent-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(201, 166, 107, 0.18), transparent 38%),
+    rgba(30, 15, 24, 0.76);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: musicConsentFadeIn 0.42s ease-out both;
+}
+
+.music-consent-dialog {
+  position: relative;
+  width: min(92vw, 460px);
+  overflow: hidden;
+  padding: clamp(28px, 6vw, 42px);
+  border: 1px solid rgba(201, 166, 107, 0.78);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(201, 166, 107, 0.3), transparent 36%),
+    linear-gradient(150deg, #fffdf9 0%, #faf3ea 58%, #f7e7ce 100%);
+  color: #1e0f18;
+  text-align: center;
+  box-shadow: 0 32px 90px rgba(12, 5, 9, 0.48), 0 0 50px rgba(201, 166, 107, 0.16);
+  animation: musicConsentRise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.music-consent-dialog::before,
+.music-consent-dialog::after {
+  content: "✦";
+  position: absolute;
+  color: rgba(140, 47, 75, 0.22);
+  font-size: 4.8rem;
+  line-height: 1;
+}
+
+.music-consent-dialog::before { top: -18px; left: -12px; }
+.music-consent-dialog::after { right: -10px; bottom: -22px; }
+
+.music-consent-note {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  border: 1px solid rgba(201, 166, 107, 0.7);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #8c2f4b, #611d35);
+  color: #faf3ea;
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  box-shadow: 0 10px 24px rgba(140, 47, 75, 0.28);
+}
+
+.music-consent-eyebrow {
+  margin: 0 0 8px;
+  color: #8c2f4b;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.music-consent-dialog h2 {
+  margin: 0;
+  color: #1e0f18;
+  font-family: var(--font-serif);
+  font-size: clamp(1.72rem, 6vw, 2.35rem);
+  line-height: 1.12;
+}
+
+.music-consent-dialog > p:not(.music-consent-eyebrow):not(.music-consent-hint) {
+  max-width: 35ch;
+  margin: 14px auto 0;
+  color: #684d59;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.music-consent-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.music-consent-primary,
+.music-consent-secondary {
+  min-height: 48px;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+.music-consent-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid #c9a66b;
+  background: linear-gradient(135deg, #8c2f4b, #6f213c);
+  color: #fffdf9;
+  box-shadow: 0 12px 24px rgba(140, 47, 75, 0.28);
+}
+
+.music-consent-secondary {
+  border: 1px solid rgba(140, 47, 75, 0.22);
+  background: rgba(255, 253, 249, 0.66);
+  color: #8c2f4b;
+}
+
+.music-consent-primary:hover,
+.music-consent-secondary:hover { transform: translateY(-2px); }
+.music-consent-primary:hover { box-shadow: 0 16px 30px rgba(140, 47, 75, 0.36); }
+.music-consent-primary:focus-visible,
+.music-consent-secondary:focus-visible {
+  outline: 3px solid rgba(201, 166, 107, 0.55);
+  outline-offset: 3px;
+}
+
+.music-consent-hint {
+  margin: 14px 0 0;
+  color: #806873;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+@keyframes musicConsentFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes musicConsentRise {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-consent-backdrop,
+  .music-consent-dialog { animation: none; }
+  .music-consent-primary,
+  .music-consent-secondary { transition: none; }
+}
+
 .playlist-toggle-btn {
   padding: 8px 12px !important;
   display: inline-flex;
