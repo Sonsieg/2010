@@ -14,6 +14,63 @@ export const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuex0SU
 
 const CACHE_TTL_MS = 45 * 1000; // 45 giây (tự động đồng bộ nhanh khi admin duyệt sheet)
 
+const LOVE_WISHES = [
+  'Em yêu Vân Anh (Anh Tỏm), chúc em một ngày 20/10 thật dịu dàng. Anh Són yêu em rất nhiều và mong nụ cười của em luôn rạng rỡ.',
+  'Vân Anh của anh, cảm ơn em vì đã bước vào cuộc đời anh. Chúc em 20/10 ngọt ngào, bình yên và luôn được anh yêu thương thật nhiều.',
+  'Gửi em yêu Anh Tỏm: em là điều đáng yêu nhất trong ngày của anh. Chúc em luôn vui, luôn hạnh phúc và biết rằng Anh Són luôn ở bên em.',
+  'Chúc Vân Anh một ngày 20/10 tràn đầy hoa, nắng và những cái ôm của anh. Anh yêu sự dịu dàng, mạnh mẽ và đáng yêu của em mỗi ngày.',
+  'Em yêu hãy luôn tin vào chính mình nhé. Với Anh Són, em luôn là cô gái đặc biệt nhất, xinh đẹp nhất và xứng đáng với mọi điều ngọt ngào.',
+  '20/10 này Anh Són chỉ muốn nói: yêu em, thương em và muốn cùng em lưu giữ thật nhiều kỷ niệm đẹp. Vân Anh hãy luôn hạnh phúc nhé!',
+  'Anh Tỏm à, mỗi lần nghĩ về em là lòng anh lại thấy bình yên. Chúc em luôn được nâng niu, che chở và mỉm cười thật nhiều.',
+  'Vân Anh yêu, em chính là món quà dịu dàng nhất mà cuộc sống dành cho Anh Són. Chúc em một ngày 20/10 ngập tràn yêu thương.',
+  'Anh mong mọi điều tốt đẹp nhất sẽ đến với em, từ những niềm vui nhỏ bé đến những ước mơ lớn lao. Anh Són sẽ luôn đồng hành cùng em.',
+  'Gửi cô gái anh thương: em không cần phải hoàn hảo, vì trong mắt anh em đã luôn tuyệt vời theo cách riêng của mình rồi. Yêu em, Anh Tỏm nhé!',
+  'Chúc em yêu ngủ thật ngon, thức dậy thật vui và mỗi ngày đều cảm nhận được tình yêu Anh Són dành cho em nhiều đến nhường nào.',
+  'Vân Anh là nơi trái tim anh muốn trở về sau mọi ngày dài. 20/10 thật ngọt ngào nhé em, anh thương em hơn mọi lời chúc có thể nói.',
+  'Anh yêu em vì sự đáng yêu, ấm áp và cả những điều rất riêng chỉ Vân Anh mới có. Mong em luôn hạnh phúc bên Anh Són.',
+  'Nếu có một điều ước trong ngày 20/10, Anh Són chỉ ước được nắm tay em thật lâu và cùng em đi qua thật nhiều mùa yêu thương.',
+  'Em yêu Anh Tỏm, cảm ơn em vì đã làm cho những ngày bình thường của anh trở nên đặc biệt. Chúc em luôn rạng rỡ và an yên.',
+  'Anh không cần điều gì quá lớn lao, chỉ cần Vân Anh luôn vui và ở bên anh. Chúc em 20/10 thật hạnh phúc, người anh yêu nhất.'
+];
+
+function loveWish(index = 0) {
+  return LOVE_WISHES[Math.abs(Number(index) || 0) % LOVE_WISHES.length];
+}
+
+function personalizePublicWishes(items) {
+  const count = Math.max(items.length, LOVE_WISHES.length);
+  return Array.from({ length: count }, (_, index) => {
+    const item = items[index % items.length] || {};
+    return {
+      ...item,
+      id: item.id || index + 1,
+      name: 'Anh Són',
+      from_name: 'Anh Són',
+      dept: 'Strongest',
+      text: loveWish(index)
+    };
+  });
+}
+
+function personalizeCardWish(item, index = 0) {
+  const text = loveWish(index);
+  return {
+    ...item,
+    highlight: text,
+    message: `${text} Nhân ngày 20/10, anh muốn dành tặng em yêu Vân Anh những lời chúc đẹp nhất và một tình yêu thật dịu dàng. ❤️`,
+    from_name: 'Anh Són',
+    dept: 'Strongest'
+  };
+}
+
+function personalizePrivateWishes(data) {
+  return data.map((item, index) => ({
+    ...item,
+    from_name: 'Anh Són',
+    text: loveWish(index)
+  }));
+}
+
 /**
  * 1. Lấy 1 lời chúc thiệp ngẫu nhiên trong 50 lời chúc chọn lọc
  */
@@ -25,12 +82,13 @@ export function getRandomCardWish(index) {
     const randomIndex = Math.floor(Math.random() * cardWishesData.length);
     item = cardWishesData[randomIndex];
   }
+  const personalized = personalizeCardWish(item, item.id || 0);
   return {
-    ...item,
+    ...personalized,
     toString() {
-      return `“${item.highlight}”\n\n${item.message}`;
+      return `“${personalized.highlight}”\n\n${personalized.message}`;
     },
-    fullText: `“${item.highlight}”\n\n${item.message}`
+    fullText: `“${personalized.highlight}”\n\n${personalized.message}`
   };
 }
 
@@ -38,7 +96,7 @@ export function getRandomCardWish(index) {
  * Lấy toàn bộ 50 lời chúc thiệp
  */
 export function getAllCardWishes() {
-  return cardWishesData;
+  return cardWishesData.map((item, index) => personalizeCardWish(item, index));
 }
 
 /**
@@ -110,41 +168,9 @@ export async function fetchPeople() {
  * 3. Lấy danh sách lời chúc công khai (bóng bay & biển bảng)
  */
 export async function fetchPublicWishes() {
-  const cacheKey = "tribute_public_wishes_cache";
-  const cached = getCache(cacheKey);
-  if (cached) return cached;
-
-  if (!APPS_SCRIPT_URL) {
-    return balloonWishesData;
-  }
-
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 6000);
-
-    const res = await fetch(`${APPS_SCRIPT_URL}?action=public`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-      const formatted = data.data.map((item, idx) => ({
-        id: item.id || idx + 1,
-        name: item.from_name || "Đồng nghiệp",
-        dept: "Công ty",
-        text: item.text,
-        color: item.color || "#C9A66B"
-      }));
-      setCache(cacheKey, formatted);
-      return formatted;
-    }
-    return balloonWishesData;
-  } catch (err) {
-    console.warn("[API] fetchPublicWishes dùng local data:", err.message);
-    return balloonWishesData;
-  }
+  // Chương 3 — Thung lũng bóng bay dùng hoàn toàn local data.
+  // Không đọc wishes từ Google Sheet/API để nội dung chỉ dành riêng cho Vân Anh.
+  return personalizePublicWishes(balloonWishesData);
 }
 
 /**
@@ -153,7 +179,7 @@ export async function fetchPublicWishes() {
 export async function fetchPrivateWishes(id) {
   const cleanId = String(id || 'lan_anh').trim().toLowerCase();
   const matchedSister = sistersData.find(s => s.id === cleanId) || {
-    name: "Chị Lan Anh",
+    name: "Vân Anh (Clouda)",
     dept: "Quality Assurance",
     role: "QA Lead"
   };
@@ -166,7 +192,7 @@ export async function fetchPrivateWishes(id) {
       return {
         success: true,
         recipient_name: displayName,
-        data: sisterWishes
+        data: personalizePrivateWishes(sisterWishes)
       };
     }
 
@@ -179,15 +205,15 @@ export async function fetchPrivateWishes(id) {
           id: 1,
           type: "winged_letter",
           badge: "🕊️ Cánh Thư Tri Ân",
-          from_name: "Anh em trong team",
-          text: `Cảm ơn ${displayName} đã luôn đồng hành, hỗ trợ và mang lại nguồn năng lượng tích cực cho toàn thể anh em. Chúc bạn một ngày 20/10 ngập tràn niềm vui, hoa tươi và những điều ngọt ngào nhất!`
+          from_name: "Anh Són",
+          text: loveWish(0)
         },
         {
           id: 2,
           type: "heart",
           badge: "💖 Trái Tim Đồng Đội",
-          from_name: "Một người đồng nghiệp giấu tên",
-          text: `Chúc ${displayName} ngày 20/10 luôn rạng rỡ, công việc hanh thông, vạn sự như ý và mãi là đóa hoa xinh đẹp của công ty!`
+          from_name: "Anh Són",
+          text: loveWish(1)
         }
       ]
     };
@@ -198,7 +224,7 @@ export async function fetchPrivateWishes(id) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-      return data;
+      return { ...data, data: personalizePrivateWishes(data.data) };
     }
     // Nếu chưa có lời chúc riêng gửi đích danh trong sheet, tự động sinh thư chúc ấm áp
     return {
@@ -209,15 +235,15 @@ export async function fetchPrivateWishes(id) {
           id: 1,
           type: "winged_letter",
           badge: "🕊️ Cánh Thư Tri Ân",
-          from_name: "Anh em trong team FE",
-          text: `Cảm ơn ${displayName} đã luôn đồng hành, hỗ trợ và mang lại nguồn năng lượng tích cực cho toàn thể anh em. Chúc bạn một ngày 20/10 ngập tràn niềm vui, hoa tươi và những điều ngọt ngào nhất!`
+          from_name: "Anh Són",
+          text: loveWish(0)
         },
         {
           id: 2,
           type: "heart",
           badge: "💖 Trái Tim Đồng Đội",
-          from_name: "Em Intern siêu đẹp trai",
-          text: `Chúc ${displayName} ngày 20/10 luôn rạng rỡ, công việc hanh thông, vạn sự như ý và mãi là đóa hoa xinh đẹp của công ty!`
+          from_name: "Anh Són",
+          text: loveWish(1)
         }
       ]
     };
@@ -231,8 +257,8 @@ export async function fetchPrivateWishes(id) {
           id: 1,
           type: "winged_letter",
           badge: "🕊️ Cánh Thư Tri Ân",
-          from_name: "Đồng nghiệp thân thiết",
-          text: `Chúc ${displayName} một ngày 20/10 ngập tràn niềm vui, công việc thuận buồm xuôi gió và luôn tươi cười hạnh phúc!`
+          from_name: "Anh Són",
+          text: loveWish(2)
         }
       ]
     };

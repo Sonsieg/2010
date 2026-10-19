@@ -40,7 +40,7 @@ export const SIGNATURE_STYLES = [
     id: 3,
     title: 'Chữ ký kèm sakura hoa lá',
     font: '"Great Vibes", cursive',
-    quote: 'Chúc chị luôn tươi tắn, dịu dàng và được yêu thương thật nhiều!',
+    quote: 'Chúc em Vân Anh (Anh Tỏm) luôn vui vẻ, bình yên và được Anh Són yêu thương thật nhiều!',
     theme: {
       bgStart: '#FFF0F5',
       bgEnd: '#FAD8E2',
@@ -102,14 +102,14 @@ export function getSignatureStyleForName(name = '') {
  * Dùng làm Texture sắc nét cho Three.js (Trạm 2 và Trạm 5) và xuất ảnh.
  * Đồng bộ 100% với giao diện Thiệp Hồng Nhung: vòng tròn vàng, giàn hoa đào botanical hai bên, chữ Pinyon Script.
  */
-export function createSignatureCardCanvas(name = 'Lan Anh', customQuote = '', width = 800, height = 1060) {
+export function createSignatureCardCanvas(name = 'Vân Anh (Clouda)', customQuote = '', width = 800, height = 1060) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext('2d');
 
-  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Lan Anh';
-  const wish = customQuote || 'Chúc chị luôn vui vẻ, may mắn và hạnh phúc!';
+  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Vân Anh (Clouda)';
+  const wish = customQuote || 'Chúc em Vân Anh luôn vui vẻ, may mắn và hạnh phúc. Anh Són yêu em!';
 
   // 1. Nền radial gradient ấm áp phong cách Thiệp Hồng Nhung
   const bgGrad = ctx.createRadialGradient(

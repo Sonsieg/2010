@@ -3,7 +3,7 @@
  */
 
 export const NAV_STAGES = [
-  { path: '/', label: 'Hộp Quà', icon: '🎁', isMainStage: true },
+  { path: '/3d', label: 'Thế Giới 3D', icon: '✨', isMainStage: true },
   { path: '/letter', label: 'Thư Ngỏ', icon: '💌', isMainStage: true },
   { path: '/balloons', label: 'Bóng Bay', icon: '🎈', isMainStage: true },
   { path: '/private', label: 'Xe Thư 2D', icon: '🌸', isMainStage: true },

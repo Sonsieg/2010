@@ -4,52 +4,20 @@ import { playSoftTapSound } from '../utils/soundEffects.js';
 
 export const PLAYLIST = [
   {
-    id: 'rmpiano1',
-    title: 'Piano 01',
-    subtitle: 'Piano sâu lắng ngọt ngào',
-    src: '/RMPIANO1.mp3',
-    icon: '🎹'
-  },
-  {
-    id: 'rmpiano2',
-    title: 'Piano 02',
-    subtitle: 'Piano lãng mạn bay bổng',
-    src: '/RMPIANO2.mp3',
-    icon: '🎼'
-  },
-  {
-    id: 'rmpiano3',
-    title: 'Piano 03',
-    subtitle: 'Piano trữ tình êm dịu',
-    src: '/RMPIANO3.mp3',
-    icon: '✨'
-  },
-  {
-    id: 'video1',
-    title: 'Sandwich & Story',
-    subtitle: 'Mono',
-    src: '/VIDEO1.mp3',
-    icon: '🎬'
-  },
-  {
     id: 'video2',
     title: 'Until I Found You',
     subtitle: 'Stephen Sanchez',
     src: '/VIDEO2.mp3',
     icon: '💖'
-  },
-  {
-    id: 'piano_moment',
-    title: 'Piano Moment (Dự phòng)',
-    subtitle: 'Bản piano acoustic Pixabay',
-    src: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-9835.mp3',
-    icon: '🕊️'
   }
 ];
 
 export default function AudioController() {
   const { isPlayingMusic, setIsPlayingMusic } = useApp();
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  // Nhạc mở đầu mặc định của trải nghiệm: Until I Found You.
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(() => (
+    Math.max(0, PLAYLIST.findIndex((track) => track.id === 'video2'))
+  ));
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const audioRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -63,11 +31,18 @@ export default function AudioController() {
 
     audio.volume = 0;
 
-    const handleFirstTouch = () => {
+    const tryStartAudio = () => {
       audio.play().then(() => {
         setIsPlayingMusic(true);
         fadeVolume(0.48);
       }).catch(() => {});
+    };
+
+    // Thử autoplay ngay khi mở trang; nếu bị browser chặn, fallback ở tương tác đầu tiên.
+    tryStartAudio();
+
+    const handleFirstTouch = () => {
+      tryStartAudio();
       window.removeEventListener('click', handleFirstTouch);
       window.removeEventListener('touchstart', handleFirstTouch);
     };
@@ -201,10 +176,10 @@ export default function AudioController() {
         <div className="music-playlist-dropdown">
           <div className="playlist-header">
             <div className="playlist-header-title">
-              <span>🎵 Danh Sách Nhạc 20/10</span>
-              <span className="playlist-auto-badge">Auto Next 🔁</span>
+              <span>🎵 Nhạc nền</span>
+              <span className="playlist-auto-badge">Phát lặp 🔁</span>
             </div>
-            <p className="playlist-header-sub">Hết bài sẽ tự động phát tiếp bài sau</p>
+            <p className="playlist-header-sub">Until I Found You — Stephen Sanchez</p>
           </div>
 
           <div className="playlist-track-list">
@@ -239,7 +214,7 @@ export default function AudioController() {
           </div>
 
           <div className="playlist-footer">
-            <span>💡 Nhấn vào bài hát bất kỳ để chuyển ngay lập tức</span>
+            <span>💡 Nhạc nền cố định cho trải nghiệm 20/10</span>
           </div>
         </div>
       )}

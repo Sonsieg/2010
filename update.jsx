@@ -1990,9 +1990,9 @@ export default function World3DExperience() {
           ? wishes[i % wishes.length]
           : {
             id: `wish_${i}`,
-            name: 'Đồng Nghiệp IT',
-            dept: 'Engineering Team',
-            text: 'Chúc bạn ngày 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
+            name: 'Anh Són',
+            dept: 'Strongest',
+            text: 'Chúc anh Tỏm 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
           };
 
         interactiveMeshes.push({
@@ -2058,7 +2058,7 @@ export default function World3DExperience() {
 
       scG.fillStyle = '#FFF';
       scG.font = 'italic bold 36px "Playfair Display", Georgia, serif';
-      scG.fillText('Thước Phim Tri Ân Phái Đẹp', 320, 160);
+      scG.fillText('Thước phim tình củm', 320, 160);
 
       scG.fillStyle = '#FDE68A';
       scG.font = '600 24px "Be Vietnam Pro", sans-serif';

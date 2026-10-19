@@ -11,7 +11,7 @@ import './garden-scene.css';
    ========================================================== */
 export default function PrivateGarden2D() {
   const { selectedSister, navigateWithFlowerTransition, experienceMode, updateExperienceMode } = useApp();
-  const sisterName = selectedSister ? selectedSister.name : 'Chị Lan Anh';
+  const sisterName = selectedSister ? selectedSister.name : 'Vân Anh (Clouda)';
 
   const [messages, setMessages] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');

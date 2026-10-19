@@ -11,7 +11,7 @@ export default function LetterPage() {
   const [imageError, setImageError] = useState(false);
 
   // Thông tin chị em được vinh danh (ưu tiên dữ liệu từ context)
-  const sisterName = selectedSister ? selectedSister.name : 'Nguyễn Thị Lan Anh';
+  const sisterName = selectedSister ? selectedSister.name : 'Vân Anh (Clouda)';
   const roleText = (selectedSister && (selectedSister.role || selectedSister.dept)) || 'PRODUCT MANAGER';
   
   // Kiểm tra ảnh chân dung: Nếu có ảnh & consent & không lỗi -> dùng ảnh thật; Nếu thiếu -> fallback thẻ chữ ký nghệ thuật!
@@ -132,7 +132,7 @@ export default function LetterPage() {
                   Chúc bạn mãi tự tin và toả sáng! 💐
                 </div>
                 <div className="letter-gentlemen-sign">
-                  — Toàn thể anh em Tech &amp; Product
+                  — Anh Són, người yêu của em
                 </div>
               </div>
 

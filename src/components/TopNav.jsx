@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import AudioController from './AudioController.jsx';
@@ -7,10 +7,6 @@ import { NAV_STAGES } from '../config/routes.config.js';
 
 export default function TopNav() {
   const { 
-    setIsArchiveOpen, 
-    openedBalloons, 
-    experienceMode, 
-    updateExperienceMode,
     navigateWithFlowerTransition
   } = useApp();
   const location = useLocation();
@@ -18,39 +14,12 @@ export default function TopNav() {
   // Ẩn top nav nếu đang ở trang Sender Studio
   if (location.pathname === '/sender') return null;
 
-  const stages = NAV_STAGES.map(s => {
-    if (s.path === '/private') {
-      return { ...s, label: experienceMode === '3d' ? 'Xe Hoa 3D' : 'Xe Thư 2D', icon: experienceMode === '3d' ? '🚐' : '🌸' };
-    }
-    return s;
-  });
-
   const is3D = location.pathname === '/3d';
-
-  const handleToggleMode = () => {
-    if (is3D) {
-      updateExperienceMode('2d', '/letter');
-    } else {
-      updateExperienceMode('3d', '/3d');
-    }
-  };
+  const stages = NAV_STAGES;
 
   return (
     <nav className="royal-top-nav" aria-label="Điều khiển đầu trang">
-      {/* 1. Toggle Mode 2D / 3D */}
-      <button
-        onClick={handleToggleMode}
-        className={`royal-nav-pill mode-switch-pill ${is3D ? 'mode-3d-active' : 'mode-2d-active'}`}
-        title={`Đang xem chế độ ${is3D ? '3D Điện Ảnh' : '2D Cổ Tích'} - Nhấn để đổi sang ${is3D ? '2D Cổ Tích' : '3D Điện Ảnh'}`}
-      >
-        <span className="mode-badge-dot"></span>
-        <span className="mode-icon">{is3D ? '✨ 3D' : '🌸 2D'}</span>
-        <span className="btn-label mode-text-label">
-          {is3D ? '3D Điện Ảnh' : '2D Cổ Tích'}
-        </span>
-      </button>
-
-      {/* 2. Quick Demo Stages Navigator (Hiển thị ở chế độ 2D Editorial) */}
+      {/* Điều hướng các màn phụ, ẩn trong trải nghiệm 3D chính */}
       {!is3D && (
         <div className="royal-stages-pill-group">
           {stages.map((st) => {
@@ -70,34 +39,9 @@ export default function TopNav() {
         </div>
       )}
 
-      {/* 3. Lời chúc đã mở */}
-      <button
-        onClick={() => setIsArchiveOpen(true)}
-        className="royal-nav-pill"
-        title="Xem lại các lời chúc đã mở"
-      >
-        <span>📜</span>
-        <span className="btn-label">
-          Đã mở ({openedBalloons.size})
-        </span>
-      </button>
+      {/* Nút Gửi Lời Chúc Dành Cho Anh Em */}
 
-      {/* 4. Nút Gửi Lời Chúc Dành Cho Anh Em */}
-      <button
-        onClick={() => navigateWithFlowerTransition('/sender')}
-        className="royal-nav-pill btn-sender-nav"
-        title="Dành cho Anh Em: Gửi lời chúc mới vào hệ thống"
-        style={{
-          background: 'linear-gradient(135deg, rgba(190,18,60,0.25) 0%, rgba(201,166,107,0.18) 100%)',
-          borderColor: 'rgba(201,166,107,0.45)',
-          color: '#FAF3EA'
-        }}
-      >
-        <span>✍️</span>
-        <span className="btn-label">Gửi lời chúc</span>
-      </button>
-
-      {/* 5. Audio Controller */}
+      {/* Audio Controller */}
       <AudioController />
     </nav>
   );

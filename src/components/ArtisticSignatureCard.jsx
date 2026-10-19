@@ -6,11 +6,11 @@ import React from 'react';
  * chữ thư pháp Pinyon Script lộng lẫy và cánh hoa rơi lãng mạn.
  */
 export default function ArtisticSignatureCard({
-  name = 'Lan Anh',
+  name = 'Vân Anh (Clouda)',
   customQuote = '',
   className = ''
 }) {
-  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Lan Anh';
+  const displayName = name.replace(/^(Chị\s+|Em\s+)/i, '').trim() || 'Vân Anh (Clouda)';
   const wishText = customQuote || 'Chúc chị luôn vui vẻ, rạng rỡ và ngập tràn hạnh phúc!';
 
   return (

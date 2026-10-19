@@ -6,26 +6,27 @@ const QUICK_TEMPLATES = [
   {
     icon: '🌸',
     label: 'Tri ân & Đồng hành',
-    text: 'Cảm ơn các chị em luôn là chỗ dựa vững chắc, sát cánh cùng anh em qua mọi dự án. Chúc chị em 20/10 ngập tràn niềm vui, hoa tươi và những khoảnh khắc ngọt ngào nhất!'
+    text: 'Em yêu Vân Anh (Anh Tỏm), cảm ơn em vì đã luôn làm cuộc sống của Anh Són dịu dàng hơn. Chúc em 20/10 thật hạnh phúc, ngọt ngào và luôn được anh yêu thương!'
   },
   {
     icon: '✨',
     label: 'Tỏa sáng & Rạng ngời',
-    text: 'Chúc các đóa hoa xinh đẹp của công ty ngày 20/10 luôn rạng rỡ, code mượt mà, release suôn sẻ và nụ cười tươi tắn luôn tiếp thêm năng lượng cho cả team!'
+    text: 'Vân Anh yêu của anh, chúc em ngày 20/10 luôn rạng rỡ, vui vẻ và tỏa sáng. Anh Són luôn tự hào và thương em thật nhiều!'
   },
   {
     icon: '☕',
     label: 'Ngọt ngào & Hạnh phúc',
-    text: 'Nhân ngày 20/10, chúc chị em luôn hạnh phúc, công việc thuận buồm xuôi gió, luôn được yêu thương trân trọng và nhận thật nhiều bất ngờ ấm áp từ mọi người!'
+    text: 'Anh Tỏm yêu ơi, chúc em một ngày 20/10 thật ấm áp. Mong mỗi ngày của em đều có niềm vui, những cái ôm và tình yêu của Anh Són!'
   },
   {
     icon: '💎',
     label: 'Bản lĩnh & Thành công',
-    text: 'Trân trọng sự nhiệt huyết, tỉ mỉ và tài năng xuất sắc của các chị em trong từng dòng code và sản phẩm. Chúc chị em luôn tự tin, tỏa sáng và gặt hái nhiều thành công!'
+    text: 'Vân Anh là cô gái tuyệt vời nhất trong lòng Anh Són. Chúc em luôn tự tin, hạnh phúc và gặt hái mọi điều em mong muốn trong cuộc sống!'
   }
 ];
 
 const DEFAULT_DEPARTMENTS = [
+  'Strongest',
   'Engineering (Backend/Dev)',
   'Frontend & Mobile Team',
   'Quality Assurance (QA/QC)',
@@ -49,7 +50,7 @@ export default function SenderStudioPage() {
     return Array.from(new Set([...fromSheet, ...DEFAULT_DEPARTMENTS]));
   }, [people]);
 
-  const [dept, setDept] = useState(DEFAULT_DEPARTMENTS[0]);
+  const [dept, setDept] = useState('Strongest');
   const [isCustomDept, setIsCustomDept] = useState(false);
   const [customDept, setCustomDept] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -83,8 +84,8 @@ export default function SenderStudioPage() {
     setIsSubmitting(true);
     const res = await submitWish({
       to,
-      from_name: fromName.trim() || 'Một người anh em',
-      dept: finalDept || 'Engineering & Product Team',
+      from_name: fromName.trim() || 'Anh Són',
+      dept: finalDept || 'Strongest',
       anonymous: isAnonymous,
       text: text.trim(),
       color,

@@ -240,7 +240,7 @@ export default function World3DExperience() {
     setIsPlayingMusic
   } = useApp();
 
-  const sisterName = selectedSister ? selectedSister.name : 'Chị Lan Anh';
+  const sisterName = selectedSister ? selectedSister.name : 'Vân Anh (Anh Tỏm)';
 
   // [P1] Navigation & Camera states
   const [activeStationIndex, setActiveStationIndex] = useState(0);
@@ -2719,7 +2719,7 @@ export default function World3DExperience() {
       lG.fillText('✦ THƯ TRI ÂN TỪ CÁNH NAM IT ✦', 55, 76);
 
       // 4. Lời đề từ kính gửi (Salutation)
-      const cleanSisterName = (sisterName || 'Lan Anh').replace(/^(Chị\s+|Em\s+)/i, '').trim();
+      const cleanSisterName = (sisterName || 'Vân Anh (Anh Tỏm)').replace(/^(Chị\s+|Em\s+)/i, '').trim();
       lG.fillStyle = '#881337';
       lG.font = 'italic bold 34px "Playfair Display", Georgia, serif';
       lG.fillText(`Thân Gửi Chị ${cleanSisterName},`, 55, 122);
@@ -2958,8 +2958,8 @@ export default function World3DExperience() {
         const wishData = (wishes && wishes.length > 0)
           ? wishes[i % wishes.length]
           : {
-            id: `wish_${i}`, name: 'Đồng Nghiệp IT', dept: 'Engineering Team',
-            text: 'Chúc bạn ngày 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
+            id: `wish_${i}`, name: 'Anh Són', dept: 'Strongest',
+            text: 'Em yêu Vân Anh (Anh Tỏm), chúc em 20/10 thật ngọt ngào. Anh Són yêu em rất nhiều! ❤️'
           };
 
         interactiveMeshes.push({
@@ -3019,7 +3019,7 @@ export default function World3DExperience() {
       scG.textAlign = 'center';
       scG.fillText('🎬 TECHCORP CINEMA • 20/10 SPECIAL', 320, 80);
       scG.fillStyle = '#FFF'; scG.font = 'italic bold 36px "Playfair Display", Georgia, serif';
-      scG.fillText('Thước Phim Tri Ân Phái Đẹp', 320, 160);
+      scG.fillText('Thước phim tình củm', 320, 160);
       scG.fillStyle = '#FDE68A'; scG.font = '600 24px "Be Vietnam Pro", sans-serif';
       scG.fillText('▶ Chạm vào màn hình để thưởng thức phim', 320, 240);
 

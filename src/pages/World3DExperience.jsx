@@ -242,7 +242,7 @@ export default function World3DExperience() {
     setIsPlayingMusic
   } = useApp();
 
-  const sisterName = selectedSister ? selectedSister.name : 'Chị Lan Anh';
+  const sisterName = selectedSister ? selectedSister.name : 'Vân Anh (Clouda)';
 
   // [P1] Navigation & Camera states
   const [activeStationIndex, setActiveStationIndex] = useState(0);
@@ -2775,10 +2775,10 @@ export default function World3DExperience() {
       lG.fillText('✦ THƯ TRI ÂN TỪ CÁNH NAM IT ✦', 55, 76);
 
       // 4. Lời đề từ kính gửi (Salutation)
-      const cleanSisterName = (sisterName || 'Lan Anh').replace(/^(Chị\s+|Em\s+)/i, '').trim();
+      const cleanSisterName = (sisterName || 'Vân Anh (Clouda)').replace(/^(Chị\s+|Em\s+)/i, '').trim();
       lG.fillStyle = '#881337';
       lG.font = 'italic bold 34px "Playfair Display", Georgia, serif';
-      lG.fillText(`Thân Gửi Chị ${cleanSisterName},`, 55, 122);
+      lG.fillText(`Thân Gửi Em ${cleanSisterName},`, 55, 122);
 
       // Đường kẻ chỉ vàng trang trí
       lG.strokeStyle = 'rgba(201, 166, 107, 0.55)';
@@ -2811,7 +2811,7 @@ export default function World3DExperience() {
       const wishHighlight = typeof cardWish === 'object' && cardWish.highlight ? cardWish.highlight : cardWish;
       const wishMessage = typeof cardWish === 'object' && cardWish.message
         ? cardWish.message
-        : 'Cảm ơn sự nhiệt tình, những nỗ lực và nguồn năng lượng tích cực mà bạn mang đến cho mọi người. Nhân ngày 20/10, chúc bạn luôn được yêu thương, gặp thật nhiều may mắn và cuộc sống ngập tràn niềm vui!';
+        : 'Em yêu Vân Anh (Anh Tỏm), Anh Són chúc em 20/10 thật hạnh phúc, bình yên và luôn biết rằng anh yêu em rất nhiều!';
 
       // 5. Câu chúc nổi bật (Wine red, nghiêng, to rõ, độ tương phản cao)
       lG.fillStyle = '#7A0C2E';
@@ -2827,11 +2827,11 @@ export default function World3DExperience() {
       const signY = Math.max(afterBodyY + 48, 650);
       lG.fillStyle = '#7A0C2E';
       lG.font = 'italic 700 22px "Playfair Display", Georgia, serif';
-      lG.fillText('Chúc chị mãi rạng rỡ, tự tin và toả sáng! 💐', 55, signY);
+      lG.fillText('Chúc em mãi rạng rỡ, hạnh phúc và được Anh Són yêu thương! 💐', 55, signY);
 
       lG.fillStyle = '#92400E';
       lG.font = '700 18px "Be Vietnam Pro", sans-serif';
-      lG.fillText('— Toàn thể anh em Tech & Product —', 55, signY + 36);
+      lG.fillText('— Anh Són, người yêu của em —', 55, signY + 36);
 
       // 8. Họa tiết hoa văn tinh tế phía trên con dấu sáp 3D
       lG.fillStyle = 'rgba(201, 166, 107, 0.75)';
@@ -3014,8 +3014,8 @@ export default function World3DExperience() {
         const wishData = (wishes && wishes.length > 0)
           ? wishes[i % wishes.length]
           : {
-            id: `wish_${i}`, name: 'Đồng Nghiệp IT', dept: 'Engineering Team',
-            text: 'Chúc bạn ngày 20/10 rạng rỡ, xinh đẹp và luôn đón nhận niềm vui bất ngờ trong cuộc sống!'
+            id: `wish_${i}`, name: 'Anh Són', dept: 'Strongest',
+            text: 'Em yêu Vân Anh (Anh Tỏm), chúc em 20/10 thật ngọt ngào. Anh Són yêu em rất nhiều! ❤️'
           };
 
         interactiveMeshes.push({
@@ -3075,7 +3075,7 @@ export default function World3DExperience() {
       scG.textAlign = 'center';
       scG.fillText('🎬 TECHCORP CINEMA • 20/10 SPECIAL', 320, 80);
       scG.fillStyle = '#FFF'; scG.font = 'italic bold 36px "Playfair Display", Georgia, serif';
-      scG.fillText('Thước Phim Tri Ân Phái Đẹp', 320, 160);
+      scG.fillText('Thước phim tình củm', 320, 160);
       scG.fillStyle = '#FDE68A'; scG.font = '600 24px "Be Vietnam Pro", sans-serif';
       scG.fillText('▶ Chạm vào màn hình để thưởng thức phim', 320, 240);
 
@@ -5623,7 +5623,7 @@ export default function World3DExperience() {
         </div>
         <h2 className="cinematic-veil-title">
           Vương Quốc Hoa 3D • 20/10<br />
-          Dành Riêng Cho <strong>{sisterName || 'Chị Em'}</strong> ✨
+          Dành Riêng Cho <strong>{sisterName || 'Vân Anh (Anh Tỏm)'}</strong> ✨
         </h2>
         <p className="cinematic-veil-sub">
           Đang chuẩn bị không gian ngập tràn hoa và ánh sáng kỳ diệu...
@@ -6067,7 +6067,7 @@ export default function World3DExperience() {
                         {msg.badge || (isHeart ? '💖 Trái Tim Tri Ân' : '🕊️ Cánh Thư May Mắn')}
                       </span>
                       <h4 className="winged-card-title">{msg.title || 'Món Quà Tinh Thần'}</h4>
-                      <span className="winged-card-sender">Từ: {msg.from_name || 'Đồng nghiệp'}</span>
+                      <span className="winged-card-sender">Từ: {msg.from_name || 'Anh Són'}</span>
                       <p className="winged-card-snippet">“{msg.text}”</p>
                       <div className="winged-card-action">
                         <span>Chạm để đọc thư</span>
@@ -6118,7 +6118,7 @@ export default function World3DExperience() {
               <div>
                 <span style={{ fontSize: '0.8rem', color: '#64748B', display: 'block' }}>Người gửi:</span>
                 <strong style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: 'var(--rose-900)' }}>
-                  {readingMessage.from_name || 'Một người đồng nghiệp giấu tên'}
+                  {readingMessage.from_name || 'Anh Són'}
                 </strong>
               </div>
 
@@ -6239,7 +6239,7 @@ export default function World3DExperience() {
                   <div style={{ textAlign: 'left' }}>
                     <span style={{ fontSize: '0.78rem', color: '#64748B' }}>Trao tặng từ:</span>
                     <strong style={{ display: 'block', fontFamily: 'var(--font-serif)', color: 'var(--rose-900)', fontSize: '0.98rem' }}>
-                      Toàn Thể Anh Em TechCorp ❤️
+                      Anh Són ❤️
                     </strong>
                   </div>
                   <div

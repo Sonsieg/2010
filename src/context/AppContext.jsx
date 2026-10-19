@@ -28,8 +28,8 @@ export function AppProvider({ children, navigate }) {
     if (typeof window !== 'undefined' && window.location.hash.includes('/3d')) {
       return '3d';
     }
-    // MẶC ĐỊNH LUÔN LÀ '2d' để trang chủ luôn mở Hộp Quà 20/10 đầu tiên cho tất cả mọi người
-    return '2d';
+    // Trải nghiệm chính của app là thế giới 3D tại #/3d.
+    return '3d';
   });
 
   const updateExperienceMode = (mode, targetPath) => {

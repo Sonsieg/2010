@@ -103,7 +103,7 @@ export default function WishModal() {
                     {senderInitial}
                   </div>
                   <div>
-                    <div className="royal-sender-eyebrow">LỜI CHÚC TỪ ANH EM</div>
+                    <div className="royal-sender-eyebrow">LỜI CHÚC TỪ ANH SÓN</div>
                     <h4 className="royal-sender-name">
                       {senderRaw}
                     </h4>

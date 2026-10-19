@@ -77,7 +77,7 @@ export default function GiftPage() {
           <span className="crown">👑</span>
           <span>
             {selectedSister 
-              ? `Món Quà Riêng Tặng: Chị ${selectedSister.name}` 
+              ? `Món Quà Riêng Tặng: Em ${selectedSister.name}` 
               : 'Chào Mừng Ngày Phụ Nữ Việt Nam 20/10'}
           </span>
           <span>🌸</span>
@@ -99,7 +99,7 @@ export default function GiftPage() {
           <div className="gift-require-name-alert">
             <span className="alert-icon">🌸</span>
             <span className="alert-text">
-              Chị ơi, hãy chọn tên của mình ở danh sách phía trên để mở món quà bí mật này nhé!
+              Em yêu ơi, hãy chọn tên của mình ở danh sách phía trên để mở món quà bí mật này nhé!
             </span>
           </div>
         )}
@@ -108,7 +108,7 @@ export default function GiftPage() {
         {selectedSister && !isLidOpened && (
           <div className="gift-aura-callout-badge" onClick={handleOpenGift}>
             <span className="badge-sparkle">✨</span>
-            <span>Món quà dành riêng cho Chị {selectedSister.name} đã sẵn sàng! Chạm để mở</span>
+            <span>Món quà dành riêng cho em {selectedSister.name} đã sẵn sàng! Chạm để mở</span>
             <span className="badge-sparkle">✨</span>
           </div>
         )}
@@ -117,7 +117,7 @@ export default function GiftPage() {
         <div
           className={`sweet-gift-wrapper ${isLidOpened ? 'box-is-open' : 'gift-wobble-anim'} ${selectedSister && !isLidOpened ? 'gift-aura-glowing' : ''}`}
           onClick={handleOpenGift}
-          title={selectedSister ? `Chạm để mở món quà của Chị ${selectedSister.name}!` : "Vui lòng chọn tên chị em ở trên trước"}
+          title={selectedSister ? `Chạm để mở món quà của em ${selectedSister.name}!` : "Vui lòng chọn tên của em trước"}
         >
           <svg className="sweet-gift-svg" viewBox="0 0 240 240" fill="none">
             <defs>
@@ -231,10 +231,10 @@ export default function GiftPage() {
             <div className="onboarding-modal-wax-seal">20.10</div>
             <div className="onboarding-badge">🌸 CHÀO MỪNG ĐÓA HOA RẠNG RỠ</div>
             <h2 className="onboarding-title">
-              Chào Mừng Chị <strong>{selectedSister.name}</strong>! 💖
+              Chào Mừng anh Tỏm ! 💖
             </h2>
             <p className="onboarding-desc">
-              Toàn thể anh em TechCorp đã chuẩn bị không gian tri ân riêng dành tặng chị. Chị muốn bắt đầu khám phá qua trải nghiệm nào?
+              Anh Són đã chuẩn bị một không gian yêu thương riêng dành tặng em Vân Anh. Em muốn bắt đầu khám phá món quà nào?
             </p>
 
             <div className="onboarding-choices">

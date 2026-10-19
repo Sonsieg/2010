@@ -12,8 +12,8 @@ export const STORAGE_KEYS = {
 };
 
 export const APP_CONFIG = {
-  TITLE: 'Chúc Mừng 20/10 ✨ Món Quà Yêu Thương Dành Tặng Chị Em IT',
-  SUBTITLE: 'Món quà ngọt ngào và trân trọng từ toàn thể anh em IT',
+  TITLE: 'Chúc Mừng 20/10 ✨ Dành Tặng Vân Anh (Anh Tỏm)',
+  SUBTITLE: 'Những lời yêu thương ngọt ngào từ Anh Són dành cho em yêu',
   FALLBACK_PIN: '2010',
   CACHE_TTL_MS: 10 * 60 * 1000 // 10 minutes
 };

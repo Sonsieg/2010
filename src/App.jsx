@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 
 import AmbientPetals from './components/AmbientPetals.jsx';
@@ -10,33 +10,12 @@ import ArchiveDrawer from './components/ArchiveDrawer.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PageLoader from './components/PageLoader.jsx';
 
-// Direct import for instantaneous initial landing render
-import GiftPage from './pages/GiftPage.jsx';
-
 // Enterprise Code-Splitting: Lazy-load route pages to keep initial bundle tiny
 const World3DExperience = lazy(() => import('./pages/World3DExperience.jsx'));
-const LetterPage = lazy(() => import('./pages/LetterPage.jsx'));
-const BalloonsPage = lazy(() => import('./pages/BalloonsPage.jsx'));
-const PrivateHeartPage = lazy(() => import('./pages/PrivateHeartPage.jsx'));
-const VideoPage = lazy(() => import('./pages/VideoPage.jsx'));
-const PartyPage = lazy(() => import('./pages/PartyPage.jsx'));
 const SenderStudioPage = lazy(() => import('./pages/SenderStudioPage.jsx'));
 
 function MainAppContent() {
-  const { experienceMode } = useApp();
   const location = useLocation();
-
-  // Khi người dùng vào trang chủ (/), dọn dẹp cờ cũ để không bị kẹt ở chế độ 3D
-  React.useEffect(() => {
-    if (location.pathname === '/' && experienceMode === '3d') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('mode') !== '3d') {
-        try {
-          localStorage.removeItem('tribute_mode');
-        } catch (e) {}
-      }
-    }
-  }, [location.pathname, experienceMode]);
 
   // Trang soạn thảo của anh em luôn mở trực tiếp
   if (location.pathname === '/sender') {
@@ -62,14 +41,16 @@ function MainAppContent() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        <Route path="/" element={<GiftPage />} />
+        {/* Trải nghiệm 3D là màn chính của app. */}
+        <Route path="/" element={<Navigate to="/3d" replace />} />
         <Route path="/3d" element={<World3DExperience />} />
-        <Route path="/letter" element={<LetterPage />} />
-        <Route path="/balloons" element={<BalloonsPage />} />
-        <Route path="/private" element={<PrivateHeartPage />} />
-        <Route path="/video" element={<VideoPage />} />
-        <Route path="/slideshow" element={<VideoPage />} />
-        <Route path="/party" element={<PartyPage />} />
+        {/* Bản 2D đã tắt: giữ URL cũ nhưng đưa người dùng về trải nghiệm chính. */}
+        <Route path="/letter" element={<Navigate to="/3d" replace />} />
+        <Route path="/balloons" element={<Navigate to="/3d" replace />} />
+        <Route path="/private" element={<Navigate to="/3d" replace />} />
+        <Route path="/video" element={<Navigate to="/3d" replace />} />
+        <Route path="/slideshow" element={<Navigate to="/3d" replace />} />
+        <Route path="/party" element={<Navigate to="/3d" replace />} />
         <Route path="/sender" element={<SenderStudioPage />} />
       </Routes>
     </Suspense>
