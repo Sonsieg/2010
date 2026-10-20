@@ -2716,60 +2716,6 @@
   text-align: center;
 }
 
-.cinematic-loading-copy {
-  width: min(390px, 84vw);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 9px;
-}
-
-.cinematic-loading-track {
-  width: 100%;
-  height: 5px;
-  overflow: hidden;
-  border: 1px solid rgba(253, 230, 138, 0.16);
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.35);
-}
-
-.cinematic-loading-bar {
-  display: block;
-  height: 100%;
-  min-width: 8%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #8C2F4B 0%, #FDA4AF 52%, #FDE68A 100%);
-  box-shadow: 0 0 14px rgba(253, 230, 138, 0.48);
-  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cinematic-loading-percent {
-  color: #FDE68A;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.cinematic-loading-hint {
-  color: rgba(250, 243, 234, 0.48);
-  font-family: var(--font-sans);
-  font-size: 0.69rem;
-  line-height: 1.45;
-  text-align: center;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cinematic-veil-ring,
-  .cinematic-veil-icon {
-    animation: none;
-  }
-
-  .cinematic-loading-bar {
-    transition-duration: 0.01ms;
-  }
-}
-
 /* Auto-tour indicator pill */
 .autotour-active-banner {
   position: fixed;

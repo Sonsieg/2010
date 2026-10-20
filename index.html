@@ -17,64 +17,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Allura&family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@600;700&family=Great+Vibes&family=JetBrains+Mono:wght@400;500;700&family=Pinyon+Script&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
-  <style>
-    /* Hiện ngay trước khi bundle React/JavaScript được tải và thực thi. */
-    .boot-loader {
-      position: fixed;
-      inset: 0;
-      z-index: 2147483647;
-      display: grid;
-      place-items: center;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 24px;
-      color: #faf3ea;
-      text-align: center;
-      background: radial-gradient(circle at 50% 38%, #4a1733 0%, #1e0f18 58%, #10070c 100%);
-      font-family: "Be Vietnam Pro", system-ui, sans-serif;
-    }
-    .boot-loader__content { width: min(360px, 88vw); }
-    .boot-loader__flower {
-      display: block;
-      margin-bottom: 18px;
-      font-size: 3rem;
-      filter: drop-shadow(0 0 18px rgba(201, 166, 107, 0.65));
-      animation: bootPulse 1.35s ease-in-out infinite alternate;
-    }
-    .boot-loader__title {
-      margin: 0;
-      color: #fffaf4;
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: clamp(1.2rem, 5vw, 1.65rem);
-    }
-    .boot-loader__text { margin: 9px 0 16px; color: rgba(250, 243, 234, 0.72); font-size: 0.82rem; }
-    .boot-loader__track { height: 4px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,0.12); }
-    .boot-loader__bar {
-      width: 42%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #8c2f4b, #fda4af, #c9a66b);
-      animation: bootLoad 1.15s ease-in-out infinite;
-    }
-    @keyframes bootLoad { from { transform: translateX(-110%); } to { transform: translateX(340%); } }
-    @keyframes bootPulse { from { transform: scale(0.92); opacity: 0.72; } to { transform: scale(1.08); opacity: 1; } }
-    @media (prefers-reduced-motion: reduce) {
-      .boot-loader__flower, .boot-loader__bar { animation: none; }
-      .boot-loader__bar { width: 100%; opacity: 0.72; }
-    }
-  </style>
 </head>
 <body>
-  <div id="root">
-    <div class="boot-loader" role="status" aria-live="polite" aria-label="Đang tải trang">
-      <div class="boot-loader__content">
-        <span class="boot-loader__flower" aria-hidden="true">🌸</span>
-        <h1 class="boot-loader__title">Đang nạp món quà cho Clouda</h1>
-        <p class="boot-loader__text">Đang tải mã JavaScript và chuẩn bị giao diện...</p>
-        <div class="boot-loader__track" aria-hidden="true"><div class="boot-loader__bar"></div></div>
-      </div>
-    </div>
-  </div>
+  <div id="root"></div>
   <script type="module" src="/src/index.jsx"></script>
 </body>
 </html>

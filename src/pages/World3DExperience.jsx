@@ -324,8 +324,6 @@ export default function World3DExperience() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastPaused, setToastPaused] = useState(false);
   const [isSceneReady, setIsSceneReady] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(8);
-  const [loadingStage, setLoadingStage] = useState('Đang khởi tạo bộ máy đồ họa...');
   const [isDownloadingCard, setIsDownloadingCard] = useState(false);
 
   // Ref tạm dừng renderLoop khi xem video để giải phóng 100% tài nguyên GPU
@@ -940,33 +938,6 @@ export default function World3DExperience() {
     const container = containerRef.current;
     if (!container) return;
 
-    let isDisposed = false;
-    let veilTimer = null;
-    let loadingSafetyTimer = null;
-    let stagedDone = false;
-    let vegetationDone = false;
-    let vegetationStep = 0;
-
-    const reportLoading = (progress, stage) => {
-      if (isDisposed) return;
-      setLoadingProgress((current) => Math.max(current, progress));
-      if (stage) setLoadingStage(stage);
-    };
-
-    const finishInitialLoading = () => {
-      if (isDisposed || !stagedDone || !vegetationDone) return;
-      reportLoading(100, 'Hoàn tất — đang mở cánh cổng...');
-      if (loadingSafetyTimer) window.clearTimeout(loadingSafetyTimer);
-      veilTimer = window.setTimeout(() => {
-        if (!isDisposed) setIsVeilOpen(true);
-      }, 260);
-    };
-
-    setIsVeilOpen(false);
-    setIsSceneReady(false);
-    setLoadingProgress(8);
-    setLoadingStage('Đang khởi tạo bộ máy đồ họa...');
-
     const lowPower = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
     const isWeakDevice = lowPower || (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4);
     // Level up tối đa: Q = 1.0 (desktop - 100% mật độ hoa ngút ngàn) / 0.45 (mobile mượt mà)
@@ -989,7 +960,6 @@ export default function World3DExperience() {
           sharedImageTextureRef.current = tex;
           sharedImageTextureRef.callbacks.forEach((fn) => fn(tex));
           sharedImageTextureRef.callbacks.length = 0;
-          reportLoading(22, 'Đã nạp ảnh và chất liệu chính...');
         });
       }
     };
@@ -1042,7 +1012,6 @@ export default function World3DExperience() {
     renderer.info.autoReset = false;
     container.appendChild(renderer.domElement);
     worldAtmosphereRef.current.renderer = renderer;
-    reportLoading(32, 'Đang dựng bầu trời và ánh sáng...');
 
     // [PARALLEL SHADER COMPILATION & BENCHMARKS]
     try {
@@ -1412,18 +1381,9 @@ export default function World3DExperience() {
         Q,
         onProgress: (txt) => {
           if (txt) console.log(`🌸 [Vegetation] ${txt}`);
-          vegetationStep += 1;
-          if (txt === 'Hoàn tất thảm hoa 3D!') {
-            vegetationDone = true;
-            reportLoading(96, 'Thảm hoa 3D đã sẵn sàng...');
-            finishInitialLoading();
-          } else {
-            reportLoading(Math.min(92, 72 + vegetationStep * 3), txt || 'Đang trải thảm hoa...');
-          }
         }
       });
     }, 900);
-    reportLoading(48, 'Đang tạo địa hình và con đường hoa...');
 
     /* ---------- [P2] Cherry Blossom Trees (Deferred) ---------- */
     const dummy = new THREE.Object3D();
@@ -4307,15 +4267,9 @@ export default function World3DExperience() {
     };
 
     const processNextStage = () => {
-      if (stagedIdx >= stagedTasks.length) {
-        stagedDone = true;
-        reportLoading(94, 'Các điểm tham quan đã sẵn sàng...');
-        finishInitialLoading();
-        return;
-      }
+      if (stagedIdx >= stagedTasks.length) return;
       const task = stagedTasks[stagedIdx++];
       try {
-        reportLoading(74 + stagedIdx * 3, `Đang dựng ${task.name}...`);
         const t0 = performance.now();
         task.run();
         const dt = (performance.now() - t0).toFixed(1);
@@ -5150,7 +5104,6 @@ export default function World3DExperience() {
 
     // [P5] Output
     composer.addPass(new OutputPass());
-    reportLoading(68, 'Đang hoàn thiện hiệu ứng điện ảnh...');
 
     /* ================================================================== */
     /*  [P5] POINTER INTERACTIONS — raycast đệ quy fix                     */
@@ -5255,15 +5208,11 @@ export default function World3DExperience() {
       console.warn('[First Frame Render] Warning:', e);
     }
     setIsSceneReady(true);
-    reportLoading(72, 'Khung hình đầu tiên đã sẵn sàng...');
-    // Giữ màn chờ trong lúc các cụm nền tiếp tục được dựng theo lát để tránh giật khi vừa vào web.
-    scheduleNextStage(120);
-    // Không để lỗi tài nguyên phụ khiến người dùng mắc kẹt ở màn chờ.
-    loadingSafetyTimer = window.setTimeout(() => {
-      if (isDisposed) return;
-      reportLoading(100, 'Đã sẵn sàng để khám phá...');
+    const veilTimer = setTimeout(() => {
       setIsVeilOpen(true);
-    }, 8000);
+      // Chỉ dựng trang trí nền lúc trình duyệt rảnh. Các trạm phụ được dựng khi người dùng tới.
+      scheduleNextStage(300);
+    }, 250);
 
     let spawnAcc = 0;
     const camTmpA = new THREE.Vector3();
@@ -5653,10 +5602,8 @@ export default function World3DExperience() {
     window.addEventListener('resize', handleResize);
 
     return () => {
-      isDisposed = true;
       cancelAnimationFrame(animId);
-      if (veilTimer) clearTimeout(veilTimer);
-      if (loadingSafetyTimer) clearTimeout(loadingSafetyTimer);
+      clearTimeout(veilTimer);
       if (stagedTimer) clearTimeout(stagedTimer);
       if (stagedIdleHandle !== null && 'cancelIdleCallback' in window) {
         window.cancelIdleCallback(stagedIdleHandle);
@@ -5700,23 +5647,11 @@ export default function World3DExperience() {
         </div>
         <h2 className="cinematic-veil-title">
           Vương Quốc Hoa 3D • 20/10<br />
-          Dành Riêng Cho <strong>{sisterName || 'Vân Anh (Clouda)'}</strong> ✨
+          Dành Riêng Cho <strong>{sisterName || 'Vân Anh (Anh Tỏm)'}</strong> ✨
         </h2>
-        <div className="cinematic-loading-copy" role="status" aria-live="polite">
-          <p className="cinematic-veil-sub">{loadingStage}</p>
-          <div
-            className="cinematic-loading-track"
-            role="progressbar"
-            aria-label="Tiến trình chuẩn bị thế giới 3D"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow={Math.round(loadingProgress)}
-          >
-            <span className="cinematic-loading-bar" style={{ width: `${loadingProgress}%` }} />
-          </div>
-          <span className="cinematic-loading-percent">{Math.round(loadingProgress)}%</span>
-          <small className="cinematic-loading-hint">Đang nạp theo từng lớp để khi mở trang không bị giật.</small>
-        </div>
+        <p className="cinematic-veil-sub">
+          Đang chuẩn bị không gian ngập tràn hoa và ánh sáng kỳ diệu...
+        </p>
       </div>
 
       {/* [P1] BANNER CHẾ ĐỘ AUTO-TOUR ĐANG CHẠY */}
