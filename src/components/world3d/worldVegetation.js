@@ -315,6 +315,8 @@ export function buildVegetationField({ scene, scatter, scatterLandscape, timeU, 
 
     if (spIndex < species.length) {
       requestAnimationFrame(stepSpecies);
+    } else if (typeof onProgress === 'function') {
+      try { onProgress('Hoàn tất thảm hoa 3D!'); } catch (e) {}
     }
   }
 

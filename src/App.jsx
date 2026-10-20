@@ -5,14 +5,14 @@ import { AppProvider, useApp } from './context/AppContext.jsx';
 import AmbientPetals from './components/AmbientPetals.jsx';
 import FloralTransition from './components/FloralTransition.jsx';
 import TopNav from './components/TopNav.jsx';
-import WishModal from './components/WishModal.jsx';
-import ArchiveDrawer from './components/ArchiveDrawer.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PageLoader from './components/PageLoader.jsx';
 
 // Enterprise Code-Splitting: Lazy-load route pages to keep initial bundle tiny
 const World3DExperience = lazy(() => import('./pages/World3DExperience.jsx'));
 const SenderStudioPage = lazy(() => import('./pages/SenderStudioPage.jsx'));
+const WishModal = lazy(() => import('./components/WishModal.jsx'));
+const ArchiveDrawer = lazy(() => import('./components/ArchiveDrawer.jsx'));
 
 function MainAppContent() {
   const location = useLocation();
@@ -64,13 +64,16 @@ function MainAppContent() {
 
 export default function App() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const is3DRoute = location.pathname === '/3d' || location.pathname === '/';
+  const isSenderRoute = location.pathname === '/sender';
 
   return (
     <ErrorBoundary>
       <AppProvider navigate={navigate}>
         <div className="app-container">
-          {/* Continuous ambient falling petals */}
-          <AmbientPetals />
+          {/* Route 3D đã có particle riêng; không chạy thêm canvas 2D tranh CPU/GPU. */}
+          {!is3DRoute && !isSenderRoute && <AmbientPetals />}
 
           {/* Top floating control bar */}
           <TopNav />
@@ -81,9 +84,13 @@ export default function App() {
           {/* Main Application: 3D Unified World vs 2D Editorial Pages */}
           <MainAppContent />
 
-          {/* Global modals & drawer */}
-          <WishModal />
-          <ArchiveDrawer />
+          {/* Modal 2D chỉ nạp khi thật sự cần, tránh tăng bundle/DOM cho thế giới 3D. */}
+          {!is3DRoute && !isSenderRoute && (
+            <Suspense fallback={null}>
+              <WishModal />
+              <ArchiveDrawer />
+            </Suspense>
+          )}
         </div>
       </AppProvider>
     </ErrorBoundary>
