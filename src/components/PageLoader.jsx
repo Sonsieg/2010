@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 const LOADING_STEPS = [
   'Đang tải mô-đun JavaScript...',
   'Đang chuẩn bị thư viện đồ họa 3D...',
-  'Đang tối ưu tài nguyên cho thiết bị...'
+  'Sắp mở không gian 3D...'
 ];
 
 /**
@@ -15,7 +15,7 @@ export default function PageLoader() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setStepIndex((current) => Math.min(current + 1, LOADING_STEPS.length - 1));
-    }, 1400);
+    }, 900);
     return () => window.clearInterval(timer);
   }, []);
 
