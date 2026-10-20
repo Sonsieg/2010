@@ -942,12 +942,24 @@ export default function World3DExperience() {
 
     let isDisposed = false;
     let veilTimer = null;
+    let loadingSafetyTimer = null;
+    let stagedDone = false;
+    let vegetationDone = false;
     let vegetationStep = 0;
 
     const reportLoading = (progress, stage) => {
       if (isDisposed) return;
       setLoadingProgress((current) => Math.max(current, progress));
       if (stage) setLoadingStage(stage);
+    };
+
+    const finishInitialLoading = () => {
+      if (isDisposed || !stagedDone || !vegetationDone) return;
+      reportLoading(100, 'Hoàn tất — đang mở cánh cổng...');
+      if (loadingSafetyTimer) window.clearTimeout(loadingSafetyTimer);
+      veilTimer = window.setTimeout(() => {
+        if (!isDisposed) setIsVeilOpen(true);
+      }, 260);
     };
 
     setIsVeilOpen(false);
@@ -957,9 +969,8 @@ export default function World3DExperience() {
 
     const lowPower = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent);
     const isWeakDevice = lowPower || (typeof navigator !== 'undefined' && (navigator.hardwareConcurrency || 4) <= 4);
-    // Giảm mật độ vừa đủ để dựng scene nhanh, vẫn giữ cảm giác vương quốc hoa dày và đầy đặn.
-    const deviceMemory = typeof navigator !== 'undefined' ? (navigator.deviceMemory || 4) : 4;
-    const Q = isWeakDevice ? (deviceMemory <= 4 ? 0.32 : 0.42) : 0.82;
+    // Level up tối đa: Q = 1.0 (desktop - 100% mật độ hoa ngút ngàn) / 0.45 (mobile mượt mà)
+    const Q = isWeakDevice ? 0.45 : 1.0;
     const rand = rngFactory(20102026);
     const timeU = { value: 0 };
 
@@ -1403,13 +1414,15 @@ export default function World3DExperience() {
           if (txt) console.log(`🌸 [Vegetation] ${txt}`);
           vegetationStep += 1;
           if (txt === 'Hoàn tất thảm hoa 3D!') {
+            vegetationDone = true;
             reportLoading(96, 'Thảm hoa 3D đã sẵn sàng...');
+            finishInitialLoading();
           } else {
             reportLoading(Math.min(92, 72 + vegetationStep * 3), txt || 'Đang trải thảm hoa...');
           }
         }
       });
-    }, 1400);
+    }, 900);
     reportLoading(48, 'Đang tạo địa hình và con đường hoa...');
 
     /* ---------- [P2] Cherry Blossom Trees (Deferred) ---------- */
@@ -4278,7 +4291,7 @@ export default function World3DExperience() {
     let stagedTimer = null;
     let stagedIdleHandle = null;
 
-    const scheduleNextStage = (delay = 700) => {
+    const scheduleNextStage = (delay = 360) => {
       stagedTimer = window.setTimeout(() => {
         const run = () => {
           stagedIdleHandle = null;
@@ -4295,7 +4308,9 @@ export default function World3DExperience() {
 
     const processNextStage = () => {
       if (stagedIdx >= stagedTasks.length) {
+        stagedDone = true;
         reportLoading(94, 'Các điểm tham quan đã sẵn sàng...');
+        finishInitialLoading();
         return;
       }
       const task = stagedTasks[stagedIdx++];
@@ -5240,12 +5255,15 @@ export default function World3DExperience() {
       console.warn('[First Frame Render] Warning:', e);
     }
     setIsSceneReady(true);
-    reportLoading(100, 'Đã sẵn sàng để khám phá...');
-    // Mở ngay sau khung hình đầu; cây, xe và hoa tiếp tục được dựng khi trình duyệt rảnh.
-    veilTimer = window.setTimeout(() => {
-      if (!isDisposed) setIsVeilOpen(true);
-    }, 140);
-    scheduleNextStage(900);
+    reportLoading(72, 'Khung hình đầu tiên đã sẵn sàng...');
+    // Giữ màn chờ trong lúc các cụm nền tiếp tục được dựng theo lát để tránh giật khi vừa vào web.
+    scheduleNextStage(120);
+    // Không để lỗi tài nguyên phụ khiến người dùng mắc kẹt ở màn chờ.
+    loadingSafetyTimer = window.setTimeout(() => {
+      if (isDisposed) return;
+      reportLoading(100, 'Đã sẵn sàng để khám phá...');
+      setIsVeilOpen(true);
+    }, 8000);
 
     let spawnAcc = 0;
     const camTmpA = new THREE.Vector3();
@@ -5638,6 +5656,7 @@ export default function World3DExperience() {
       isDisposed = true;
       cancelAnimationFrame(animId);
       if (veilTimer) clearTimeout(veilTimer);
+      if (loadingSafetyTimer) clearTimeout(loadingSafetyTimer);
       if (stagedTimer) clearTimeout(stagedTimer);
       if (stagedIdleHandle !== null && 'cancelIdleCallback' in window) {
         window.cancelIdleCallback(stagedIdleHandle);

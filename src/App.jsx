@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 
@@ -9,14 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary.jsx';
 import PageLoader from './components/PageLoader.jsx';
 
 // Enterprise Code-Splitting: Lazy-load route pages to keep initial bundle tiny
-let world3DModulePromise;
-const loadWorld3DModule = () => {
-  if (!world3DModulePromise) {
-    world3DModulePromise = import('./pages/World3DExperience.jsx');
-  }
-  return world3DModulePromise;
-};
-const World3DExperience = lazy(loadWorld3DModule);
+const World3DExperience = lazy(() => import('./pages/World3DExperience.jsx'));
 const SenderStudioPage = lazy(() => import('./pages/SenderStudioPage.jsx'));
 const WishModal = lazy(() => import('./components/WishModal.jsx'));
 const ArchiveDrawer = lazy(() => import('./components/ArchiveDrawer.jsx'));
@@ -74,27 +67,6 @@ export default function App() {
   const location = useLocation();
   const is3DRoute = location.pathname === '/3d' || location.pathname === '/';
   const isSenderRoute = location.pathname === '/sender';
-
-  // Tải trước chunk Three.js khi trình duyệt rảnh trong lúc người dùng chọn nhạc.
-  // Chỉ tải mã; scene WebGL vẫn chưa được khởi tạo nên không tranh GPU ở màn chào.
-  useEffect(() => {
-    if (!is3DRoute) return undefined;
-    let idleHandle = null;
-    const timer = window.setTimeout(() => {
-      if ('requestIdleCallback' in window) {
-        idleHandle = window.requestIdleCallback(() => loadWorld3DModule(), { timeout: 1200 });
-      } else {
-        loadWorld3DModule();
-      }
-    }, 350);
-
-    return () => {
-      window.clearTimeout(timer);
-      if (idleHandle !== null && 'cancelIdleCallback' in window) {
-        window.cancelIdleCallback(idleHandle);
-      }
-    };
-  }, [is3DRoute]);
 
   return (
     <ErrorBoundary>
