@@ -14,7 +14,11 @@ export const PLAYLIST = [
 ];
 
 export default function AudioController() {
-  const { isPlayingMusic, setIsPlayingMusic } = useApp();
+  const {
+    isPlayingMusic,
+    setIsPlayingMusic,
+    setHasConfirmedAudioChoice
+  } = useApp();
   // Nhạc mở đầu mặc định của trải nghiệm: Until I Found You.
   const [currentTrackIndex, setCurrentTrackIndex] = useState(() => (
     Math.max(0, PLAYLIST.findIndex((track) => track.id === 'video2'))
@@ -42,7 +46,10 @@ export default function AudioController() {
 
     const focusTimer = window.setTimeout(() => enableMusicButtonRef.current?.focus(), 80);
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setIsMusicPromptOpen(false);
+      if (event.key === 'Escape') {
+        setIsMusicPromptOpen(false);
+        setHasConfirmedAudioChoice(true);
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
@@ -111,17 +118,28 @@ export default function AudioController() {
 
   const enableMusicFromPrompt = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio) {
+      setIsMusicPromptOpen(false);
+      setHasConfirmedAudioChoice(true);
+      return;
+    }
 
     audio.play().then(() => {
       setIsPlayingMusic(true);
       setIsMusicPromptOpen(false);
+      setHasConfirmedAudioChoice(true);
       fadeVolume(0.48);
     }).catch(() => {
       // Vẫn đóng hộp hỏi nếu thiết bị từ chối; nút nhạc luôn còn ở góc màn hình.
       setIsMusicPromptOpen(false);
       setIsPlayingMusic(false);
+      setHasConfirmedAudioChoice(true);
     });
+  };
+
+  const continueWithoutMusic = () => {
+    setIsMusicPromptOpen(false);
+    setHasConfirmedAudioChoice(true);
   };
 
   const togglePlaylist = (e) => {
@@ -153,7 +171,7 @@ export default function AudioController() {
     <div className="audio-controller-wrapper" ref={dropdownRef}>
       <audio
         ref={audioRef}
-        preload="auto"
+        preload="metadata"
         src={currentTrack.src}
         onEnded={handleTrackEnded}
         onError={handleAudioError}
@@ -258,7 +276,7 @@ export default function AudioController() {
               <button
                 type="button"
                 className="music-consent-secondary"
-                onClick={() => setIsMusicPromptOpen(false)}
+                onClick={continueWithoutMusic}
               >
                 Để sau
               </button>

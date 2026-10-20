@@ -16,6 +16,8 @@ export function AppProvider({ children, navigate }) {
 
   // Audio state
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  // Chỉ khởi tạo thế giới 3D nặng sau khi người dùng đã chọn có bật nhạc hay không.
+  const [hasConfirmedAudioChoice, setHasConfirmedAudioChoice] = useState(false);
 
   // Demo Experience Mode: '3d' | '2d'
   const [experienceMode, setExperienceMode] = useState(() => {
@@ -146,6 +148,8 @@ export function AppProvider({ children, navigate }) {
       navigateWithFlowerTransition,
       isPlayingMusic,
       setIsPlayingMusic,
+      hasConfirmedAudioChoice,
+      setHasConfirmedAudioChoice,
       experienceMode,
       updateExperienceMode,
       toggleExperienceMode

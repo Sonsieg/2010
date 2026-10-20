@@ -998,13 +998,16 @@ export default function World3DExperience() {
       powerPreference: 'high-performance',
       stencil: false
     });
-    const pr = Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2);
+    // Giới hạn mật độ điểm ảnh: 1.5x -> 1.25x trên mobile giảm gần 31% số pixel
+    // phải tô mỗi frame, trong khi độ nét trên màn hình nhỏ gần như không đổi.
+    const pr = Math.min(window.devicePixelRatio || 1, lowPower ? 1.25 : 1.75);
     renderer.setPixelRatio(pr);
     renderer.setSize(width, height);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.08;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.shadowMap.enabled = true;
+    // Bóng động là một trong các pass GPU đắt nhất; mobile dùng ánh sáng baked/material.
+    renderer.shadowMap.enabled = !lowPower;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.info.autoReset = false;
     container.appendChild(renderer.domElement);
@@ -1367,6 +1370,7 @@ export default function World3DExperience() {
     }
 
     /* ---------- [P2] Vegetation (Progressive Multi-slice Loading) ---------- */
+    // Nhường khung hình đầu cho scene chính và modal; thảm hoa tiếp tục được dựng theo lát.
     vegTimer = setTimeout(() => {
       buildVegetationField({
         scene,
@@ -1379,7 +1383,7 @@ export default function World3DExperience() {
           if (txt) console.log(`🌸 [Vegetation] ${txt}`);
         }
       });
-    }, 120);
+    }, 900);
 
     /* ---------- [P2] Cherry Blossom Trees (Deferred) ---------- */
     const dummy = new THREE.Object3D();
@@ -4240,15 +4244,28 @@ export default function World3DExperience() {
       { name: 'Cỗ Xe Bạch Mã Hoàng Gia', run: buildCarriageVehicle },
       { name: 'Hàng Rào Cổ Điển', run: buildVintageFence },
       { name: 'Đèn Đường Cổ Điển', run: buildStreetLamps },
-      { name: 'Rừng Anh Đào', run: buildCherryTrees },
-      { name: 'Trạm 1 (Bưu Điện Hoa)', run: () => ensureStation(1) },
-      { name: 'Trạm 2 (Vườn Trà & Bánh)', run: () => ensureStation(2) },
-      { name: 'Trạm 4 (Quảng Trường Hoa)', run: () => ensureStation(4) },
-      { name: 'Trạm 5 (Lâu Đài Cổ Tích)', run: () => ensureStation(5) },
-      { name: 'Trạm 6 (Vọng Lâu Ngắm Sao)', run: () => ensureStation(6) }
+      { name: 'Rừng Anh Đào', run: buildCherryTrees }
     ];
 
     let stagedIdx = 0;
+    let stagedTimer = null;
+    let stagedIdleHandle = null;
+
+    const scheduleNextStage = (delay = 360) => {
+      stagedTimer = window.setTimeout(() => {
+        const run = () => {
+          stagedIdleHandle = null;
+          processNextStage();
+        };
+
+        if ('requestIdleCallback' in window) {
+          stagedIdleHandle = window.requestIdleCallback(run, { timeout: 1200 });
+        } else {
+          run();
+        }
+      }, delay);
+    };
+
     const processNextStage = () => {
       if (stagedIdx >= stagedTasks.length) return;
       const task = stagedTasks[stagedIdx++];
@@ -4260,7 +4277,8 @@ export default function World3DExperience() {
       } catch (err) {
         console.warn(`[Progressive Stage] Error loading ${task.name}:`, err);
       }
-      requestAnimationFrame(processNextStage);
+      // Không dồn một tác vụ nặng vào mọi frame liên tiếp; ưu tiên tương tác/camera trước.
+      scheduleNextStage();
     };
 
     /* ---------- [P3] Camera transitions dictionary ---------- */
@@ -5080,8 +5098,9 @@ export default function World3DExperience() {
     worldAtmosphereRef.current.colorGrade = colorGrade;
 
     // [P5] SMAA
-    const smaaPass = new SMAAPass(width * pr, height * pr);
-    composer.addPass(smaaPass);
+    // Mobile đã có mật độ điểm ảnh 1.25x; bỏ SMAA riêng để tiết kiệm một full-screen pass.
+    const smaaPass = lowPower ? null : new SMAAPass(width * pr, height * pr);
+    if (smaaPass) composer.addPass(smaaPass);
 
     // [P5] Output
     composer.addPass(new OutputPass());
@@ -5189,10 +5208,10 @@ export default function World3DExperience() {
       console.warn('[First Frame Render] Warning:', e);
     }
     setIsSceneReady(true);
-    setTimeout(() => {
+    const veilTimer = setTimeout(() => {
       setIsVeilOpen(true);
-      // Bắt đầu chuỗi nạp các thành phần & trạm ngầm theo từng nhịp rAF
-      requestAnimationFrame(processNextStage);
+      // Chỉ dựng trang trí nền lúc trình duyệt rảnh. Các trạm phụ được dựng khi người dùng tới.
+      scheduleNextStage(300);
     }, 250);
 
     let spawnAcc = 0;
@@ -5584,6 +5603,11 @@ export default function World3DExperience() {
 
     return () => {
       cancelAnimationFrame(animId);
+      clearTimeout(veilTimer);
+      if (stagedTimer) clearTimeout(stagedTimer);
+      if (stagedIdleHandle !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(stagedIdleHandle);
+      }
       fwTimers.forEach((t) => clearTimeout(t));
       if (vegTimer) clearTimeout(vegTimer);
       window.removeEventListener('pointerdown', resumeAudio);

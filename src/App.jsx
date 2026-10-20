@@ -16,6 +16,7 @@ const SenderStudioPage = lazy(() => import('./pages/SenderStudioPage.jsx'));
 
 function MainAppContent() {
   const location = useLocation();
+  const { hasConfirmedAudioChoice } = useApp();
 
   // Trang soạn thảo của anh em luôn mở trực tiếp
   if (location.pathname === '/sender') {
@@ -30,6 +31,10 @@ function MainAppContent() {
 
   // Kịch bản 1: THẾ GIỚI 3D LIỀN MẠCH (Chỉ render khi người dùng đang ở route /3d)
   if (location.pathname === '/3d') {
+    // Không tải/khởi tạo Three.js phía sau modal hỏi nhạc. Cách này giữ màn chào
+    // phản hồi tức thì và tránh tranh CPU, GPU, mạng trong những giây đầu tiên.
+    if (!hasConfirmedAudioChoice) return <PageLoader />;
+
     return (
       <Suspense fallback={<PageLoader />}>
         <World3DExperience />
